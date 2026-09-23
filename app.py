@@ -259,11 +259,24 @@ with tab3:
                 st.json(json.loads(real[0].payload))
 
         except FileNotFoundError:
+            import glob as _glob
+            import os as _os
+
+            import synthea_layer as _sl
+
+            searched = "\n".join(
+                f"- `{d}` — {len(_glob.glob(_os.path.join(d, '*.json')))} bundles"
+                for d in _sl.SYNTHEA_DIRS
+            )
             st.info(
-                "No committed bundles found. Offline step, requires Java 17+:\n\n"
+                "No committed bundles found in this deployment. Directories "
+                f"searched:\n\n{searched}\n\n"
+                "Fix: commit the eight-bundle subset to `data/synthea_subset/` "
+                "in the repository root. Alternatively regenerate the full "
+                "cohort offline, which needs Java 17+:\n\n"
                 "`java -jar synthea.jar -s 20260915 -cs 20260915 -p 100 "
                 "--exporter.fhir.export=true`\n\n"
-                "then commit `synthea_run/output/fhir/` to the repository."
+                "and commit `synthea_run/output/fhir/`."
             )
 
 
@@ -374,18 +387,19 @@ with tab4:
             c1.metric("records", len(recs))
             c2.metric("Sem I violations", sum(1 for k in v1 if v1[k]))
             c3.metric("structural (no erasure request)", structural)
-            st.success(
-                "No structural collision. The floor ends at t_a + 12 and the "
-                "ceiling bites at t_a + 36, both measured from the same origin, "
-                "so § 17 defines a bounded retention window rather than a "
-                "contradiction. Every collision found is erasure-driven. "
-                "Article 68(12) collides instead because it anchors its ceiling "
-                "to an external event, the expiry of the data permit, which can "
-                "fall before the floor has run.",
-                icon="✅",
-            ) if structural == 0 else st.warning(
-                f"{structural} structural collisions in this draw."
-            )
+            if structural == 0:
+                st.success(
+                    "No structural collision. The floor ends at t_a + 12 and the "
+                    "ceiling bites at t_a + 36, both measured from the same "
+                    "origin, so § 17 defines a bounded retention window rather "
+                    "than a contradiction. Every collision found is "
+                    "erasure-driven. Article 68(12) collides instead because it "
+                    "anchors its ceiling to an external event, the expiry of the "
+                    "data permit, which can fall before the floor has run.",
+                    icon="✅",
+                )
+            else:
+                st.warning(f"{structural} structural collisions in this draw.")
             st.caption(
                 f"Semantics II violations: {sum(len(x) for x in v2.values())}"
             )
