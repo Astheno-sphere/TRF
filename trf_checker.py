@@ -116,6 +116,7 @@ def apply_invalidation(rec):
         ground = ("GDPR Art 17(1)" if rec.erasure_deadline() <= rec.ceiling_deadline()
                   else "EHDS Art 68(12)")
         rec.k = None                      # irreversible key destruction
+        rec.salt = None                   # salt destroyed with the key (Ch4 §4.8)
         rec.iota = {"rid": rec.rid, "month": t_I, "ground": ground,
                     "authorised_by": "DPO", "key_id_commitment":
                         hashlib.sha256(f"KEY-{rec.rid:06d}".encode()).hexdigest()[:16]}
@@ -320,3 +321,43 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ----------------------------------------------------------------------
+# Extended response period witness (Chapter 5, Section 5.5a)
+# GDPR Art 12(3) permits extension of the one-month response period by a
+# further two months. The theorems are stated for arbitrary finite delta;
+# this runs the model at delta = 3 to witness that claim rather than assert it.
+# ----------------------------------------------------------------------
+
+def delta_witness(delta_values=(1, 3)):
+    """Re-run the population at each delta and report the figures."""
+    global DELTA
+    original, rows = DELTA, []
+    for d in delta_values:
+        DELTA = d
+        recs = generate()
+        v1 = {r.rid: check_semantics_I(r) for r in recs}
+        sec = [r for r in recs if r.sigma == "secondary"]
+        row = {"delta": d,
+               "sem1_records": sum(1 for k in v1 if v1[k]),
+               "sem1_total": sum(len(x) for x in v1.values()),
+               "cor12": sum(1 for r in sec if r.t_r == INF and v1[r.rid])}
+        for r in recs:
+            apply_invalidation(r)
+        v2 = {r.rid: check_semantics_II(r) for r in recs}
+        row["sem2_records"] = sum(1 for k in v2 if v2[k])
+        row["sem2_total"] = sum(len(x) for x in v2.values())
+        row["invalidated"] = sum(1 for r in recs if r.iota is not None)
+        rows.append(row)
+    DELTA = original
+    return rows
+
+
+if __name__ == "__main__" and "--delta-witness" in __import__("sys").argv:
+    print(f"{'delta':>6}{'SemI recs':>11}{'SemI viol':>11}{'Cor1.2':>9}"
+          f"{'SemII recs':>12}{'SemII viol':>12}{'invalidated':>13}")
+    for r in delta_witness():
+        print(f"{r['delta']:>6}{r['sem1_records']:>11}{r['sem1_total']:>11}"
+              f"{r['cor12']:>9}{r['sem2_records']:>12}{r['sem2_total']:>12}"
+              f"{r['invalidated']:>13}")
