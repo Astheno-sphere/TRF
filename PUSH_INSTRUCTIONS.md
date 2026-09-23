@@ -1,44 +1,50 @@
-# Pushing this to github.com/Astheno-sphere/TRF
+# Pushing to github.com/Astheno-sphere/TRF — second upload
 
-The repository currently holds an older checker, so Appendix A's listing and the live demo no longer match it. This bundle is the version after the pass-2 salt change and all later patching.
+The first upload landed `trf_checker.py` (363 lines, correct), `app.py`, `synthea_layer.py` and a placeholder README. This upload adds what is missing and fixes Tab 3.
 
-## What changed since the repo was last updated
+## Important: the layout is now flat
 
-- `trf_checker.py` is 363 lines. `apply_invalidation` now destroys the commitment salt along with the key: `rec.salt = None`. That is the only code change, and the run output is unchanged.
-- The Synthea subset is included, so the demo's Tab 3 will work.
-- The Norwegian modules and their documentation are new.
+Streamlit Cloud runs `app.py` from the repository root and imports modules beside it. So every Python file sits at the root, not in `src/`. Do not move them into folders or the app will fail on import.
+
+```
+trf_checker.py            # unchanged from your first upload
+synthea_layer.py          # UPDATED: now also looks in data/synthea_subset/
+app.py                    # UPDATED: new Tab 4, Norwegian context
+norwegian_layer.py        # new
+cross_sector_check.py     # new
+requirements.txt
+data/synthea_subset/      # new, 8 bundles, this is what fixes Tab 3
+docs/Appendix_A.md
+docs/expected_trf_output.txt
+norwegian_docs/           # module README and the run-and-demo guide
+README.md
+```
 
 ## Steps
 
 ```bash
-cd /path/to/your/local/TRF
+cd /path/to/local/TRF
 git pull
 
-# copy the bundle over the working tree
-cp -r 10_GitHub_Push/src/* .
-mkdir -p norwegian data/synthea_subset docs
-cp -r 10_GitHub_Push/norwegian/* norwegian/
-cp -r 10_GitHub_Push/data/synthea_subset/* data/synthea_subset/
-cp -r 10_GitHub_Push/docs/* docs/
-cp 10_GitHub_Push/README.md .
+# copy everything from this bundle into the repository root
+cp -r /path/to/10_GitHub_Push/* .
+rm -f PUSH_INSTRUCTIONS.md CHECKSUMS.md      # these two are for you, not the repo
 
-# verify BEFORE committing
+# verify before committing
 python3 trf_checker.py > /tmp/run.txt
 diff /tmp/run.txt docs/expected_trf_output.txt && echo MATCHES
+python3 synthea_layer.py | grep "bundles read"      # expect 8
 
 git add -A
-git commit -m "Checker v2: destroy commitment salt at invalidation; add Norwegian modules and Synthea subset"
+git commit -m "Add Synthea subset, Norwegian modules and Tab 4; layer now finds the subset"
 git push
 ```
 
-If the diff does not print MATCHES, stop and tell me. Do not push a checker whose output disagrees with Chapter 5.
+If the diff does not print MATCHES, stop and tell me.
 
 ## After pushing
 
-1. Check that the Streamlit demo reloads and that Tab 3 finds the bundles.
-2. Mint the Zenodo DOI from the repository, then send me the DOI so Appendix A §A.1 can cite it.
-3. The subset is about 40 MB. That is fine for GitHub, but if you would rather keep the repository light, trim each bundle to its first 25 entries and note the trimming in Appendix A §A.5. The payload-independence result holds either way.
-
-## One caveat to keep honest
-
-Appendix A §A.1b and §A.5 currently describe three bundles trimmed to 25 entries, which is what `code_artefacts/synthea_sample/` holds. Once you push 8 untrimmed bundles, those two passages need a one-line update. Tell me when the push is done and I will patch them with a trail row.
+1. Open the Streamlit app. Tab 3 should now report 8 bundles and a mean payload of 891 bytes. Tab 4 is new.
+2. In the repository About panel, add a description and topics. It currently says none are provided.
+3. Add a licence: MIT for the code, CC BY 4.0 for the documents.
+4. Mint the Zenodo DOI and send it to me for Appendix A §A.1.

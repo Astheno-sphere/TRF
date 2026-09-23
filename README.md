@@ -7,7 +7,7 @@ Python 3, standard library only for the checker and the Norwegian modules. No pa
 ## Reproduce the thesis result
 
 ```bash
-python3 src/trf_checker.py
+python3 trf_checker.py
 ```
 
 Expected output, which must match `docs/expected_trf_output.txt` byte for byte:
@@ -26,16 +26,16 @@ Seed 20260915 is fixed in the module header. If a number differs, the file has c
 Extended erasure response period, Chapter 5 §5.5a:
 
 ```bash
-python3 src/trf_checker.py --delta-witness
+python3 trf_checker.py --delta-witness
 ```
 
 ## Payload independence
 
 ```bash
-mkdir -p synthea_run/output && cp -r data/synthea_subset synthea_run/output/fhir
-cp src/trf_checker.py src/synthea_layer.py .
 python3 synthea_layer.py
 ```
+
+It reads `synthea_run/output/fhir/` if you have regenerated the full cohort, and otherwise falls back to the eight bundles in `data/synthea_subset/`.
 
 Every reported figure is identical to the constructed-payload run while all 200 commitments differ. Mean payload rises from 35 bytes to 891 with this 8-bundle subset, and to 1,006 with the full 98-bundle cohort. The model reads timing and accessibility, never payload content.
 
@@ -44,22 +44,23 @@ Every reported figure is identical to the constructed-payload run while all 200 
 Parallel to the thesis result. They import `trf_checker.py` unmodified and change nothing it reports.
 
 ```bash
-cp src/trf_checker.py norwegian/ && cd norwegian
 python3 norwegian_layer.py       # NO-XB, NO-SPE, NO-JOURNAL classes with case walkthroughs
 python3 cross_sector_check.py    # politiregisterloven § 17: floor 12 months, ceiling 36
 ```
 
-See `norwegian/NORWEGIAN_MODULE_README.md` for what is varied, what is not, and the limits. `norwegian/HOW_TO_RUN.md` has a step-by-step guide and a demonstration script.
+The same two modules drive Tab 4 of the app. See `norwegian_docs/NORWEGIAN_MODULE_README.md` for what is varied, what is not, and the limits, and `norwegian_docs/HOW_TO_RUN.md` for a step-by-step guide and a demonstration script.
+
+All Python files sit at the repository root, because Streamlit Cloud runs `app.py` from there and imports its neighbours.
 
 ## Contents
 
 | Path | What it is | Lines |
 |---|---|---|
-| `src/trf_checker.py` | Feasibility checker: executable witness for Theorems 1 and 2, with an independently written exhaustive cross-check | 363 |
-| `src/synthea_layer.py` | Realism layer and payload-provenance comparison | 136 |
-| `src/app.py` | Streamlit viewer over the artefact, never a source of results | 275 |
-| `norwegian/norwegian_layer.py` | Three Norwegian record classes | 135 |
-| `norwegian/cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
+| `trf_checker.py` | Feasibility checker: executable witness for Theorems 1 and 2, with an independently written exhaustive cross-check | 363 |
+| `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
+| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context | 404 |
+| `norwegian_layer.py` | Three Norwegian record classes | 135 |
+| `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `data/synthea_subset/` | 8 untrimmed Synthea FHIR R4 bundles, seed 20260915 | 8 files |
 | `docs/Appendix_A.md` | Appendix A: provenance, commands, full source listings, console output | — |
 | `docs/expected_trf_output.txt` | The recorded run to diff against | — |

@@ -25,8 +25,22 @@ import os
 
 import trf_checker as trf
 
-SYNTHEA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "synthea_run", "output", "fhir")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+# Search order: the full regenerated cohort first, then the 8-bundle subset
+# shipped in the repository. The first directory that contains bundles wins.
+SYNTHEA_DIRS = [os.path.join(_HERE, "synthea_run", "output", "fhir"),
+                os.path.join(_HERE, "data", "synthea_subset"),
+                os.path.join(_HERE, "synthea_subset")]
+
+
+def _resolve_dir():
+    for d in SYNTHEA_DIRS:
+        if glob.glob(os.path.join(d, "*.json")):
+            return d
+    return SYNTHEA_DIRS[0]
+
+
+SYNTHEA_DIR = _resolve_dir()
 CLINICAL_TYPES = ("Condition", "Observation", "MedicationRequest",
                   "AllergyIntolerance", "Immunization", "Procedure")
 
@@ -35,11 +49,13 @@ def load_payloads(limit=400, seed=trf.SEED):
     """Extract clinically meaningful resources from Synthea bundles and
     serialise each as a payload. These stand in for the content of an
     exchanged patient summary or the subject of an SPE access."""
-    files = sorted(glob.glob(os.path.join(SYNTHEA_DIR, "*.json")))
+    files = sorted(glob.glob(os.path.join(_resolve_dir(), "*.json")))
     if not files:
         raise FileNotFoundError(
-            f"No Synthea bundles at {SYNTHEA_DIR}. Generate with:\n"
-            f"  java -jar synthea.jar -s 20260915 -cs 20260915 -p 100")
+            "No Synthea bundles found. Looked in:\n  "
+            + "\n  ".join(SYNTHEA_DIRS)
+            + "\nRegenerate the full cohort with:\n"
+              "  java -jar synthea.jar -s 20260915 -cs 20260915 -p 100")
     payloads, meta = [], []
     for path in files:
         with open(path) as fh:

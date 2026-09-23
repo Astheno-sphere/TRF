@@ -29,8 +29,9 @@ st.caption(
     "Seed 20260915 throughout the thesis run."
 )
 
-tab1, tab2, tab3 = st.tabs(
-    ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer"]
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer",
+     "Norwegian context — illustrative"]
 )
 
 
@@ -266,10 +267,138 @@ with tab3:
             )
 
 
+# ----------------------------------------------------------------------
+# Tab 4 — Norwegian context modules (parallel to the thesis, illustrative)
+# ----------------------------------------------------------------------
+
+with tab4:
+    st.subheader("Norwegian context — plug-and-play modules")
+    st.write(
+        "These modules import `trf_checker.py` unmodified and change nothing the "
+        "thesis reports. They vary what the model actually reads: the retention "
+        "floor F(a), the pathway, and the arrival of erasure requests and permit "
+        "expiries. Payload content cannot change any figure, which Tab 3 "
+        "demonstrates, so the Norwegian payloads here are for legibility only."
+    )
+    st.info(
+        "Illustrative, not empirical. No Norwegian permit-duration statistics were "
+        "used, and no Norwegian patient data exists here: Synthea has no Norwegian "
+        "module. Nothing on this tab is a thesis claim.",
+        icon="ℹ️",
+    )
+
+    st.markdown(
+        "| Class | Floor | Ceiling | Source |\n|---|---|---|---|\n"
+        "| NO-XB | 120 months | — | eHDSI deployment baseline; inbound patient "
+        "summary at Bodø / Stjørdal legevakt from PT, CZ, FI |\n"
+        "| NO-SPE | 12 months | 6 months after permit expiry | EHDS Art 73(1)(e); "
+        "Art 68(12); Helsedataservice permit into a NORTRE node |\n"
+        "| NO-JOURNAL | indefinite | — | pasientjournalloven § 25, "
+        "journalforskriften § 14: purpose-based, no fixed period in law |"
+    )
+
+    if st.button("Run Norwegian layer", key="run_no"):
+        try:
+            import norwegian_layer as nl
+
+            with st.spinner("Building Norwegian record classes ..."):
+                recs = nl.build()
+                v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+                for r in recs:
+                    trf.apply_invalidation(r)
+                v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+
+            rows = []
+            for k in sorted({r.m["klasse"] for r in recs}):
+                sub = [r for r in recs if r.m["klasse"] == k]
+                rows.append({
+                    "class": k,
+                    "records": len(sub),
+                    "Sem I records with violation": sum(1 for r in sub if v1[r.rid]),
+                    "Sem I violations": sum(len(v1[r.rid]) for r in sub),
+                    "invalidated": sum(1 for r in sub if r.iota),
+                    "Sem II violations": sum(len(v2[r.rid]) for r in sub),
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+            st.markdown("**One case per class**")
+            for k in sorted({r.m["klasse"] for r in recs}):
+                cand = [r for r in recs if r.m["klasse"] == k and v1[r.rid]]
+                if not cand:
+                    st.write(f"{k}: no infeasible record in this draw.")
+                    continue
+                r = cand[0]
+                d = v1[r.rid][0]
+                where = r.m.get("site") or r.m.get("node") or r.m["legal_basis"]
+                st.code(
+                    f"{k}  rid={r.rid}  ({where})\n"
+                    f"  floor     : t={r.t_a} .. {r.t_a + r.floor}"
+                    + ("   [indefinite, truncated for computation]"
+                       if k == "NO-JOURNAL" else "") + "\n"
+                    f"  erasure   : "
+                    + ("none" if r.t_r == trf.INF
+                       else f"t_r={r.t_r} -> deadline {int(r.erasure_deadline())}") + "\n"
+                    f"  ceiling   : "
+                    + ("n/a" if r.ceiling_deadline() == trf.INF
+                       else f"t_pi={r.t_pi} -> {int(r.ceiling_deadline())}") + "\n"
+                    f"  collision : {d['constraint']} at t={d['month']}\n"
+                    f"  after invalidation: metadata intact, commitment "
+                    f"{r.c[:16]}..., key={r.k}, salt={r.salt}, "
+                    f"ground={r.iota['ground'] if r.iota else None}",
+                    language="text",
+                )
+        except ModuleNotFoundError:
+            st.error("norwegian_layer.py is not beside app.py in this deployment.")
+
+    st.divider()
+    st.markdown("**Cross-sector instance: politiregisterloven § 17**")
+    st.write(
+        "Norwegian police register law requires information about use of the "
+        "system to be stored for at least one year and deleted at the latest "
+        "after three: a floor, a ceiling and a subject right on one log, outside "
+        "health. Running it through the same model gives the result we did not "
+        "expect, and the more informative one."
+    )
+
+    if st.button("Run cross-sector check", key="run_cs"):
+        try:
+            import cross_sector_check as cs
+
+            recs = cs.build()
+            v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+            structural = sum(1 for r in recs if r.t_r == trf.INF and v1[r.rid])
+            for r in recs:
+                trf.apply_invalidation(r)
+            v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+            c1, c2, c3 = st.columns(3)
+            c1.metric("records", len(recs))
+            c2.metric("Sem I violations", sum(1 for k in v1 if v1[k]))
+            c3.metric("structural (no erasure request)", structural)
+            st.success(
+                "No structural collision. The floor ends at t_a + 12 and the "
+                "ceiling bites at t_a + 36, both measured from the same origin, "
+                "so § 17 defines a bounded retention window rather than a "
+                "contradiction. Every collision found is erasure-driven. "
+                "Article 68(12) collides instead because it anchors its ceiling "
+                "to an external event, the expiry of the data permit, which can "
+                "fall before the floor has run.",
+                icon="✅",
+            ) if structural == 0 else st.warning(
+                f"{structural} structural collisions in this draw."
+            )
+            st.caption(
+                f"Semantics II violations: {sum(len(x) for x in v2.values())}"
+            )
+        except ModuleNotFoundError:
+            st.error("cross_sector_check.py is not beside app.py in this deployment.")
+
+
 st.divider()
 st.caption(
     "This application is a viewer over the verified artefact. It is not a source "
     "of results. Tab 1 and Tab 3 reproduce figures reported in Chapter 5; Tab 2 "
-    "is outside the thesis claims. Source: trf_checker.py and synthea_layer.py, "
-    "both unmodified."
+    "is outside the thesis claims, and Tab 4 is illustrative of the Norwegian "
+    "setting and not a thesis claim either. Source: trf_checker.py and "
+    "synthea_layer.py, both unmodified, plus the Norwegian modules, which "
+    "import the checker without modifying it."
 )
