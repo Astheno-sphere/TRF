@@ -29,6 +29,18 @@ Extended erasure response period, Chapter 5 §5.5a:
 python3 trf_checker.py --delta-witness
 ```
 
+Reproduces Table 5.2a: 90 records and 95 violations at δ = 1, against 89 and 94 at δ = 3, with 39 Corollary 1.2 witnesses and zero Semantics II violations at both. The infeasibility is structural, not a consequence of the one-month response period.
+
+Every recorded run lives in `docs/`, one file per command, for diffing:
+
+| Command | Recorded output |
+|---|---|
+| `python3 trf_checker.py` | `docs/expected_trf_output.txt` |
+| `python3 trf_checker.py --delta-witness` | `docs/expected_delta_witness_output.txt` |
+| `python3 synthea_layer.py` | `docs/expected_synthea_subset_output.txt` |
+| `python3 norwegian_layer.py` | `docs/expected_norwegian_output.txt` |
+| `python3 cross_sector_check.py` | `docs/expected_cross_sector_output.txt` |
+
 ## Payload independence
 
 ```bash
@@ -58,12 +70,17 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 |---|---|---|
 | `trf_checker.py` | Feasibility checker: executable witness for Theorems 1 and 2, with an independently written exhaustive cross-check | 363 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
-| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context | 404 |
+| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks | 524 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `data/synthea_subset/` | 8 untrimmed Synthea FHIR R4 bundles, seed 20260915 | 8 files |
 | `docs/Appendix_A.md` | Appendix A: provenance, commands, full source listings, console output | — |
-| `docs/expected_trf_output.txt` | The recorded run to diff against | — |
+| `docs/expected_trf_output.txt` | The recorded checker run, to diff against | — |
+| `docs/expected_delta_witness_output.txt` | Recorded δ = 1 against δ = 3 run, Chapter 5 §5.5a | — |
+| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset | — |
+| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run | — |
+| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | — |
+| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, and how to check it yourself | — |
 
 ## Regenerating the full cohort
 
@@ -74,6 +91,14 @@ java -jar synthea.jar -s 20260915 -cs 20260915 -p 100 \
 ```
 
 Yields 98 usable bundles from 100 requested. Synthea's default export is US Core with United States demographics, not Norwegian basisprofiler. The FHIR version, R4, matches the version the Norwegian profiles constrain. No claim of Norwegian clinical representativeness is made, and the payload-independence result is why that does not affect any figure.
+
+## Robustness
+
+Tab 5 of the app runs two checks the thesis reports and the other tabs do not show.
+
+The **exhaustive cross-check** enumerates all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon using `brute_force_semantics_I()`, which is written independently of `check_semantics_I()`. Agreement between two separate implementations is worth more than confidence in either. The control case, where neither the erasure right nor the ceiling is active, returns feasible, so the search can succeed when it should.
+
+The **δ witness** re-runs the population at δ = 1 and δ = 3, the extension Article 12(3) GDPR allows for complex requests, and shows the infeasibility surviving the longer period.
 
 ## What this artefact does not do
 

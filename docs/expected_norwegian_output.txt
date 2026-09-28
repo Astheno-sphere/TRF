@@ -1,0 +1,39 @@
+==========================================================================
+                             NORWEGIAN LAYER                              
+==========================================================================
+
+class           n  SemI recs  SemI viol  invalidated  SemII viol
+NO-JOURNAL     40         12         12           12           0
+NO-SPE         60         36         40           60           0
+NO-XB          60         20         20           23           0
+
+TOTAL         160         68         72           95           0
+
+--------------------------------------------------------------------------
+CASE WALKTHROUGHS
+--------------------------------------------------------------------------
+
+NO-JOURNAL  rid=121  (pasientjournalloven s 25 (purpose-based, indefinite))
+  floor    : t=0 .. 600   [indefinite, truncated]
+  erasure  : t_r=10 -> deadline 11
+  ceiling  : n/a
+  collision: C2 at t=11
+  after invalidation -> metadata intact=True, commitment=c8eb840b7abcb3e4..., key=None, salt=None, ground=GDPR Art 17(1)
+
+NO-SPE  rid=61  (controller-provided server)
+  floor    : t=10 .. 22
+  erasure  : none
+  ceiling  : t_pi=15 -> 21
+  collision: C3 at t=21
+  after invalidation -> metadata intact=True, commitment=900dc608470b8289..., key=None, salt=None, ground=EHDS Art 68(12)
+
+NO-XB  rid=1  (Bodo legevakt)
+  floor    : t=4 .. 124
+  erasure  : t_r=119 -> deadline 120
+  ceiling  : n/a
+  collision: C2 at t=120
+  after invalidation -> metadata intact=True, commitment=af06e57b08ba4cf8..., key=None, salt=None, ground=GDPR Art 17(1)
+
+Note: figures above are illustrative of the Norwegian setting, not
+empirical. The canonical result of the thesis is unchanged and is
+reproduced by running trf_checker.py on its own.

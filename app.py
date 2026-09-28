@@ -29,9 +29,9 @@ st.caption(
     "Seed 20260915 throughout the thesis run."
 )
 
-tab1, tab2, tab3, tab4 = st.tabs(
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
     ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer",
-     "Norwegian context — illustrative"]
+     "Norwegian context — illustrative", "Robustness and cross-checks"]
 )
 
 
@@ -407,12 +407,120 @@ with tab4:
             st.error("cross_sector_check.py is not beside app.py in this deployment.")
 
 
+# ----------------------------------------------------------------------
+# Tab 5 — Robustness and cross-checks (Chapter 5 §5.4 and §5.5a)
+# ----------------------------------------------------------------------
+
+with tab5:
+    st.subheader("Robustness and cross-checks")
+    st.write(
+        "Two results the thesis reports that the other tabs do not show. Both "
+        "answer the same objection: that the infeasibility rests on one "
+        "implementation, or on one arbitrary parameter."
+    )
+
+    st.markdown("**Independent exhaustive cross-check — Chapter 5 §5.4**")
+    st.write(
+        "`brute_force_semantics_I()` is written separately from "
+        "`check_semantics_I()`. It takes the constraint definitions directly and "
+        "enumerates all 2¹⁴ assignments of the accessibility variable over a "
+        "fourteen-month horizon. Agreement between two independent "
+        "implementations is worth more than confidence in either one. The "
+        "control case, where neither the erasure right nor the ceiling is "
+        "active, must come back feasible: a search that never succeeds proves "
+        "nothing."
+    )
+
+    if st.button("Run exhaustive cross-check", key="run_bf"):
+        # Parameters copied verbatim from trf_checker.main(); the expected
+        # column is what docs/expected_trf_output.txt records for each case.
+        cases = [
+            ("SPE, no erasure request, permit 3mo",
+             (0, 12, trf.INF, 3, "secondary", 14), False),
+            ("SPE, erasure at t=2",
+             (0, 12, 2, 9, "secondary", 14), False),
+            ("cross-border scaled (F=12), erasure at t=4",
+             (0, 12, 4, trf.INF, "primary", 14), False),
+            ("control: no request, no expiry",
+             (0, 12, trf.INF, trf.INF, "primary", 14), True),
+        ]
+        rows, ok = [], True
+        with st.spinner("Enumerating 2^14 assignments per case ..."):
+            for label, args, expected in cases:
+                got = trf.brute_force_semantics_I(*args)
+                rows.append({"case": label, "feasible": got,
+                             "expected": expected,
+                             "agrees": "yes" if got == expected else "NO"})
+                ok = ok and got == expected
+        st.dataframe(rows, use_container_width=True, hide_index=True)
+        if ok:
+            st.success(
+                "Both implementations agree on every case, and the control "
+                "returns feasible, so the search can succeed when it should.",
+                icon="✅",
+            )
+        else:
+            st.error(
+                "DISAGREEMENT. Do not present any figure from this artefact "
+                "until the discrepancy is explained.",
+                icon="🚨",
+            )
+
+    st.divider()
+    st.markdown("**Erasure response period — Chapter 5 §5.5a**")
+    st.write(
+        "The model sets δ, the controller's response period for an erasure "
+        "request, to one month. GDPR Article 12(3) allows an extension to three "
+        "where the request is complex. If the infeasibility were an artefact of "
+        "the tighter period, a longer one would dissolve it. This runs the "
+        "population at both values rather than asserting the answer."
+    )
+
+    if st.button("Run δ witness", key="run_delta"):
+        with st.spinner("Re-running the population at δ = 1 and δ = 3 ..."):
+            rows = trf.delta_witness()
+        st.dataframe(
+            [{"δ (months)": r["delta"],
+              "Sem I records": r["sem1_records"],
+              "Sem I violations": r["sem1_total"],
+              "Corollary 1.2 witnesses": r["cor12"],
+              "invalidated": r["invalidated"],
+              "Sem II violations": r["sem2_total"]} for r in rows],
+            use_container_width=True, hide_index=True,
+        )
+        if all(r["sem2_total"] == 0 for r in rows) and all(
+                r["sem1_total"] > 0 for r in rows):
+            st.success(
+                "Infeasibility under Semantics I survives the longer response "
+                "period, and Semantics II remains satisfiable at both values. "
+                "The collision is structural, not a consequence of δ = 1.",
+                icon="✅",
+            )
+        else:
+            st.warning(
+                "The pattern differs from what Chapter 5 §5.5a reports. Check "
+                "the module before citing this.",
+                icon="⚠️",
+            )
+
+    st.divider()
+    st.markdown("**What this artefact does not do**")
+    st.write(
+        "It does not connect to any National Contact Point, implement the "
+        "OpenNCP transmission flow, evaluate consent policies, or implement any "
+        "zero-knowledge proof system. Key destruction is simulated by removing a "
+        "reference in program state: that demonstrates the mechanism's logic and "
+        "says nothing about whether destruction can be assured in deployment. "
+        "Chapter 5 §5.7 and Chapter 6 state these limits in full."
+    )
+
+
 st.divider()
 st.caption(
     "This application is a viewer over the verified artefact. It is not a source "
-    "of results. Tab 1 and Tab 3 reproduce figures reported in Chapter 5; Tab 2 "
-    "is outside the thesis claims, and Tab 4 is illustrative of the Norwegian "
-    "setting and not a thesis claim either. Source: trf_checker.py and "
+    "of results. Tab 1, Tab 3 and Tab 5 reproduce figures reported in Chapter 5; "
+    "Tab 2 is outside the thesis claims, and Tab 4 is illustrative of the "
+    "Norwegian setting and not a thesis claim either. Source: trf_checker.py and "
     "synthea_layer.py, both unmodified, plus the Norwegian modules, which "
     "import the checker without modifying it."
 )

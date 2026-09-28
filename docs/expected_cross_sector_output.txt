@@ -1,0 +1,23 @@
+==========================================================================
+  CROSS-SECTOR INSTANCE: politiregisterloven s 17 (floor 12, ceiling 36)  
+==========================================================================
+
+records                              : 60
+Semantics I, records with violation  : 7
+  of which with NO erasure request   : 0  <- floor vs ceiling alone
+Semantics II, total violations       : 0
+records invalidated                  : 60
+
+No structural collision: s 17 orders its two limbs from one origin
+(floor at t_a + 12, ceiling at t_a + 36), so the provision defines a
+bounded retention window rather than a contradiction. Every collision
+found is erasure-driven.
+
+witness rid=906: log written t=0; floor to t=12; ceiling at t=36; erasure deadline 11; collision C2 at t=11
+
+The floor parameter F(a) took a third value with no change to the model.
+The finding: floors and ceilings coexist when one instrument fixes both from
+the same origin, and collide when the ceiling is anchored to an external
+event, as Art 68(12) anchors it to permit expiry. Scope: a structural
+parallel. Whether the mechanism transfers to a record-level ceiling is a
+design question this module does not answer.
