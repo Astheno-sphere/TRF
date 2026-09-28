@@ -29,8 +29,8 @@ A note on durability. Hosted applications are not archival objects: the live dem
 | `trf_checker.py` | Feasibility checker — executable witness for Theorems 1 and 2, including the independent exhaustive cross-check | 363 |
 | `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run | 152 |
 | `data/synthea_subset/` | Eight untrimmed Synthea bundles from the same cohort, so a reader can run the realism layer without regenerating it | 8 files |
-| `norwegian/norwegian_layer.py` | Norwegian context classes, parallel to the thesis and reporting no thesis figure | 135 |
-| `norwegian/cross_sector_check.py` | Cross-sector instance from politiregisterloven § 17 | 110 |
+| `norwegian_layer.py` | Norwegian context classes, parallel to the thesis and reporting no thesis figure | 135 |
+| `cross_sector_check.py` | Cross-sector instance from politiregisterloven § 17 | 110 |
 | `build_substrate_patch1.py` | Generator for the research-substrate patch workbook (September 2026, round 1) | — |
 | `build_substrate_patch2.py` | Generator for the research-substrate patch workbook (round 2: corrections CORR-015–021, fetch register) | — |
 
