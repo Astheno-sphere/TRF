@@ -1,0 +1,53 @@
+==========================================================================
+                         TRF FEASIBILITY CHECKER                          
+   seed=20260915  delta=1  ceiling=6  floors: cross-border=120, SPE=12    
+==========================================================================
+
+Generated 200 records (100 cross-border, 100 SPE access-log)
+
+--------------------------------------------------------------------------
+SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1
+--------------------------------------------------------------------------
+records with >=1 violation : 90/200
+  cross-border (F=120)     : 37/100
+  SPE access-log (F=12)    : 53/100
+total constraint violations: 95
+
+Corollary 1.2 witnesses (SPE, NO erasure request, still infeasible): 39
+  rid=100: t_a=7 permit expires t_pi=10 -> C3 from t=16, C1 to t=19  | collision at t=16
+  rid=103: t_a=7 permit expires t_pi=10 -> C3 from t=16, C1 to t=19  | collision at t=16
+  rid=104: t_a=3 permit expires t_pi=4 -> C3 from t=10, C1 to t=15  | collision at t=10
+
+Sample violation witnesses (cross-border):
+  C1 requires V=1 (=> alpha=1) at t=116 within [11,131]; C2 requires alpha=0 from t=116
+  C1 requires V=1 (=> alpha=1) at t=120 within [4,124]; C2 requires alpha=0 from t=120
+  C1 requires V=1 (=> alpha=1) at t=41 within [0,120]; C2 requires alpha=0 from t=41
+
+--------------------------------------------------------------------------
+INDEPENDENT CROSS-CHECK: exhaustive search over alpha assignments
+--------------------------------------------------------------------------
+  SPE, no erasure request, permit 3mo            feasible=False
+  SPE, erasure at t=2                            feasible=False
+  cross-border scaled (F=12), erasure at t=4     feasible=False
+  control: no request, no expiry                 feasible=True
+
+--------------------------------------------------------------------------
+SEMANTICS II (accountability preservation)          -> Theorem 2
+--------------------------------------------------------------------------
+records invalidated        : 138/200
+  ground = GDPR Art 17(1)  : 52
+  ground = EHDS Art 68(12) : 86
+records with >=1 violation : 0/200
+total constraint violations: 0
+
+Auditor view of rid=100 after invalidation:
+  metadata intact      : True  actor=HP-026 ncp=NO outcome=success
+  commitment c(a)      : 11087780fd192c8fdaa237081ee0bb11...
+  payload key k(a)     : None   <- destroyed
+  invalidation iota(a) : month=16 ground=EHDS Art 68(12)
+  payload readable?    : False
+
+==========================================================================
+RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE
+RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
+==========================================================================
