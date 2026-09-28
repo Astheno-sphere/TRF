@@ -5,13 +5,13 @@ provenance is recorded in `data/synthea_subset/README.md`.
 
 | File | md5 | Lines |
 |---|---|---|
-| `CHANGE_TRAIL.md` | 77f683e61fc5 | 228 |
+| `CHANGE_TRAIL.md` | b8dca2a557ad | 232 |
 | `PUSH_INSTRUCTIONS.md` | 6bb6853f5241 | 50 |
 | `README.md` | 3557037c1693 | 88 |
 | `app.py` | b74ec9905035 | 418 |
 | `cross_sector_check.py` | 86deaf873464 | 110 |
 | `data/synthea_subset/README.md` | c2c9564cf734 | 67 |
-| `docs/Appendix_A.md` | 71d1eb8f91c5 | 788 |
+| `docs/Appendix_A.md` | 2f4323a8545f | 788 |
 | `docs/expected_trf_output.txt` | 41b56742d35d | 53 |
 | `norwegian_docs/HOW_TO_RUN.md` | 70bce00b2315 | 103 |
 | `norwegian_docs/NORWEGIAN_MODULE_README.md` | 75a47ac43d91 | 81 |
