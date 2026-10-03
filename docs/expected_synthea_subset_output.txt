@@ -5,7 +5,7 @@
 Synthea bundles read : 8
 clinical payloads    : 8
 records              : 200
-payload bytes (mean) : constructed=35  synthea=891
+payload bytes (mean) : constructed=43  synthea=891
 
 --------------------------------------------------------------------------
 measure                                       constructed        synthea

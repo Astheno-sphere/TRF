@@ -120,10 +120,13 @@ with tab1:
         demo = next(r for r in records if r.rid == 100)
         st.markdown("**Auditor's view of record 100 after invalidation**")
         st.code(
-            f"metadata intact      : True   actor={demo.m['actor']}  "
-            f"ncp={demo.m['ncp']}  outcome={demo.m['outcome']}\n"
+            f"accessor fields      : {trf.integrity(demo)[0]}   actor={demo.m['actor']}  "
+            f"permit={demo.m.get('permit', '-')}  outcome={demo.m['outcome']}\n"
+            f"subject link         : "
+            f"{'removed month ' + str(demo.iota_subj['month']) if demo.iota_subj else 'present'}\n"
             f"commitment c(a)      : {demo.c[:32]}...\n"
             f"payload key k(a)     : {demo.k}   <- destroyed\n"
+            f"salt, ciphertext     : {demo.salt}, {demo.payload}   <- destroyed, deleted\n"
             f"invalidation iota(a) : month={demo.iota['month']}  "
             f"ground={demo.iota['ground']}\n"
             f"payload readable     : {bool(trf.alpha(demo, demo.t_a + demo.floor))}",
@@ -214,6 +217,7 @@ with tab3:
             with st.spinner("Loading bundles and rerunning both checkers ..."):
                 base = trf.generate()
                 real, n_files, n_payloads = sl.generate_with_synthea()
+                sample_payload = real[0].payload      # read before invalidation deletes it
                 mean_base = sum(len(r.payload) for r in base) // len(base)
                 mean_real = sum(len(r.payload) for r in real) // len(real)
                 diff_c = sum(1 for x, y in zip(base, real) if x.c != y.c)
@@ -256,7 +260,7 @@ with tab3:
                 )
 
             with st.expander("Inspect one Synthea payload"):
-                st.json(json.loads(real[0].payload))
+                st.json(json.loads(sample_payload))
 
         except FileNotFoundError:
             import glob as _glob

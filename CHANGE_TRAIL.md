@@ -244,3 +244,18 @@ An audit of the app against what `trf_checker.py` exposes found two reported res
 | R-15 | `README.md` | Documents Tab 5, the recorded-run table, and the robustness section; `app.py` line count 404 → 524 | The README described four tabs and one recorded output | Line count read from the file |
 
 Not changed, and why: `cross_sector_check.py` was already committed on 23 September and already wired into Tab 4 at line 378 with its own button and result banner. Verified by `git ls-tree`, by reading the file, and by importing and running `cs.build()` headless: 60 records, 7 Semantics I violations, 0 structural. The gap was the two results above, not this module.
+
+## Supervisor review, 3 October 2026
+
+The thesis-side record of these changes is in the thesis change trail (patches P12–P14). Here, what
+changed in this repository and how it was checked.
+
+| ID | File | Change | Reason | Verification |
+|---|---|---|---|---|
+| R-16 | `trf_checker.py` | Accessor/subject split of the metadata; subject link removed at the ceiling and logged; payload deleted with key and salt; payloads per record class; Merkle-log integrity in `V_II` with two tamper tests; `make_salt()` and `--random-salts` replace the dead branch | Supervisor's M1, M3, M4 | Semantics I and II figures unchanged; 200/200 records verify; both tamper tests fail `V_II`; `--random-salts` gives the same results |
+| R-17 | `app.py` | Auditor view shows accessor fields, permit, subject link, salt and ciphertext; Synthea sample read before invalidation deletes the payload | Follows R-16 | Every button run headless (Streamlit AppTest): no exception |
+| R-18 | `docs/expected_trf_output.txt`, `docs/expected_delta_witness_output.txt`, `docs/expected_synthea_subset_output.txt` | Re-recorded | R-16 changes the auditor view, adds the integrity section, and changes the constructed payload mean (35 → 43) | `expected_norwegian_output.txt` and `expected_cross_sector_output.txt` unchanged: both runs byte-identical after R-16 |
+| R-19 | `docs/Appendix_A.md` | Replaced by the thesis's Appendix A | The copy here was older than the thesis's | Every source listing and console output in it equals the file it reproduces (`appendix_sync.py` in the thesis tools) |
+| R-20 | `README.md` | Line counts, payload mean, a section on this revision | Follows R-16 | — |
+| R-21 | `CHECKSUMS.md` | Regenerated from the files present | README had changed after the last regeneration (28 Sept, 11:10: `app.py` line count) | Generated, not typed |
+

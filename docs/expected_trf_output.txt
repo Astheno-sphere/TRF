@@ -41,11 +41,23 @@ records with >=1 violation : 0/200
 total constraint violations: 0
 
 Auditor view of rid=100 after invalidation:
-  metadata intact      : True  actor=HP-026 ncp=NO outcome=success
-  commitment c(a)      : 11087780fd192c8fdaa237081ee0bb11...
+  accessor fields      : True  actor=R-008 permit=DP-015 outcome=success
+  subject link         : removed month 16
+  commitment c(a)      : 678ade47c1e6dc03296175e056fd8116...
   payload key k(a)     : None   <- destroyed
+  salt, ciphertext     : None, None   <- destroyed, deleted
   invalidation iota(a) : month=16 ground=EHDS Art 68(12)
   payload readable?    : False
+
+--------------------------------------------------------------------------
+AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
+--------------------------------------------------------------------------
+log entries                : 438
+log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+records verifying          : 200/200
+tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
+tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
+after restoring both       : V_II=True
 
 ==========================================================================
 RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE

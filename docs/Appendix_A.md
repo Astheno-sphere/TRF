@@ -1,4 +1,4 @@
-# Appendix A — Code Artefacts and Reproduction Record
+# Appendix A. Code Artefacts and Reproduction Record
 
 *Thesis:* Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space
 *Author:* Arshad Akhtar Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde
@@ -18,7 +18,9 @@ The artefact is publicly available in two forms.
 | Source repository | https://github.com/Astheno-sphere/TRF |
 | Live demonstration | https://trfhimolde.streamlit.app/ |
 
-The repository is the citable artefact and contains the checker, the realism layer, and the demonstration viewer. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its first tab asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
+The repository is the citable artefact. It contains five Python modules, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its first tab asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
+
+The demonstration presents five tabs. Tab 1 runs the thesis configuration and reproduces Tables 5.1 and 5.3. Tab 2 varies population parameters as a teaching aid and is explicitly outside the thesis claims. Tab 3 runs the realism layer and reproduces Table 5.4. Tab 4 runs the Norwegian context modules, which are illustrative and report no thesis figure. Tab 5 runs the two robustness checks: the independent exhaustive cross-check of Section 5.4 and the erasure-response-period witness of Section 5.5a.
 
 A note on durability. Hosted applications are not archival objects: the live demonstration may be withdrawn or may sleep after inactivity, and no claim in this thesis depends on its availability. Every result reported here is reproducible from the code listed below by executing a single command on any machine with Python installed, which is the form in which the artefact should be assessed.
 
@@ -26,17 +28,24 @@ A note on durability. Hosted applications are not archival objects: the live dem
 
 | File | Purpose | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker — executable witness for Theorems 1 and 2, including the independent exhaustive cross-check | 363 |
+| `trf_checker.py` | Feasibility checker — executable witness for Theorems 1 and 2, including the independent exhaustive cross-check and the audit-log integrity check | 533 |
 | `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run | 152 |
-| `data/synthea_subset/` | Eight untrimmed Synthea bundles from the same cohort, so a reader can run the realism layer without regenerating it | 8 files |
-| `norwegian_layer.py` | Norwegian context classes, parallel to the thesis and reporting no thesis figure | 135 |
-| `cross_sector_check.py` | Cross-sector instance from politiregisterloven § 17 | 110 |
-| `build_substrate_patch1.py` | Generator for the research-substrate patch workbook (September 2026, round 1) | — |
-| `build_substrate_patch2.py` | Generator for the research-substrate patch workbook (round 2: corrections CORR-015–021, fetch register) | — |
+| `norwegian_layer.py` | Three Norwegian record classes, parallel to the thesis and reporting no thesis figure | 135 |
+| `cross_sector_check.py` | Cross-sector instance drawn from politiregisterloven § 17 | 110 |
+| `app.py` | Five-tab demonstration viewer over the artefact, never a source of results | 530 |
+| `data/synthea_subset/` | Eight untrimmed Synthea bundles from the reported cohort, so a reader can run the realism layer without regenerating it | 8 files, 40 MB |
+| `docs/expected_trf_output.txt` | Recorded console run of the checker | — |
+| `docs/expected_delta_witness_output.txt` | Recorded run at δ = 1 and δ = 3 | — |
+| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset | — |
+| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run | — |
+| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | — |
+| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison | — |
+| `requirements.txt` | `streamlit>=1.30`; the checker itself needs nothing | 1 |
+| `build_substrate_patch1.py`, `build_substrate_patch2.py` | Generators for the research-substrate patch workbooks; no thesis result depends on them | — |
+
+Every command has a recorded run committed beside it. A reader who executes a command and diffs the result against its recorded file can distinguish a changed file from a changed result, which is the distinction that matters when a figure disagrees with the text.
 
 Two files are *not* included and the reason is stated rather than omitted: the full 98-bundle Synthea cohort (314 MB) and the Synthea jar (197 MB). Both are regenerable from the commands in A.3, deterministically, under the seeds given. The eight-bundle subset that is included is drawn from that cohort and is sufficient to run the realism layer; Chapter 5, Section 5.7 reports the comparison at both cohort sizes and finds every figure identical.
-
----
 
 ## A.2 Environment and generation provenance
 
@@ -57,7 +66,7 @@ The checker has no third-party dependencies. This is deliberate: a reader should
 
 ## A.3 Exact commands
 
-*1 — Run the feasibility checker (produces every figure in Chapter 5, Sections 5.3–5.6):*
+*1. Run the feasibility checker (produces every figure in Chapter 5, Sections 5.3–5.6):*
 
 ```bash
 python3 trf_checker.py
@@ -65,14 +74,14 @@ python3 trf_checker.py
 
 Deterministic. Seed 20260915 is set in the module header. Output is byte-identical across runs and across machines. Runtime measured at 0.019 s.
 
-*2 — Obtain Synthea (required only for the realism layer):*
+*2. Obtain Synthea (required only for the realism layer):*
 
 ```bash
 curl -sL -o synthea.jar \
   https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar
 ```
 
-*3 — Generate the synthetic cohort:*
+*3. Generate the synthetic cohort:*
 
 ```bash
 mkdir -p synthea_run && cd synthea_run
@@ -86,7 +95,7 @@ java -jar ../synthea.jar \
 
 `-s` sets the population seed and `-cs` the clinician seed; both are fixed to the thesis seed so the cohort is reproducible. The run yields 98 usable patient bundles from 100 requested. Output lands in `synthea_run/output/fhir/`.
 
-*4 — Run the realism layer and the payload-provenance comparison (produces Table 5.4):*
+*4. Run the realism layer and the payload-provenance comparison (produces Table 5.4):*
 
 ```bash
 python3 synthea_layer.py
@@ -94,29 +103,62 @@ python3 synthea_layer.py
 
 Looks for bundles in `./synthea_run/output/fhir/` first and falls back to `./data/synthea_subset/`, so it runs against either the regenerated cohort or the subset shipped with the artefact. Reports both runs side by side and flags any divergence.
 
+*5. Run the erasure-response-period witness (produces Table 5.2a):*
+
+```bash
+python3 trf_checker.py --delta-witness
+```
+
+Re-runs the population at δ = 1 and δ = 3, the extension Article 12(3) GDPR permits for complex requests, and prints both rows for comparison.
+
+*6. Run the Norwegian context modules (illustrative; no thesis figure depends on them):*
+
+```bash
+python3 norwegian_layer.py
+python3 cross_sector_check.py
+```
+
+The first builds the NO-XB, NO-SPE and NO-JOURNAL classes and walks through one case per class. The second builds the politiregisterloven § 17 instance discussed in Chapter 6, Section 6.9a.
+
+*7. Run the demonstration viewer locally:*
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+*8. Verify any run against its recorded output:*
+
+```bash
+python3 trf_checker.py | diff - docs/expected_trf_output.txt && echo identical
+```
+
+The same form applies to each of the five recorded runs listed in A.1b. A difference means a file changed, not that the result changed.
+
 ---
 
 ## A.4 What the code does
 
 ### `trf_checker.py`
 
-Implements the TRF Model of Chapter 4 directly. Records are the seven-element tuples of Section 4.3. Two record classes are generated: cross-border audit records with a 120-month floor, and Secure Processing Environment access-log records with a 12-month floor and the Article 68(12) ceiling. Generation parameters are listed in full in Chapter 5, Table 5.0.
+Implements the TRF Model of Chapter 4 directly. Records are the seven-element tuples of Section 4.3, with the metadata split into accessor fields and subject fields. A Secure Processing Environment record carries a researcher and a permit rather than a clinician and a contact point, and its payload stands for the logged activity; a cross-border record's payload stands for the demographic query that the IHE patient-discovery transaction puts into the audit message. Two record classes are generated: cross-border audit records with a 120-month floor, and Secure Processing Environment access-log records with a 12-month floor and the Article 68(12) ceiling. Generation parameters are listed in full in Chapter 5, Table 5.0.
 
 Three components matter for the thesis's claims:
 
 - `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Theorem 1.
-- `check_semantics_II()` applies the constructive trajectory from the proof of Theorem 2 — destroy the payload key and the commitment salt at `min(t_r + δ, t_π + 6)`, append a grounded invalidation entry, retain metadata and commitment — and then verifies all three constraints.
+- `check_semantics_II()` applies the constructive trajectory from the proof of Theorem 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
+- `integrity()` and the `MerkleLog` class give condition (i) of Semantics II real content. Every access event, invalidation and subject-link removal is appended to an append-only Merkle log using RFC 6962 hashing, and `V_II` checks each of a record's entries against the current root with an inclusion proof. The run includes two tamper tests, an altered accessor field and an altered invalidation ground, under which `V_II` fails, and a restore after which it holds.
 - `brute_force_semantics_I()` is written independently of the first function, taking the constraint definitions directly and enumerating all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon. It exists so that the infeasibility results do not rest on the correctness of a single implementation. The control case, in which neither C2 nor C3 is active, returns feasible: confirming the search can succeed when it should.
 
-Cryptographic operations use `hashlib` only. Commitments are salted (`SHA-256(salt ‖ payload)`) because Chapter 4, Section 4.9 establishes that an unsalted hash of a low-entropy clinical payload would itself remain personal data. Salts are derived deterministically from the record identifier so that runs reproduce exactly. That derivation is for reproducibility only: a production deployment must draw each salt from a cryptographically secure random source, since a salt derivable from the record identifier offers no hiding against an adversary who knows the derivation.
+Cryptographic operations use `hashlib` only. Commitments are salted (`SHA-256(salt ‖ payload)`) because Chapter 4, Section 4.9 establishes that an unsalted hash of a low-entropy clinical payload would itself remain personal data. By default `make_salt()` derives each salt from the record identifier so that runs reproduce exactly; `--random-salts` draws them from `os.urandom` instead and gives the same results. The derivation is for reproducibility only: a production deployment must draw each salt from a cryptographically secure random source, since a salt derivable from the record identifier offers no hiding against an adversary who knows the derivation.
 
-Key destruction is modelled as setting the key reference to `None`. This demonstrates the mechanism's logic and demonstrates nothing about deployment assurance: a limitation stated in Chapter 5, Section 5.7 and treated in Chapter 6.
+Key destruction is modelled as setting the key reference to `None`, and deletion of the ciphertext as setting the payload to `None`. This demonstrates the mechanism's logic and demonstrates nothing about deployment assurance: a limitation stated in Chapter 5, Section 5.7 and treated in Chapter 6.
 
 ### `synthea_layer.py`
 
-Replaces the constructed payload strings with real FHIR R4 resources drawn from Synthea bundles — one clinical resource per bundle, from `Condition`, `Observation`, `MedicationRequest`, `AllergyIntolerance`, `Immunization`, or `Procedure` — recomputes each commitment over the real payload, and leaves every timing quantity untouched. It then runs both populations through the same checks and prints them side by side.
+Replaces the constructed payload strings with real FHIR R4 resources drawn from Synthea bundles (one clinical resource per bundle, from `Condition`, `Observation`, `MedicationRequest`, `AllergyIntolerance`, `Immunization`, or `Procedure`), recomputes each commitment over the real payload, and leaves every timing quantity untouched. It then runs both populations through the same checks and prints them side by side.
 
-The expected result, and the observed one, is that every reported figure is identical while all 200 commitments differ. Mean payload size rises from 35 bytes to 1,006. The model reads timing and accessibility, never payload content; running the comparison rather than asserting the invariance lets a reader see the claim tested against inputs that demonstrably changed.
+The expected result, and the observed one, is that every reported figure is identical while all 200 commitments differ. Mean payload size rises from 43 bytes to 891 with the committed subset (to 1,006 with the full cohort, recorded on 28 September when the constructed payloads averaged 35 bytes; see A.11). The model reads timing and accessibility, never payload content; running the comparison rather than asserting the invariance lets a reader see the claim tested against inputs that demonstrably changed.
 
 ---
 
@@ -146,9 +188,10 @@ Results reported in Chapters 4 and 5 and confirmed by execution:
 | Semantics II — total violations | 0 | Table 5.3 |
 | Synthea comparison — figures changed | none | Table 5.4 |
 | Synthea comparison — commitments changed | 200 / 200 | Table 5.4 |
-| Reference commitment, record 100 | `11087780fd192c8f…` | §5.6 |
+| Audit-log integrity | 200 / 200 records verify; both tamper tests fail V_II | §5.6 |
+| Reference commitment, record 100 | `678ade47c1e6dc03…` | §5.6 |
 
-The reference commitment is included so that a reader re-running the checker can confirm in one glance that their run matches the one reported. It is unchanged across the salt-handling refactor documented in the thesis change log, which is the intended behaviour.
+The reference commitment is included so that a reader re-running the checker can confirm in one glance that their run matches the one reported. It changed once, on 3 October 2026, when the Secure Processing Environment payload was redefined as the logged activity (Chapter 4, Section 4.3). Under `--random-salts` it differs on every run, by design.
 
 ---
 
@@ -167,7 +210,7 @@ Stated here so that they are not inferred from silence:
 
 ## A.8 Source listing: `trf_checker.py`
 
-The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 363.
+The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 533.
 
 ```python
 """
@@ -187,13 +230,26 @@ Model reference: Chapter 4, Sections 4.3-4.7.
   C2 erasure right   : alpha(a,t) = 0 for t >= t_r + delta
   C3 deletion ceiling: alpha(a,t) = 0 for t >= t_pi + 6   (secondary pathway)
 
-Run:  python trf_checker.py
-Deterministic: fixed seed, identical output on every run.
+Run:  python trf_checker.py            (reproducible: salts derived from the record id)
+      python trf_checker.py --random-salts   (salts from os.urandom, as a deployment must)
+Deterministic by default: fixed seed, identical output on every run.
+
+Revised 3 Oct 2026 for the supervisor review of 30 Sept (thesis patches P04, P06; D-15..D-17):
+  - metadata split into accessor fields and subject fields (Ch4 s4.3); the subject link is
+    removed at the deletion ceiling and the removal is logged (Ch4 s4.7, step 4)
+  - payload ciphertext deleted with key and salt at invalidation (Ch4 s4.8)
+  - payloads modelled per record class: the ITI-55 patient-discovery query for cross-border
+    records, the logged activity for SPE records (Ch4 s4.3)
+  - V_II tests integrity against an append-only Merkle log (RFC 6962 hashing), with a tamper
+    test, instead of checking only that fields are present (supervisor's M4)
+  - the dead `os.urandom(16) if False` branch replaced by make_salt() and --random-salts
 """
 
 import hashlib
+import json
 import os
 import random
+import sys
 from itertools import product
 
 SEED = 20260915
@@ -202,11 +258,108 @@ CEILING = 6        # EHDS Art 68(12), months after permit expiry
 FLOOR_XBORDER = 120  # eHDSI deployment baseline, months
 FLOOR_SPE = 12       # EHDS Art 73(1)(e), months
 INF = float("inf")
+RANDOM_SALTS = "--random-salts" in sys.argv
+SUBJECT_FIELDS = ("patient_pseudonym",)   # m_subj(a); every other metadata field is m_acc(a)
 
 
 # ----------------------------------------------------------------------
 # Cryptographic primitives (hiding commitment + simulated key destruction)
 # ----------------------------------------------------------------------
+
+def make_salt(rid: int) -> bytes:
+    """Per-record 16-byte salt. By default derived from the record id so that every run
+    reproduces exactly; that derivation is for reproducibility only and gives no hiding
+    against an adversary who knows it. --random-salts draws each salt from os.urandom,
+    which is what a deployment must do (Appendix A, A.4)."""
+    if RANDOM_SALTS:
+        return os.urandom(16)
+    return bytes([(rid * 7 + i) % 256 for i in range(16)])
+
+
+# ----------------------------------------------------------------------
+# Append-only audit log: Merkle tree with RFC 6962 hashing
+# leaf = H(0x00 || data), node = H(0x01 || left || right)
+# ----------------------------------------------------------------------
+
+def _h(b: bytes) -> bytes:
+    return hashlib.sha256(b).digest()
+
+
+class MerkleLog:
+    """Append-only log of audit events. An auditor holding the current root can check that
+    a given event is in the log, unaltered, with an inclusion proof of log2(n) hashes."""
+
+    def __init__(self):
+        self.leaves = []                       # leaf hashes
+
+    def append(self, data: bytes) -> int:
+        self.leaves.append(_h(b"\x00" + data))
+        return len(self.leaves) - 1
+
+    @staticmethod
+    def _mth(leaves):
+        if len(leaves) == 1:
+            return leaves[0]
+        k = 1 << ((len(leaves) - 1).bit_length() - 1)     # largest power of 2 < n
+        return _h(b"\x01" + MerkleLog._mth(leaves[:k]) + MerkleLog._mth(leaves[k:]))
+
+    def root(self) -> bytes:
+        return self._mth(self.leaves) if self.leaves else _h(b"")
+
+    def proof(self, m: int, leaves=None):
+        leaves = self.leaves if leaves is None else leaves
+        if len(leaves) == 1:
+            return []
+        k = 1 << ((len(leaves) - 1).bit_length() - 1)
+        if m < k:
+            return self.proof(m, leaves[:k]) + [("R", self._mth(leaves[k:]))]
+        return self.proof(m - k, leaves[k:]) + [("L", self._mth(leaves[:k]))]
+
+    @staticmethod
+    def verify(data: bytes, proof, root: bytes) -> bool:
+        node = _h(b"\x00" + data)
+        for side, sib in proof:
+            node = _h(b"\x01" + (sib + node if side == "L" else node + sib))
+        return node == root
+
+
+AUDIT_LOG = MerkleLog()
+
+
+def _creation_entry(rec) -> bytes:
+    """What the floor protects: accessor fields, commitment, creation month (not m_subj)."""
+    m_acc = {k: v for k, v in rec.m.items() if k not in SUBJECT_FIELDS}
+    return json.dumps({"event": "access", "rid": rec.rid, "t_a": rec.t_a,
+                       "m_acc": m_acc, "c": rec.c}, sort_keys=True).encode()
+
+
+def _entry(obj) -> bytes:
+    return json.dumps(obj, sort_keys=True).encode()
+
+
+def log_creation(rec):
+    if getattr(rec, "log_idx", None) is None:
+        rec.log_idx = {"access": AUDIT_LOG.append(_creation_entry(rec))}
+
+
+def integrity(rec):
+    """(ok, reason): every logged event of the record verifies against the current root."""
+    idx = getattr(rec, "log_idx", None)
+    if not idx:
+        return False, "record not in the audit log"
+    root = AUDIT_LOG.root()
+    checks = [("access", _creation_entry(rec))]
+    if rec.iota is not None:
+        checks.append(("invalidation", _entry(rec.iota)))
+    if rec.iota_subj is not None:
+        checks.append(("subject_link", _entry(rec.iota_subj)))
+    for name, data in checks:
+        if name not in idx:
+            return False, f"{name} event not logged"
+        if not MerkleLog.verify(data, AUDIT_LOG.proof(idx[name]), root):
+            return False, f"{name} entry fails its inclusion proof (altered)"
+    return True, ""
+
 
 def commit(payload: bytes, salt: bytes) -> str:
     """Hiding, binding commitment. Salt is REQUIRED (Chapter 4, Section 4.9):
@@ -225,18 +378,26 @@ class Record:
         self.sigma = sigma
         self.t_r = t_r
         self.t_pi = t_pi
-        # metadata m(a): accountability content, no clinical payload
-        self.m = {"rid": rid, "actor": f"HP-{rid % 37:03d}",
-                  "ncp": ["NO", "PT", "CZ", "FI"][rid % 4],
-                  "patient_pseudonym": f"PSN-{rid % 100:04d}",
-                  "doc_category": "PatientSummary" if sigma == "primary" else "SPE-AccessLog",
-                  "legal_basis": "Art9(2)(h)" if sigma == "primary" else "DataPermit",
-                  "outcome": "success"}
-        self.salt = os.urandom(16) if False else bytes([(rid * 7 + i) % 256 for i in range(16)])
-        self.payload = payload
+        # metadata m(a) = m_acc(a) + m_subj(a); no clinical content (Ch4 s4.3)
+        if sigma == "primary":                # cross-border: clinician, contact point
+            self.m = {"rid": rid, "actor": f"HP-{rid % 37:03d}",
+                      "ncp": ["NO", "PT", "CZ", "FI"][rid % 4],
+                      "patient_pseudonym": f"PSN-{rid % 100:04d}",
+                      "doc_category": "PatientSummary", "legal_basis": "Art9(2)(h)",
+                      "outcome": "success"}
+        else:                                 # SPE: researcher named in the permit
+            self.m = {"rid": rid, "actor": f"R-{rid % 23:03d}",
+                      "permit": f"DP-{rid % 17:03d}",
+                      "patient_pseudonym": f"PSN-{rid % 100:04d}",
+                      "doc_category": "SPE-AccessLog", "legal_basis": "DataPermit",
+                      "outcome": "success"}
+        self.salt = make_salt(rid)
+        self.payload = payload                # stands for the ciphertext of p(a)
         self.c = commit(payload, self.salt)   # survives invalidation
         self.k = f"KEY-{rid:06d}"             # destroyed at invalidation
         self.iota = None                      # invalidation entry
+        self.iota_subj = None                 # subject-link removal entry (SPE, ceiling)
+        self.log_idx = None
 
     # -- model quantities ------------------------------------------------
     def window(self):
@@ -252,6 +413,10 @@ class Record:
 
     def t_invalidation(self):
         return min(self.erasure_deadline(), self.ceiling_deadline())
+
+    def subject_removal(self):
+        """Month from which m_subj is gone: the ceiling, where C3 reaches the subject fields."""
+        return self.ceiling_deadline()
 
 
 # ----------------------------------------------------------------------
@@ -283,15 +448,25 @@ def check_semantics_I(rec):
 # ----------------------------------------------------------------------
 
 def apply_invalidation(rec):
+    log_creation(rec)                     # the access event enters the log first
     t_I = rec.t_invalidation()
     if t_I < INF:
         ground = ("GDPR Art 17(1)" if rec.erasure_deadline() <= rec.ceiling_deadline()
                   else "EHDS Art 68(12)")
         rec.k = None                      # irreversible key destruction
-        rec.salt = None                   # salt destroyed with the key (Ch4 §4.8)
+        rec.salt = None                   # salt destroyed with the key (Ch4 s4.8)
+        rec.payload = None                # ciphertext deleted with the key (Ch4 s4.8, D-17)
         rec.iota = {"rid": rec.rid, "month": t_I, "ground": ground,
                     "authorised_by": "DPO", "key_id_commitment":
                         hashlib.sha256(f"KEY-{rec.rid:06d}".encode()).hexdigest()[:16]}
+        rec.log_idx["invalidation"] = AUDIT_LOG.append(_entry(rec.iota))
+    t_S = rec.subject_removal()
+    if t_S < INF and any(f in rec.m for f in SUBJECT_FIELDS):
+        for f in SUBJECT_FIELDS:          # beta = 0 from the ceiling (Ch4 s4.7, steps 2 and 4)
+            rec.m.pop(f, None)
+        rec.iota_subj = {"rid": rec.rid, "month": t_S, "removed": list(SUBJECT_FIELDS),
+                         "ground": "EHDS Art 68(12)", "authorised_by": "DPO"}
+        rec.log_idx["subject_link"] = AUDIT_LOG.append(_entry(rec.iota_subj))
     return rec
 
 
@@ -299,23 +474,32 @@ def alpha(rec, t):
     return 1 if t < rec.t_invalidation() else 0
 
 
-def V_II(rec, t):
-    """(i) metadata intact, (ii) commitment present,
-       (iii) any loss of accessibility is itself logged."""
-    if not rec.m:
-        return False, "metadata missing"
+def beta(rec, t):
+    """Subject-link variable: 0 from the month the subject fields were removed."""
+    return 0 if rec.iota_subj is not None and t >= rec.iota_subj["month"] else 1
+
+
+def V_II(rec, t, integrity_result=None):
+    """(i) m_acc intact and unmodified, checked against the audit log;
+       (ii) commitment present and logged; (iii) every loss of accessibility,
+       of the payload or of the subject link, is itself a logged entry."""
+    ok, why = integrity_result if integrity_result is not None else integrity(rec)
+    if not ok:
+        return False, why
     if not rec.c:
         return False, "commitment missing"
-    if alpha(rec, t) == 0 and t >= rec.t_a:
-        if rec.iota is None:
-            return False, "payload inaccessible but no invalidation entry"
+    if alpha(rec, t) == 0 and t >= rec.t_a and rec.iota is None:
+        return False, "payload inaccessible but no invalidation entry"
+    if not any(f in rec.m for f in SUBJECT_FIELDS) and rec.iota_subj is None:
+        return False, "subject fields removed without a logged entry"
     return True, ""
 
 
 def check_semantics_II(rec):
     violations = []
+    integ = integrity(rec)                                   # one proof check per record
     for t in rec.window():                                   # C1
-        ok, why = V_II(rec, t)
+        ok, why = V_II(rec, t, integ)
         if not ok:
             violations.append({"rid": rec.rid, "month": t,
                                "constraint": "C1", "detail": why})
@@ -335,6 +519,11 @@ def check_semantics_II(rec):
             if alpha(rec, t) != 0:
                 violations.append({"rid": rec.rid, "month": t, "constraint": "C3",
                                    "detail": "payload still accessible after deletion ceiling"})
+                break
+        for t in range(int(d), horizon + 1):                 # C3 over the subject link
+            if beta(rec, t) != 0:
+                violations.append({"rid": rec.rid, "month": t, "constraint": "C3",
+                                   "detail": "subject link still present after deletion ceiling"})
                 break
     return violations
 
@@ -376,7 +565,8 @@ def generate(n_primary=100, n_secondary=100, seed=SEED):
     for _ in range(n_primary):
         t_a = rng.randint(0, 11)
         t_r = t_a + rng.randint(1, 130) if rng.random() < 0.40 else INF
-        payload = f"<FHIR:Bundle patient-summary rid={rid}>".encode()
+        payload = (f"<ITI-55 QBP name=N{rid:03d} birthTime=19{40 + rid % 60:02d} "
+                   f"rid={rid}>").encode()       # demographic query (Ch4 s4.3)
         records.append(Record(rid, t_a, FLOOR_XBORDER, "primary", payload, t_r=t_r))
         rid += 1
     # Class 2: SPE access-log records, floor 12 months, ceiling applies
@@ -385,7 +575,7 @@ def generate(n_primary=100, n_secondary=100, seed=SEED):
         permit_len = rng.randint(1, 12)
         t_pi = t_a + permit_len
         t_r = t_a + rng.randint(1, 18) if rng.random() < 0.25 else INF
-        payload = f"<FHIR:AuditEvent spe-access rid={rid}>".encode()
+        payload = f"<SPE-activity query=cohort-extract rid={rid}>".encode()
         records.append(Record(rid, t_a, FLOOR_SPE, "secondary", payload,
                               t_r=t_r, t_pi=t_pi))
         rid += 1
@@ -475,13 +665,36 @@ def main():
     # auditor view on a previously-violating record
     demo = no_req[0] if no_req else sec[0]
     print(f"\nAuditor view of rid={demo.rid} after invalidation:")
-    print(f"  metadata intact      : {bool(demo.m)}  actor={demo.m['actor']} "
-          f"ncp={demo.m['ncp']} outcome={demo.m['outcome']}")
+    print(f"  accessor fields      : {integrity(demo)[0]}  actor={demo.m['actor']} "
+          f"permit={demo.m.get('permit', '-')} outcome={demo.m['outcome']}")
+    print(f"  subject link         : "
+          f"{'removed month ' + str(demo.iota_subj['month']) if demo.iota_subj else 'present'}")
     print(f"  commitment c(a)      : {demo.c[:32]}...")
     print(f"  payload key k(a)     : {demo.k}   <- destroyed")
+    print(f"  salt, ciphertext     : {demo.salt}, {demo.payload}   <- destroyed, deleted")
     print(f"  invalidation iota(a) : month={demo.iota['month']} "
           f"ground={demo.iota['ground']}")
     print(f"  payload readable?    : {bool(alpha(demo, demo.t_a + demo.floor))}")
+
+    # ---------------- Integrity of the audit log ----------------
+    print("\n" + "-" * 74)
+    print("AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)")
+    print("-" * 74)
+    n_ok = sum(1 for r in records if integrity(r)[0])
+    print(f"log entries                : {len(AUDIT_LOG.leaves)}")
+    print(f"log root                   : {AUDIT_LOG.root().hex()[:32]}...")
+    print(f"records verifying          : {n_ok}/{len(records)}")
+    saved = demo.m["actor"]
+    demo.m["actor"] = "R-999"                                  # tamper with one accessor field
+    ok_t, why_t = V_II(demo, demo.t_a)
+    demo.m["actor"] = saved
+    print(f"tamper test, rid={demo.rid} actor altered : V_II={ok_t}  ({why_t})")
+    saved_g = demo.iota["ground"]
+    demo.iota["ground"] = "none"                               # tamper with the invalidation entry
+    ok_g, why_g = V_II(demo, demo.t_a)
+    demo.iota["ground"] = saved_g
+    print(f"tamper test, rid={demo.rid} ground altered: V_II={ok_g}  ({why_g})")
+    print(f"after restoring both       : V_II={V_II(demo, demo.t_a)[0]}")
 
     print("\n" + "=" * 74)
     print(f"RESULT  Semantics I : {total_v} violations across {n_bad} records  "
@@ -694,6 +907,808 @@ if __name__ == "__main__":
     main()
 ```
 
+## A.9b Source listing: `norwegian_layer.py`
+
+The Norwegian context module, reproduced as executed. It imports `trf_checker.py` without modifying it and changes nothing the thesis reports: it varies only the retention floor, the pathway, and the arrival of erasure requests and permit expiries. Line count: 135.
+
+```python
+"""
+Norwegian context layer for the TRF feasibility checker
+=======================================================
+PLUG-AND-PLAY. This module imports trf_checker unmodified and adds record
+classes shaped by the Norwegian implementation context. It changes nothing the
+thesis depends on: `python3 trf_checker.py` still reproduces 95/90/39/0/138.
+
+What it varies is what the model actually reads: the retention floor F(a), the
+pathway, and the arrival of erasure requests and permit expiries. It does NOT
+claim that Norwegian payloads change any result — Chapter 5 shows the results
+are invariant to payload content, and that invariance is why the illustrative
+payloads below are safe to use.
+
+Classes
+  NO-XB      Cross-border audit record at the Norwegian NCPeH. Inbound patient
+             summary from PT/CZ/FI to a legevakt (Bodo, Stjordal).
+             F = 120 months (eHDSI deployment baseline).
+  NO-SPE     Secure Processing Environment access log, Helsedataservice permit,
+             processing in a NORTRE node. F = 12 (Art 73(1)(e)),
+             ceiling 6 months after permit expiry (Art 68(12)).
+  NO-JOURNAL Audit record tied to a patient record held under Norwegian law.
+             Floor is INDEFINITE: pasientjournalloven s 25 and journalforskriften
+             s 14 require retention until, given the character of the health care,
+             the record is no longer assumed to be needed; archive law may then
+             preserve it. There is no number in the primary sources, so none is
+             invented here. For computation the indefinite floor is truncated at
+             HORIZON_INDEFINITE months and labelled as a truncation.
+
+Run:  python3 norwegian_layer.py
+"""
+
+import random
+import trf_checker as trf
+
+HORIZON_INDEFINITE = 600          # 50 years; a computation bound, NOT a legal period
+SEED = trf.SEED
+
+NCPS = ["PT", "CZ", "FI"]
+SITES = ["Bodo legevakt", "Stjordal legevakt"]
+NODES = ["TSD (UiO)", "SAFE (UiB)", "HUNT Cloud (NTNU)", "controller-provided server"]
+
+
+def _xb_payload(rid, rng):
+    """Stands for the ITI-55 QueryByParameter segment an ATNA record carries:
+    the demographics typed into patient discovery. Constructed, not real."""
+    return (f"<ITI-55 QueryByParameter base64> name=SYN-{rid:04d} "
+            f"birthTime=19{rng.randint(40,99)}{rng.randint(10,12)}{rng.randint(10,28)} "
+            f"gender={rng.choice('MF')} addr=NO-{rng.randint(1000,9999)}").encode()
+
+
+def _spe_payload(rid, rng):
+    return (f"<SPE activity log> query=SELECT diagnosis,birthyear FROM permit-"
+            f"{rng.randint(2026,2031)}-{rid:04d} rows={rng.randint(50,5000)}").encode()
+
+
+def build(n_xb=60, n_spe=60, n_journal=40, seed=SEED):
+    rng = random.Random(seed)
+    recs, rid = [], 0
+    for _ in range(n_xb):                                   # NO-XB
+        t_a = rng.randint(0, 11)
+        t_r = t_a + rng.randint(1, 130) if rng.random() < 0.40 else trf.INF
+        r = trf.Record(rid, t_a, trf.FLOOR_XBORDER, "primary", _xb_payload(rid, rng), t_r=t_r)
+        r.m.update({"klasse": "NO-XB", "site": rng.choice(SITES),
+                    "ncp": rng.choice(NCPS), "doc_category": "PatientSummary (inbound)",
+                    "legal_basis": "Art9(2)(h)"})
+        recs.append(r); rid += 1
+    for _ in range(n_spe):                                  # NO-SPE
+        t_a = rng.randint(0, 11)
+        t_pi = t_a + rng.randint(1, 12)
+        t_r = t_a + rng.randint(1, 18) if rng.random() < 0.25 else trf.INF
+        r = trf.Record(rid, t_a, trf.FLOOR_SPE, "secondary", _spe_payload(rid, rng),
+                       t_r=t_r, t_pi=t_pi)
+        r.m.update({"klasse": "NO-SPE", "node": rng.choice(NODES),
+                    "doc_category": "SPE-ActivityLog", "legal_basis": "DataPermit (Helsedataservice)"})
+        recs.append(r); rid += 1
+    for _ in range(n_journal):                              # NO-JOURNAL
+        t_a = rng.randint(0, 11)
+        t_r = t_a + rng.randint(1, 240) if rng.random() < 0.40 else trf.INF
+        r = trf.Record(rid, t_a, HORIZON_INDEFINITE, "primary", _xb_payload(rid, rng), t_r=t_r)
+        r.m.update({"klasse": "NO-JOURNAL", "doc_category": "JournalAccess",
+                    "legal_basis": "pasientjournalloven s 25 (purpose-based, indefinite)"})
+        recs.append(r); rid += 1
+    return recs
+
+
+def run(recs, label="NORWEGIAN LAYER"):
+    klasser = sorted({r.m["klasse"] for r in recs})
+    v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+    for r in recs:
+        trf.apply_invalidation(r)
+    v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+    print("=" * 74); print(label.center(74)); print("=" * 74)
+    print(f"\n{'class':<12}{'n':>5}{'SemI recs':>11}{'SemI viol':>11}"
+          f"{'invalidated':>13}{'SemII viol':>12}")
+    for k in klasser:
+        sub = [r for r in recs if r.m["klasse"] == k]
+        print(f"{k:<12}{len(sub):>5}"
+              f"{sum(1 for r in sub if v1[r.rid]):>11}"
+              f"{sum(len(v1[r.rid]) for r in sub):>11}"
+              f"{sum(1 for r in sub if r.iota):>13}"
+              f"{sum(len(v2[r.rid]) for r in sub):>12}")
+    print(f"\n{'TOTAL':<12}{len(recs):>5}"
+          f"{sum(1 for r in recs if v1[r.rid]):>11}"
+          f"{sum(len(x) for x in v1.values()):>11}"
+          f"{sum(1 for r in recs if r.iota):>13}"
+          f"{sum(len(x) for x in v2.values()):>12}")
+    return v1, v2
+
+
+def walkthrough(recs, v1):
+    """One record per class, shown end to end: which obligation binds, where it
+    collides, and what an auditor is left with after invalidation."""
+    print("\n" + "-" * 74); print("CASE WALKTHROUGHS"); print("-" * 74)
+    for k in sorted({r.m["klasse"] for r in recs}):
+        cand = [r for r in recs if r.m["klasse"] == k and v1[r.rid]]
+        if not cand:
+            print(f"\n{k}: no infeasible record under Semantics I in this draw."); continue
+        r = cand[0]
+        print(f"\n{k}  rid={r.rid}  ({r.m.get('site') or r.m.get('node') or r.m['legal_basis']})")
+        print(f"  floor    : t={r.t_a} .. {r.t_a + r.floor}"
+              + ("   [indefinite, truncated]" if k == "NO-JOURNAL" else ""))
+        print(f"  erasure  : {'none' if r.t_r == trf.INF else 't_r=' + str(r.t_r) + ' -> deadline ' + str(int(r.erasure_deadline()))}")
+        print(f"  ceiling  : {'n/a' if r.ceiling_deadline() == trf.INF else 't_pi=' + str(r.t_pi) + ' -> ' + str(int(r.ceiling_deadline()))}")
+        print(f"  collision: {v1[r.rid][0]['constraint']} at t={v1[r.rid][0]['month']}")
+        print(f"  after invalidation -> metadata intact={bool(r.m)}, commitment={r.c[:16]}..., "
+              f"key={r.k}, salt={r.salt}, ground={r.iota['ground'] if r.iota else None}")
+
+
+if __name__ == "__main__":
+    recs = build()
+    v1, _ = run(recs)
+    walkthrough(recs, v1)
+    print("\nNote: figures above are illustrative of the Norwegian setting, not")
+    print("empirical. The canonical result of the thesis is unchanged and is")
+    print("reproduced by running trf_checker.py on its own.")
+```
+
+---
+
+## A.9c Source listing: `cross_sector_check.py`
+
+The cross-sector instance discussed in Chapter 6, Section 6.9a. It takes the floor and ceiling of politiregisterloven § 17 and runs them through the same unmodified model. Line count: 110.
+
+```python
+"""
+Cross-sector instance: Norwegian police register logs
+=====================================================
+PLUG-AND-PLAY. Imports trf_checker unmodified.
+
+Why this exists. Chapter 6 s 6.9 and Chapter 7 s 7.5 say the structure the TRF
+Model captures — a retention floor, a subject-triggered erasure right, and a
+deletion ceiling — is probably not specific to health, and flag the question as
+uninvestigated. Norwegian law supplies a genuine instance outside health.
+
+  Politiregisterloven (LOV-2010-05-28-16) s 17, kravet til sporbarhet:
+    information about use of the system shall be registered and stored for at
+    least 1 year and deleted at the latest after 3 years.
+  Politiregisterforskriften (FOR-2013-09-20-1097) ch. 40 mirrors this:
+    deleted at the earliest after 1 year and at the latest after 3 years.
+  Politiregisterloven s 50-51 give the registered person rights to correction,
+    blocking and deletion of information no longer necessary for the purpose.
+
+That is a floor of 12 months and a ceiling of 36 months on the SAME log, plus a
+subject-triggered right: the tri-lateral structure, in another sector, in
+national law.
+
+THE RESULT IS NOT THE ONE EXPECTED, AND IT IS THE MORE USEFUL ONE. Running the
+model on this instance produces NO structural collision at all: the floor ends
+at t_a + 12 and the ceiling bites at t_a + 36, so the provision defines a
+bounded retention window rather than a contradiction. The Norwegian legislator
+ordered the two limbs. Collisions appear only where an erasure request lands
+inside the window.
+
+That isolates what is defective about the EHDS pair. There the ceiling is
+anchored to an EXTERNAL event, the expiry of the data permit, which can fall
+before the floor on a log written late in the permit. A floor and a ceiling on
+the same record are compatible when the instrument orders them from the same
+origin, and collide when one is anchored elsewhere. The contribution of the
+thesis is therefore not that floors and ceilings conflict in general; it is that
+they conflict when their origins differ, which is the EHDS case.
+
+Two further differences from the EHDS case are stated rather than hidden:
+  1. The ceiling here runs from the log's own creation, not from the expiry of a
+     permit. It is modelled by setting t_pi so that the ceiling lands at
+     t_a + 36 (the checker computes ceiling = t_pi + 6).
+  2. The ceiling attaches to the whole record, not only to a payload inside it.
+     Under Semantics II the metadata cannot survive it, so the terminal
+     transition of Chapter 4 s 4.8 is what discharges the ceiling here, at
+     t_a + 36 rather than at floor expiry. This module reports the collision;
+     it does not claim the mechanism transfers unchanged.
+
+Run:  python3 cross_sector_check.py
+"""
+
+import random
+import trf_checker as trf
+
+FLOOR_POLITI = 12      # politiregisterloven s 17: at least 1 year
+CEILING_POLITI = 36    # politiregisterloven s 17: deleted at the latest after 3 years
+
+
+def build(n=60, seed=trf.SEED):
+    rng = random.Random(seed)
+    recs = []
+    for rid in range(900, 900 + n):
+        t_a = rng.randint(0, 11)
+        # ceiling lands at t_a + 36; checker computes t_pi + 6
+        t_pi = t_a + CEILING_POLITI - trf.CEILING
+        t_r = t_a + rng.randint(1, 40) if rng.random() < 0.30 else trf.INF
+        payload = f"<politiloggpost> bruker=POL-{rid % 97:03d} oppslag=register".encode()
+        r = trf.Record(rid, t_a, FLOOR_POLITI, "secondary", payload, t_r=t_r, t_pi=t_pi)
+        r.m.update({"klasse": "POLITI-LOG", "doc_category": "SystemUseLog",
+                    "legal_basis": "politiregisterloven s 17"})
+        recs.append(r)
+    return recs
+
+
+def main():
+    recs = build()
+    v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+    n_bad = sum(1 for k in v1 if v1[k])
+    structural = sum(1 for r in recs if r.t_r == trf.INF and v1[r.rid])
+    for r in recs:
+        trf.apply_invalidation(r)
+    v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+    print("=" * 74)
+    print("CROSS-SECTOR INSTANCE: politiregisterloven s 17 (floor 12, ceiling 36)".center(74))
+    print("=" * 74)
+    print(f"\nrecords                              : {len(recs)}")
+    print(f"Semantics I, records with violation  : {n_bad}")
+    print(f"  of which with NO erasure request   : {structural}  <- floor vs ceiling alone")
+    print(f"Semantics II, total violations       : {sum(len(x) for x in v2.values())}")
+    print(f"records invalidated                  : {sum(1 for r in recs if r.iota)}")
+    if structural == 0:
+        print("\nNo structural collision: s 17 orders its two limbs from one origin")
+        print("(floor at t_a + 12, ceiling at t_a + 36), so the provision defines a")
+        print("bounded retention window rather than a contradiction. Every collision")
+        print("found is erasure-driven.")
+    cand = [r for r in recs if v1[r.rid]]
+    if cand:
+        r = cand[0]; d = v1[r.rid][0]
+        print(f"\nwitness rid={r.rid}: log written t={r.t_a}; floor to t={r.t_a + r.floor}; "
+              f"ceiling at t={int(r.ceiling_deadline())}; erasure deadline "
+              f"{int(r.erasure_deadline())}; collision {d['constraint']} at t={d['month']}")
+    print("\nThe floor parameter F(a) took a third value with no change to the model.")
+    print("The finding: floors and ceilings coexist when one instrument fixes both from")
+    print("the same origin, and collide when the ceiling is anchored to an external")
+    print("event, as Art 68(12) anchors it to permit expiry. Scope: a structural")
+    print("parallel. Whether the mechanism transfers to a record-level ceiling is a")
+    print("design question this module does not answer.")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## A.9d Source listing: `app.py`
+
+The demonstration viewer. It is a viewer over the artefact and never a source of results: every figure it displays comes from executing one of the modules above. Tab 1 self-asserts the reported figures and shows a failure banner rather than results if the run disagrees with Chapter 5. Line count: 530.
+
+```python
+"""
+TRF Feasibility Checker — online demonstration (viewer over the verified artefact).
+
+THESIS INTEGRITY NOTE
+  Tab 1 executes trf_checker.py UNMODIFIED under seed 20260915. Every figure it
+  shows is the figure reported in Chapter 5. Tab 3 executes the Synthea realism
+  layer unmodified and reproduces Table 5.4. Tab 2 is a teaching aid that varies
+  population parameters and is NOT part of any thesis claim.
+
+  The app is a viewer over the artefact, never a source of results. If a number
+  here disagrees with the thesis, either the thesis text is wrong or the app is
+  wrong — the app never becomes the authority.
+
+Run locally:  streamlit run app.py
+"""
+
+import json
+
+import streamlit as st
+
+import trf_checker as trf
+
+st.set_page_config(page_title="TRF Feasibility Checker", layout="wide")
+
+st.title("Tri-Lateral Retention Feasibility Model")
+st.caption(
+    "Live demonstration of the executable witness for Theorems 1 and 2. "
+    "Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
+    "Seed 20260915 throughout the thesis run."
+)
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer",
+     "Norwegian context — illustrative", "Robustness and cross-checks"]
+)
+
+
+# ----------------------------------------------------------------------
+# Shared measurement, used by tabs 1 and 3 so both report identically
+# ----------------------------------------------------------------------
+
+def measure(records):
+    """Run both semantics over a population and return the reported figures."""
+    v1 = {r.rid: trf.check_semantics_I(r) for r in records}
+    primary = [r for r in records if r.sigma == "primary"]
+    secondary = [r for r in records if r.sigma == "secondary"]
+
+    out = {
+        "records": len(records),
+        "sem1_records": sum(1 for k in v1 if v1[k]),
+        "sem1_total": sum(len(x) for x in v1.values()),
+        "sem1_primary": sum(1 for r in primary if v1[r.rid]),
+        "sem1_secondary": sum(1 for r in secondary if v1[r.rid]),
+        "cor12": sum(1 for r in secondary if r.t_r == trf.INF and v1[r.rid]),
+        "witnesses": [v1[r.rid][0] for r in secondary
+                      if r.t_r == trf.INF and v1[r.rid]][:3],
+    }
+
+    for r in records:
+        trf.apply_invalidation(r)
+    v2 = {r.rid: trf.check_semantics_II(r) for r in records}
+    out["sem2_records"] = sum(1 for k in v2 if v2[k])
+    out["sem2_total"] = sum(len(x) for x in v2.values())
+    out["invalidated"] = sum(1 for r in records if r.iota is not None)
+    out["ground_art17"] = sum(1 for r in records
+                              if r.iota and "Art 17" in r.iota["ground"])
+    out["ground_art68"] = sum(1 for r in records
+                              if r.iota and "68(12)" in r.iota["ground"])
+    return out, records
+
+
+# ----------------------------------------------------------------------
+# Tab 1 — the thesis run
+# ----------------------------------------------------------------------
+
+with tab1:
+    st.subheader("Thesis configuration — seed 20260915, n = 200")
+    st.info(
+        "Executes the checker exactly as reported in Chapter 5, Tables 5.1 to 5.3. "
+        "Deterministic: this run is byte-identical to the one in the thesis."
+    )
+
+    if st.button("Run thesis configuration", key="run_thesis"):
+        with st.spinner("Executing trf_checker.py ..."):
+            M, records = measure(trf.generate())
+
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Violations — Semantics I", M["sem1_total"])
+        c2.metric("Records infeasible", f"{M['sem1_records']}/{M['records']}")
+        c3.metric("Corollary 1.2 witnesses", M["cor12"])
+        c4.metric("Violations — Semantics II", M["sem2_total"])
+
+        st.markdown("**Table 5.1 — violations under Semantics I**")
+        st.table({
+            "Record class": ["Cross-border audit (F = 120)",
+                             "SPE access log (F = 12)", "Total"],
+            "Records": [100, 100, 200],
+            "With ≥1 violation": [M["sem1_primary"], M["sem1_secondary"],
+                                  M["sem1_records"]],
+        })
+
+        st.markdown(
+            "**Corollary 1.2 — infeasible with no erasure request whatsoever.** "
+            "These records received no Article 17 request. The collision is between "
+            "Article 73(1)(e) and Article 68(12) alone, conditional on the reading "
+            "of Article 68(12) defended in Chapter 4, Section 4.6."
+        )
+        for w in M["witnesses"]:
+            st.code(w["detail"], language="text")
+
+        st.markdown("**Table 5.3 — Semantics II**")
+        st.table({
+            "Measure": ["Records invalidated", "— ground: GDPR Art. 17(1)",
+                        "— ground: EHDS Art. 68(12)", "Records with violation",
+                        "Total violations"],
+            "Value": [M["invalidated"], M["ground_art17"], M["ground_art68"],
+                      M["sem2_records"], M["sem2_total"]],
+        })
+
+        demo = next(r for r in records if r.rid == 100)
+        st.markdown("**Auditor's view of record 100 after invalidation**")
+        st.code(
+            f"accessor fields      : {trf.integrity(demo)[0]}   actor={demo.m['actor']}  "
+            f"permit={demo.m.get('permit', '-')}  outcome={demo.m['outcome']}\n"
+            f"subject link         : "
+            f"{'removed month ' + str(demo.iota_subj['month']) if demo.iota_subj else 'present'}\n"
+            f"commitment c(a)      : {demo.c[:32]}...\n"
+            f"payload key k(a)     : {demo.k}   <- destroyed\n"
+            f"salt, ciphertext     : {demo.salt}, {demo.payload}   <- destroyed, deleted\n"
+            f"invalidation iota(a) : month={demo.iota['month']}  "
+            f"ground={demo.iota['ground']}\n"
+            f"payload readable     : {bool(trf.alpha(demo, demo.t_a + demo.floor))}",
+            language="text",
+        )
+
+        if M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39:
+            st.success(
+                "Matches the thesis: 95 violations across 90 records under "
+                "Semantics I, 39 Corollary 1.2 witnesses, 0 violations under "
+                "Semantics II."
+            )
+        else:
+            st.error(
+                "This run does NOT match the figures reported in Chapter 5. "
+                "Do not present these numbers — investigate the discrepancy first."
+            )
+
+
+# ----------------------------------------------------------------------
+# Tab 2 — parameter exploration, explicitly outside the thesis
+# ----------------------------------------------------------------------
+
+with tab2:
+    st.subheader("Exploration — how the violation rate responds to parameters")
+    st.warning(
+        "Not a thesis claim. The thesis reports the seed-20260915 configuration "
+        "only. This tab exists to show that the collision is not an artefact of "
+        "the chosen parameters: Theorem 1 holds for any parameters under which a "
+        "deadline falls inside a retention window."
+    )
+
+    p_primary = st.slider("Erasure-request probability — cross-border",
+                          0.0, 1.0, 0.40, 0.05)
+    p_spe = st.slider("Erasure-request probability — SPE", 0.0, 1.0, 0.25, 0.05)
+    pi_max = st.slider("Permit horizon, months — SPE", 1, 60, 12)
+
+    if st.button("Run exploration", key="run_explore"):
+        import random
+
+        rng = random.Random(trf.SEED)
+        records, rid = [], 0
+        for _ in range(100):
+            t_a = rng.randint(0, 11)
+            t_r = t_a + rng.randint(1, 130) if rng.random() < p_primary else trf.INF
+            records.append(trf.Record(rid, t_a, trf.FLOOR_XBORDER, "primary",
+                                      f"<payload {rid}>".encode(), t_r=t_r))
+            rid += 1
+        for _ in range(100):
+            t_a = rng.randint(0, 11)
+            t_pi = t_a + rng.randint(1, pi_max)
+            t_r = t_a + rng.randint(1, 18) if rng.random() < p_spe else trf.INF
+            records.append(trf.Record(rid, t_a, trf.FLOOR_SPE, "secondary",
+                                      f"<payload {rid}>".encode(),
+                                      t_r=t_r, t_pi=t_pi))
+            rid += 1
+
+        M, _ = measure(records)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Records infeasible — Semantics I",
+                  f"{M['sem1_records']}/{M['records']}")
+        c2.metric("Corollary 1.2 witnesses", M["cor12"])
+        c3.metric("Violations — Semantics II", M["sem2_total"])
+        st.caption(
+            f"Structural SPE collision rate at this horizon is approximately "
+            f"6/{pi_max} = {6 / pi_max:.0%}, as Chapter 5, Section 5.4 states. "
+            f"Semantics II yields {M['sem2_total']} violations at every setting."
+        )
+
+
+# ----------------------------------------------------------------------
+# Tab 3 — Synthea realism layer
+# ----------------------------------------------------------------------
+
+with tab3:
+    st.subheader("Synthea realism layer — payload-provenance invariance")
+    st.write(
+        "Replaces constructed payloads with committed Synthea FHIR R4 resources "
+        "and reruns both checkers with every timing quantity untouched. Java is "
+        "needed only for the offline generation step, never at runtime. Expected "
+        "result: every figure identical, every commitment different."
+    )
+
+    if st.button("Run realism comparison", key="run_synthea"):
+        try:
+            import synthea_layer as sl
+
+            with st.spinner("Loading bundles and rerunning both checkers ..."):
+                base = trf.generate()
+                real, n_files, n_payloads = sl.generate_with_synthea()
+                sample_payload = real[0].payload      # read before invalidation deletes it
+                mean_base = sum(len(r.payload) for r in base) // len(base)
+                mean_real = sum(len(r.payload) for r in real) // len(real)
+                diff_c = sum(1 for x, y in zip(base, real) if x.c != y.c)
+                Mb, _ = measure(base)
+                Mr, _ = measure(real)
+
+            st.write(
+                f"Bundles read: {n_files}  |  clinical payloads: {n_payloads}  |  "
+                f"records: {len(real)}"
+            )
+            st.write(
+                f"Mean payload size: constructed {mean_base} bytes, "
+                f"Synthea {mean_real} bytes"
+            )
+
+            keys = [("sem1_records", "Semantics I — records with violation"),
+                    ("sem1_total", "Semantics I — total violations"),
+                    ("cor12", "Corollary 1.2 witnesses"),
+                    ("invalidated", "Records invalidated"),
+                    ("sem2_records", "Semantics II — records with violation"),
+                    ("sem2_total", "Semantics II — total violations")]
+            st.markdown("**Table 5.4 — constructed against Synthea payloads**")
+            st.table({
+                "Measure": [label for _, label in keys],
+                "Constructed": [Mb[k] for k, _ in keys],
+                "Synthea": [Mr[k] for k, _ in keys],
+            })
+
+            identical = all(Mb[k] == Mr[k] for k, _ in keys)
+            if identical and diff_c == len(base):
+                st.success(
+                    f"Invariance holds: every figure identical, {diff_c}/"
+                    f"{len(base)} commitments differ. The model reads timing "
+                    f"and accessibility, never payload content."
+                )
+            else:
+                st.error(
+                    "Divergence detected. Do not report these figures — the "
+                    "model is reading something it should not."
+                )
+
+            with st.expander("Inspect one Synthea payload"):
+                st.json(json.loads(sample_payload))
+
+        except FileNotFoundError:
+            import glob as _glob
+            import os as _os
+
+            import synthea_layer as _sl
+
+            searched = "\n".join(
+                f"- `{d}` — {len(_glob.glob(_os.path.join(d, '*.json')))} bundles"
+                for d in _sl.SYNTHEA_DIRS
+            )
+            st.info(
+                "No committed bundles found in this deployment. Directories "
+                f"searched:\n\n{searched}\n\n"
+                "Fix: commit the eight-bundle subset to `data/synthea_subset/` "
+                "in the repository root. Alternatively regenerate the full "
+                "cohort offline, which needs Java 17+:\n\n"
+                "`java -jar synthea.jar -s 20260915 -cs 20260915 -p 100 "
+                "--exporter.fhir.export=true`\n\n"
+                "and commit `synthea_run/output/fhir/`."
+            )
+
+
+# ----------------------------------------------------------------------
+# Tab 4 — Norwegian context modules (parallel to the thesis, illustrative)
+# ----------------------------------------------------------------------
+
+with tab4:
+    st.subheader("Norwegian context — plug-and-play modules")
+    st.write(
+        "These modules import `trf_checker.py` unmodified and change nothing the "
+        "thesis reports. They vary what the model actually reads: the retention "
+        "floor F(a), the pathway, and the arrival of erasure requests and permit "
+        "expiries. Payload content cannot change any figure, which Tab 3 "
+        "demonstrates, so the Norwegian payloads here are for legibility only."
+    )
+    st.info(
+        "Illustrative, not empirical. No Norwegian permit-duration statistics were "
+        "used, and no Norwegian patient data exists here: Synthea has no Norwegian "
+        "module. Nothing on this tab is a thesis claim.",
+        icon="ℹ️",
+    )
+
+    st.markdown(
+        "| Class | Floor | Ceiling | Source |\n|---|---|---|---|\n"
+        "| NO-XB | 120 months | — | eHDSI deployment baseline; inbound patient "
+        "summary at Bodø / Stjørdal legevakt from PT, CZ, FI |\n"
+        "| NO-SPE | 12 months | 6 months after permit expiry | EHDS Art 73(1)(e); "
+        "Art 68(12); Helsedataservice permit into a NORTRE node |\n"
+        "| NO-JOURNAL | indefinite | — | pasientjournalloven § 25, "
+        "journalforskriften § 14: purpose-based, no fixed period in law |"
+    )
+
+    if st.button("Run Norwegian layer", key="run_no"):
+        try:
+            import norwegian_layer as nl
+
+            with st.spinner("Building Norwegian record classes ..."):
+                recs = nl.build()
+                v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+                for r in recs:
+                    trf.apply_invalidation(r)
+                v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+
+            rows = []
+            for k in sorted({r.m["klasse"] for r in recs}):
+                sub = [r for r in recs if r.m["klasse"] == k]
+                rows.append({
+                    "class": k,
+                    "records": len(sub),
+                    "Sem I records with violation": sum(1 for r in sub if v1[r.rid]),
+                    "Sem I violations": sum(len(v1[r.rid]) for r in sub),
+                    "invalidated": sum(1 for r in sub if r.iota),
+                    "Sem II violations": sum(len(v2[r.rid]) for r in sub),
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+            st.markdown("**One case per class**")
+            for k in sorted({r.m["klasse"] for r in recs}):
+                cand = [r for r in recs if r.m["klasse"] == k and v1[r.rid]]
+                if not cand:
+                    st.write(f"{k}: no infeasible record in this draw.")
+                    continue
+                r = cand[0]
+                d = v1[r.rid][0]
+                where = r.m.get("site") or r.m.get("node") or r.m["legal_basis"]
+                st.code(
+                    f"{k}  rid={r.rid}  ({where})\n"
+                    f"  floor     : t={r.t_a} .. {r.t_a + r.floor}"
+                    + ("   [indefinite, truncated for computation]"
+                       if k == "NO-JOURNAL" else "") + "\n"
+                    f"  erasure   : "
+                    + ("none" if r.t_r == trf.INF
+                       else f"t_r={r.t_r} -> deadline {int(r.erasure_deadline())}") + "\n"
+                    f"  ceiling   : "
+                    + ("n/a" if r.ceiling_deadline() == trf.INF
+                       else f"t_pi={r.t_pi} -> {int(r.ceiling_deadline())}") + "\n"
+                    f"  collision : {d['constraint']} at t={d['month']}\n"
+                    f"  after invalidation: metadata intact, commitment "
+                    f"{r.c[:16]}..., key={r.k}, salt={r.salt}, "
+                    f"ground={r.iota['ground'] if r.iota else None}",
+                    language="text",
+                )
+        except ModuleNotFoundError:
+            st.error("norwegian_layer.py is not beside app.py in this deployment.")
+
+    st.divider()
+    st.markdown("**Cross-sector instance: politiregisterloven § 17**")
+    st.write(
+        "Norwegian police register law requires information about use of the "
+        "system to be stored for at least one year and deleted at the latest "
+        "after three: a floor, a ceiling and a subject right on one log, outside "
+        "health. Running it through the same model gives the result we did not "
+        "expect, and the more informative one."
+    )
+
+    if st.button("Run cross-sector check", key="run_cs"):
+        try:
+            import cross_sector_check as cs
+
+            recs = cs.build()
+            v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+            structural = sum(1 for r in recs if r.t_r == trf.INF and v1[r.rid])
+            for r in recs:
+                trf.apply_invalidation(r)
+            v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+            c1, c2, c3 = st.columns(3)
+            c1.metric("records", len(recs))
+            c2.metric("Sem I violations", sum(1 for k in v1 if v1[k]))
+            c3.metric("structural (no erasure request)", structural)
+            if structural == 0:
+                st.success(
+                    "No structural collision. The floor ends at t_a + 12 and the "
+                    "ceiling bites at t_a + 36, both measured from the same "
+                    "origin, so § 17 defines a bounded retention window rather "
+                    "than a contradiction. Every collision found is "
+                    "erasure-driven. Article 68(12) collides instead because it "
+                    "anchors its ceiling to an external event, the expiry of the "
+                    "data permit, which can fall before the floor has run.",
+                    icon="✅",
+                )
+            else:
+                st.warning(f"{structural} structural collisions in this draw.")
+            st.caption(
+                f"Semantics II violations: {sum(len(x) for x in v2.values())}"
+            )
+        except ModuleNotFoundError:
+            st.error("cross_sector_check.py is not beside app.py in this deployment.")
+
+
+# ----------------------------------------------------------------------
+# Tab 5 — Robustness and cross-checks (Chapter 5 §5.4 and §5.5a)
+# ----------------------------------------------------------------------
+
+with tab5:
+    st.subheader("Robustness and cross-checks")
+    st.write(
+        "Two results the thesis reports that the other tabs do not show. Both "
+        "answer the same objection: that the infeasibility rests on one "
+        "implementation, or on one arbitrary parameter."
+    )
+
+    st.markdown("**Independent exhaustive cross-check — Chapter 5 §5.4**")
+    st.write(
+        "`brute_force_semantics_I()` is written separately from "
+        "`check_semantics_I()`. It takes the constraint definitions directly and "
+        "enumerates all 2¹⁴ assignments of the accessibility variable over a "
+        "fourteen-month horizon. Agreement between two independent "
+        "implementations is worth more than confidence in either one. The "
+        "control case, where neither the erasure right nor the ceiling is "
+        "active, must come back feasible: a search that never succeeds proves "
+        "nothing."
+    )
+
+    if st.button("Run exhaustive cross-check", key="run_bf"):
+        # Parameters copied verbatim from trf_checker.main(); the expected
+        # column is what docs/expected_trf_output.txt records for each case.
+        cases = [
+            ("SPE, no erasure request, permit 3mo",
+             (0, 12, trf.INF, 3, "secondary", 14), False),
+            ("SPE, erasure at t=2",
+             (0, 12, 2, 9, "secondary", 14), False),
+            ("cross-border scaled (F=12), erasure at t=4",
+             (0, 12, 4, trf.INF, "primary", 14), False),
+            ("control: no request, no expiry",
+             (0, 12, trf.INF, trf.INF, "primary", 14), True),
+        ]
+        rows, ok = [], True
+        with st.spinner("Enumerating 2^14 assignments per case ..."):
+            for label, args, expected in cases:
+                got = trf.brute_force_semantics_I(*args)
+                rows.append({"case": label, "feasible": got,
+                             "expected": expected,
+                             "agrees": "yes" if got == expected else "NO"})
+                ok = ok and got == expected
+        st.dataframe(rows, use_container_width=True, hide_index=True)
+        if ok:
+            st.success(
+                "Both implementations agree on every case, and the control "
+                "returns feasible, so the search can succeed when it should.",
+                icon="✅",
+            )
+        else:
+            st.error(
+                "DISAGREEMENT. Do not present any figure from this artefact "
+                "until the discrepancy is explained.",
+                icon="🚨",
+            )
+
+    st.divider()
+    st.markdown("**Erasure response period — Chapter 5 §5.5a**")
+    st.write(
+        "The model sets δ, the controller's response period for an erasure "
+        "request, to one month. GDPR Article 12(3) allows an extension to three "
+        "where the request is complex. If the infeasibility were an artefact of "
+        "the tighter period, a longer one would dissolve it. This runs the "
+        "population at both values rather than asserting the answer."
+    )
+
+    if st.button("Run δ witness", key="run_delta"):
+        with st.spinner("Re-running the population at δ = 1 and δ = 3 ..."):
+            rows = trf.delta_witness()
+        st.dataframe(
+            [{"δ (months)": r["delta"],
+              "Sem I records": r["sem1_records"],
+              "Sem I violations": r["sem1_total"],
+              "Corollary 1.2 witnesses": r["cor12"],
+              "invalidated": r["invalidated"],
+              "Sem II violations": r["sem2_total"]} for r in rows],
+            use_container_width=True, hide_index=True,
+        )
+        if all(r["sem2_total"] == 0 for r in rows) and all(
+                r["sem1_total"] > 0 for r in rows):
+            st.success(
+                "Infeasibility under Semantics I survives the longer response "
+                "period, and Semantics II remains satisfiable at both values. "
+                "The collision is structural, not a consequence of δ = 1.",
+                icon="✅",
+            )
+        else:
+            st.warning(
+                "The pattern differs from what Chapter 5 §5.5a reports. Check "
+                "the module before citing this.",
+                icon="⚠️",
+            )
+
+    st.divider()
+    st.markdown("**What this artefact does not do**")
+    st.write(
+        "It does not connect to any National Contact Point, implement the "
+        "OpenNCP transmission flow, evaluate consent policies, or implement any "
+        "zero-knowledge proof system. Key destruction is simulated by removing a "
+        "reference in program state: that demonstrates the mechanism's logic and "
+        "says nothing about whether destruction can be assured in deployment. "
+        "Chapter 5 §5.7 and Chapter 6 state these limits in full."
+    )
+
+
+st.divider()
+st.caption(
+    "This application is a viewer over the verified artefact. It is not a source "
+    "of results. Tab 1, Tab 3 and Tab 5 reproduce figures reported in Chapter 5; "
+    "Tab 2 is outside the thesis claims, and Tab 4 is illustrative of the "
+    "Norwegian setting and not a thesis claim either. Source: trf_checker.py and "
+    "synthea_layer.py, both unmodified, plus the Norwegian modules, which "
+    "import the checker without modifying it."
+)
+```
+
+---
+
 ## A.10 Console output of the reported run
 
 Verbatim output of `python3 trf_checker.py` under seed 20260915. Every figure in Chapter 5, Tables 5.1 to 5.3, appears here.
@@ -742,11 +1757,23 @@ records with >=1 violation : 0/200
 total constraint violations: 0
 
 Auditor view of rid=100 after invalidation:
-  metadata intact      : True  actor=HP-026 ncp=NO outcome=success
-  commitment c(a)      : 11087780fd192c8fdaa237081ee0bb11...
+  accessor fields      : True  actor=R-008 permit=DP-015 outcome=success
+  subject link         : removed month 16
+  commitment c(a)      : 678ade47c1e6dc03296175e056fd8116...
   payload key k(a)     : None   <- destroyed
+  salt, ciphertext     : None, None   <- destroyed, deleted
   invalidation iota(a) : month=16 ground=EHDS Art 68(12)
   payload readable?    : False
+
+--------------------------------------------------------------------------
+AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
+--------------------------------------------------------------------------
+log entries                : 438
+log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+records verifying          : 200/200
+tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
+tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
+after restoring both       : V_II=True
 
 ==========================================================================
 RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE
@@ -754,7 +1781,9 @@ RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
 ==========================================================================
 ```
 
-## A.11 Console output of the payload-provenance comparison
+## A.11 Console output of the payload-provenance comparison, full cohort
+
+Produced by command 4 against the regenerated 98-bundle cohort. This is the run Chapter 5, Section 5.7 reports at a mean payload of 1,006 bytes. It was recorded on 28 September 2026, before the code revision of 3 October, and its constructed-payload mean (35 bytes) reflects the earlier constructed strings; no measure in it depends on them, as the subset run in A.11b, recorded after the revision, shows. Reproducing it requires regenerating the cohort with command 3, because the full cohort is 314 MB and is not committed.
 
 Verbatim output of `python3 synthea_layer.py` against the full 98-bundle cohort. This is the source of Chapter 5, Table 5.4.
 
@@ -767,6 +1796,198 @@ Synthea bundles read : 98
 clinical payloads    : 98
 records              : 200
 payload bytes (mean) : constructed=35  synthea=1006
+
+--------------------------------------------------------------------------
+measure                                       constructed        synthea
+--------------------------------------------------------------------------
+Semantics I: records with violation                    90             90
+Semantics I: total violations                          95             95
+Corollary 1.2 witnesses (no request)                   39             39
+Records invalidated                                   138            138
+Semantics II: records with violation                    0              0
+Semantics II: total violations                          0              0
+--------------------------------------------------------------------------
+
+commitments differing between the two runs: 200/200   (expected 200 — same salt, different payload)
+
+==========================================================================
+   RESULT: every reported figure is IDENTICAL under real FHIR payloads,   
+   while every commitment differs. The model reads timing, not content.   
+==========================================================================
+```
+
+---
+
+## A.12 Console output of the erasure-response-period witness
+
+Produced by command 5. Reproduces Table 5.2a: the infeasibility survives the extension Article 12(3) GDPR permits.
+
+```text
+==========================================================================
+                         TRF FEASIBILITY CHECKER                          
+   seed=20260915  delta=1  ceiling=6  floors: cross-border=120, SPE=12    
+==========================================================================
+
+Generated 200 records (100 cross-border, 100 SPE access-log)
+
+--------------------------------------------------------------------------
+SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1
+--------------------------------------------------------------------------
+records with >=1 violation : 90/200
+  cross-border (F=120)     : 37/100
+  SPE access-log (F=12)    : 53/100
+total constraint violations: 95
+
+Corollary 1.2 witnesses (SPE, NO erasure request, still infeasible): 39
+  rid=100: t_a=7 permit expires t_pi=10 -> C3 from t=16, C1 to t=19  | collision at t=16
+  rid=103: t_a=7 permit expires t_pi=10 -> C3 from t=16, C1 to t=19  | collision at t=16
+  rid=104: t_a=3 permit expires t_pi=4 -> C3 from t=10, C1 to t=15  | collision at t=10
+
+Sample violation witnesses (cross-border):
+  C1 requires V=1 (=> alpha=1) at t=116 within [11,131]; C2 requires alpha=0 from t=116
+  C1 requires V=1 (=> alpha=1) at t=120 within [4,124]; C2 requires alpha=0 from t=120
+  C1 requires V=1 (=> alpha=1) at t=41 within [0,120]; C2 requires alpha=0 from t=41
+
+--------------------------------------------------------------------------
+INDEPENDENT CROSS-CHECK: exhaustive search over alpha assignments
+--------------------------------------------------------------------------
+  SPE, no erasure request, permit 3mo            feasible=False
+  SPE, erasure at t=2                            feasible=False
+  cross-border scaled (F=12), erasure at t=4     feasible=False
+  control: no request, no expiry                 feasible=True
+
+--------------------------------------------------------------------------
+SEMANTICS II (accountability preservation)          -> Theorem 2
+--------------------------------------------------------------------------
+records invalidated        : 138/200
+  ground = GDPR Art 17(1)  : 52
+  ground = EHDS Art 68(12) : 86
+records with >=1 violation : 0/200
+total constraint violations: 0
+
+Auditor view of rid=100 after invalidation:
+  accessor fields      : True  actor=R-008 permit=DP-015 outcome=success
+  subject link         : removed month 16
+  commitment c(a)      : 678ade47c1e6dc03296175e056fd8116...
+  payload key k(a)     : None   <- destroyed
+  salt, ciphertext     : None, None   <- destroyed, deleted
+  invalidation iota(a) : month=16 ground=EHDS Art 68(12)
+  payload readable?    : False
+
+--------------------------------------------------------------------------
+AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
+--------------------------------------------------------------------------
+log entries                : 438
+log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+records verifying          : 200/200
+tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
+tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
+after restoring both       : V_II=True
+
+==========================================================================
+RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE
+RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
+==========================================================================
+ delta  SemI recs  SemI viol   Cor1.2  SemII recs  SemII viol  invalidated
+     1         90         95       39           0           0          138
+     3         89         94       39           0           0          138
+```
+
+---
+
+## A.13 Console output of the Norwegian context module
+
+Produced by the first command in 6. Illustrative of the Norwegian setting; no figure here is a thesis claim, and the module states so in its own output.
+
+```text
+==========================================================================
+                             NORWEGIAN LAYER                              
+==========================================================================
+
+class           n  SemI recs  SemI viol  invalidated  SemII viol
+NO-JOURNAL     40         12         12           12           0
+NO-SPE         60         36         40           60           0
+NO-XB          60         20         20           23           0
+
+TOTAL         160         68         72           95           0
+
+--------------------------------------------------------------------------
+CASE WALKTHROUGHS
+--------------------------------------------------------------------------
+
+NO-JOURNAL  rid=121  (pasientjournalloven s 25 (purpose-based, indefinite))
+  floor    : t=0 .. 600   [indefinite, truncated]
+  erasure  : t_r=10 -> deadline 11
+  ceiling  : n/a
+  collision: C2 at t=11
+  after invalidation -> metadata intact=True, commitment=c8eb840b7abcb3e4..., key=None, salt=None, ground=GDPR Art 17(1)
+
+NO-SPE  rid=61  (controller-provided server)
+  floor    : t=10 .. 22
+  erasure  : none
+  ceiling  : t_pi=15 -> 21
+  collision: C3 at t=21
+  after invalidation -> metadata intact=True, commitment=900dc608470b8289..., key=None, salt=None, ground=EHDS Art 68(12)
+
+NO-XB  rid=1  (Bodo legevakt)
+  floor    : t=4 .. 124
+  erasure  : t_r=119 -> deadline 120
+  ceiling  : n/a
+  collision: C2 at t=120
+  after invalidation -> metadata intact=True, commitment=af06e57b08ba4cf8..., key=None, salt=None, ground=GDPR Art 17(1)
+
+Note: figures above are illustrative of the Norwegian setting, not
+empirical. The canonical result of the thesis is unchanged and is
+reproduced by running trf_checker.py on its own.
+```
+
+---
+
+## A.14 Console output of the cross-sector instance
+
+Produced by the second command in 6, and discussed in Chapter 6, Section 6.9a. The zero in the second row is the finding: § 17 fixes both its limbs from the same origin, so it bounds a retention window rather than contradicting itself, and every collision the model finds is erasure-driven.
+
+```text
+==========================================================================
+  CROSS-SECTOR INSTANCE: politiregisterloven s 17 (floor 12, ceiling 36)  
+==========================================================================
+
+records                              : 60
+Semantics I, records with violation  : 7
+  of which with NO erasure request   : 0  <- floor vs ceiling alone
+Semantics II, total violations       : 0
+records invalidated                  : 60
+
+No structural collision: s 17 orders its two limbs from one origin
+(floor at t_a + 12, ceiling at t_a + 36), so the provision defines a
+bounded retention window rather than a contradiction. Every collision
+found is erasure-driven.
+
+witness rid=906: log written t=0; floor to t=12; ceiling at t=36; erasure deadline 11; collision C2 at t=11
+
+The floor parameter F(a) took a third value with no change to the model.
+The finding: floors and ceilings coexist when one instrument fixes both from
+the same origin, and collide when the ceiling is anchored to an external
+event, as Art 68(12) anchors it to permit expiry. Scope: a structural
+parallel. Whether the mechanism transfers to a record-level ceiling is a
+design question this module does not answer.
+```
+
+---
+
+## A.11b Console output of the payload-provenance comparison, committed subset
+
+Produced by command 4 against the eight bundles committed at `data/synthea_subset/`, which is what a reader who clones the repository obtains without regenerating anything. Chapter 5, Section 5.7 reports both cohort sizes because one figure changes and the rest do not: the mean payload is 891 bytes here against 1,006 for the full cohort, while all six measures and all 200 differing commitments are identical. That the measures hold across cohort size and across payload repetition frequency is a stronger result than a single substitution would give.
+
+```text
+==========================================================================
+     SYNTHEA REALISM LAYER — comparison against constructed payloads      
+==========================================================================
+
+Synthea bundles read : 8
+clinical payloads    : 8
+records              : 200
+payload bytes (mean) : constructed=43  synthea=891
 
 --------------------------------------------------------------------------
 measure                                       constructed        synthea
