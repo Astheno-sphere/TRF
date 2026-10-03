@@ -24,7 +24,7 @@ st.set_page_config(page_title="TRF Feasibility Checker", layout="wide")
 
 st.title("Tri-Lateral Retention Feasibility Model")
 st.caption(
-    "Live demonstration of the executable witness for Theorems 1 and 2. "
+    "Live demonstration of the executable witness for Propositions 1 and 2. "
     "Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
     "Seed 20260915 throughout the thesis run."
 )
@@ -155,7 +155,7 @@ with tab2:
     st.warning(
         "Not a thesis claim. The thesis reports the seed-20260915 configuration "
         "only. This tab exists to show that the collision is not an artefact of "
-        "the chosen parameters: Theorem 1 holds for any parameters under which a "
+        "the chosen parameters: Proposition 1 holds for any parameters under which a "
         "deadline falls inside a retention window."
     )
 

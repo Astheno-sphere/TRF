@@ -1,8 +1,8 @@
 """
 TRF feasibility checker
 =======================
-Executable witness for Theorem 1 (infeasibility under plaintext-verifiability
-semantics) and Theorem 2 (feasibility under accountability-preserving semantics)
+Executable witness for Proposition 1 (infeasibility under plaintext-verifiability
+semantics) and Proposition 2 (feasibility under accountability-preserving semantics)
 of the Tri-Lateral Retention Feasibility Model.
 
 Thesis: Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails
@@ -229,7 +229,7 @@ def check_semantics_I(rec):
 
 # ----------------------------------------------------------------------
 # Semantics II - accountability-preserving verifiability
-# Trajectory from the constructive proof of Theorem 2.
+# Trajectory from the constructive proof of Proposition 2.
 # ----------------------------------------------------------------------
 
 def apply_invalidation(rec):
@@ -386,7 +386,7 @@ def main():
 
     # ---------------- Semantics I ----------------
     print("\n" + "-" * 74)
-    print("SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1")
+    print("SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Proposition 1")
     print("-" * 74)
     v1 = {r.rid: check_semantics_I(r) for r in records}
     n_bad = sum(1 for k in v1 if v1[k])
@@ -431,7 +431,7 @@ def main():
 
     # ---------------- Semantics II ----------------
     print("\n" + "-" * 74)
-    print("SEMANTICS II (accountability preservation)          -> Theorem 2")
+    print("SEMANTICS II (accountability preservation)          -> Proposition 2")
     print("-" * 74)
     for r in records:
         apply_invalidation(r)
@@ -496,7 +496,7 @@ if __name__ == "__main__":
 # ----------------------------------------------------------------------
 # Extended response period witness (Chapter 5, Section 5.5a)
 # GDPR Art 12(3) permits extension of the one-month response period by a
-# further two months. The theorems are stated for arbitrary finite delta;
+# further two months. The propositions are stated for arbitrary finite delta;
 # this runs the model at delta = 3 to witness that claim rather than assert it.
 # ----------------------------------------------------------------------
 

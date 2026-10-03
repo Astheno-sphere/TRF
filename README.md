@@ -68,7 +68,7 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 
 | Path | What it is | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker: executable witness for Theorems 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 533 |
+| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 533 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
 | `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks | 530 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |

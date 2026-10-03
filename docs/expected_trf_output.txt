@@ -6,7 +6,7 @@
 Generated 200 records (100 cross-border, 100 SPE access-log)
 
 --------------------------------------------------------------------------
-SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1
+SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Proposition 1
 --------------------------------------------------------------------------
 records with >=1 violation : 90/200
   cross-border (F=120)     : 37/100
@@ -32,7 +32,7 @@ INDEPENDENT CROSS-CHECK: exhaustive search over alpha assignments
   control: no request, no expiry                 feasible=True
 
 --------------------------------------------------------------------------
-SEMANTICS II (accountability preservation)          -> Theorem 2
+SEMANTICS II (accountability preservation)          -> Proposition 2
 --------------------------------------------------------------------------
 records invalidated        : 138/200
   ground = GDPR Art 17(1)  : 52

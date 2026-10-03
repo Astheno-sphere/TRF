@@ -258,4 +258,4 @@ changed in this repository and how it was checked.
 | R-19 | `docs/Appendix_A.md` | Replaced by the thesis's Appendix A | The copy here was older than the thesis's | Every source listing and console output in it equals the file it reproduces (`appendix_sync.py` in the thesis tools) |
 | R-20 | `README.md` | Line counts, payload mean, a section on this revision | Follows R-16 | — |
 | R-21 | `CHECKSUMS.md` | Regenerated from the files present | README had changed after the last regeneration (28 Sept, 11:10: `app.py` line count) | Generated, not typed |
-
+| R-22 | `trf_checker.py`, `app.py`, `README.md`, `docs/Appendix_A.md`, `docs/expected_trf_output.txt`, `docs/expected_delta_witness_output.txt` | "Theorem" renamed "Proposition" in comments, printed headers and text | The thesis now states its results as propositions (supervisor's M4) | Two printed header lines change per affected run; Synthea, Norwegian and cross-sector runs byte-identical |

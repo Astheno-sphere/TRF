@@ -28,7 +28,7 @@ A note on durability. Hosted applications are not archival objects: the live dem
 
 | File | Purpose | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker — executable witness for Theorems 1 and 2, including the independent exhaustive cross-check and the audit-log integrity check | 533 |
+| `trf_checker.py` | Feasibility checker — executable witness for Propositions 1 and 2, including the independent exhaustive cross-check and the audit-log integrity check | 533 |
 | `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run | 152 |
 | `norwegian_layer.py` | Three Norwegian record classes, parallel to the thesis and reporting no thesis figure | 135 |
 | `cross_sector_check.py` | Cross-sector instance drawn from politiregisterloven § 17 | 110 |
@@ -145,8 +145,8 @@ Implements the TRF Model of Chapter 4 directly. Records are the seven-element tu
 
 Three components matter for the thesis's claims:
 
-- `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Theorem 1.
-- `check_semantics_II()` applies the constructive trajectory from the proof of Theorem 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
+- `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Proposition 1.
+- `check_semantics_II()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
 - `integrity()` and the `MerkleLog` class give condition (i) of Semantics II real content. Every access event, invalidation and subject-link removal is appended to an append-only Merkle log using RFC 6962 hashing, and `V_II` checks each of a record's entries against the current root with an inclusion proof. The run includes two tamper tests, an altered accessor field and an altered invalidation ground, under which `V_II` fails, and a restore after which it holds.
 - `brute_force_semantics_I()` is written independently of the first function, taking the constraint definitions directly and enumerating all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon. It exists so that the infeasibility results do not rest on the correctness of a single implementation. The control case, in which neither C2 nor C3 is active, returns feasible: confirming the search can succeed when it should.
 
@@ -199,8 +199,8 @@ The reference commitment is included so that a reader re-running the checker can
 
 Stated here so that they are not inferred from silence:
 
-1. The demonstration checks the theorems on the instances generated under one seed. The general claims rest on the proofs in Chapter 4, not on this code.
-2. The exhaustive cross-check covers four small cases at a fourteen-month horizon. The cross-border floor is scaled from 120 months to 12 for that check because 2¹²⁰ assignments are not enumerable; Theorem 1's argument depends on the deadline falling inside the window, not on the window's length.
+1. The demonstration checks the propositions on the instances generated under one seed. The general claims rest on the proofs in Chapter 4, not on this code.
+2. The exhaustive cross-check covers four small cases at a fourteen-month horizon. The cross-border floor is scaled from 120 months to 12 for that check because 2¹²⁰ assignments are not enumerable; Proposition 1's argument depends on the deadline falling inside the window, not on the window's length.
 3. No performance measurement is offered as a result. The runtime figure in Chapter 5 indicates only that reproduction is cheap.
 4. Key destruction is simulated in program state. The artefact demonstrates the mechanism's logic and says nothing about whether destruction can be assured in deployment.
 5. The checker does not connect to any National Contact Point, implement the OpenNCP transmission flow, evaluate consent policies, or implement any zero-knowledge proof system. None of these is claimed anywhere in the thesis.
@@ -216,8 +216,8 @@ The complete source of the feasibility checker, reproduced as executed. It depen
 """
 TRF feasibility checker
 =======================
-Executable witness for Theorem 1 (infeasibility under plaintext-verifiability
-semantics) and Theorem 2 (feasibility under accountability-preserving semantics)
+Executable witness for Proposition 1 (infeasibility under plaintext-verifiability
+semantics) and Proposition 2 (feasibility under accountability-preserving semantics)
 of the Tri-Lateral Retention Feasibility Model.
 
 Thesis: Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails
@@ -444,7 +444,7 @@ def check_semantics_I(rec):
 
 # ----------------------------------------------------------------------
 # Semantics II - accountability-preserving verifiability
-# Trajectory from the constructive proof of Theorem 2.
+# Trajectory from the constructive proof of Proposition 2.
 # ----------------------------------------------------------------------
 
 def apply_invalidation(rec):
@@ -601,7 +601,7 @@ def main():
 
     # ---------------- Semantics I ----------------
     print("\n" + "-" * 74)
-    print("SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1")
+    print("SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Proposition 1")
     print("-" * 74)
     v1 = {r.rid: check_semantics_I(r) for r in records}
     n_bad = sum(1 for k in v1 if v1[k])
@@ -646,7 +646,7 @@ def main():
 
     # ---------------- Semantics II ----------------
     print("\n" + "-" * 74)
-    print("SEMANTICS II (accountability preservation)          -> Theorem 2")
+    print("SEMANTICS II (accountability preservation)          -> Proposition 2")
     print("-" * 74)
     for r in records:
         apply_invalidation(r)
@@ -711,7 +711,7 @@ if __name__ == "__main__":
 # ----------------------------------------------------------------------
 # Extended response period witness (Chapter 5, Section 5.5a)
 # GDPR Art 12(3) permits extension of the one-month response period by a
-# further two months. The theorems are stated for arbitrary finite delta;
+# further two months. The propositions are stated for arbitrary finite delta;
 # this runs the model at delta = 3 to witness that claim rather than assert it.
 # ----------------------------------------------------------------------
 
@@ -1201,7 +1201,7 @@ st.set_page_config(page_title="TRF Feasibility Checker", layout="wide")
 
 st.title("Tri-Lateral Retention Feasibility Model")
 st.caption(
-    "Live demonstration of the executable witness for Theorems 1 and 2. "
+    "Live demonstration of the executable witness for Propositions 1 and 2. "
     "Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
     "Seed 20260915 throughout the thesis run."
 )
@@ -1332,7 +1332,7 @@ with tab2:
     st.warning(
         "Not a thesis claim. The thesis reports the seed-20260915 configuration "
         "only. This tab exists to show that the collision is not an artefact of "
-        "the chosen parameters: Theorem 1 holds for any parameters under which a "
+        "the chosen parameters: Proposition 1 holds for any parameters under which a "
         "deadline falls inside a retention window."
     )
 
@@ -1722,7 +1722,7 @@ Verbatim output of `python3 trf_checker.py` under seed 20260915. Every figure in
 Generated 200 records (100 cross-border, 100 SPE access-log)
 
 --------------------------------------------------------------------------
-SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1
+SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Proposition 1
 --------------------------------------------------------------------------
 records with >=1 violation : 90/200
   cross-border (F=120)     : 37/100
@@ -1748,7 +1748,7 @@ INDEPENDENT CROSS-CHECK: exhaustive search over alpha assignments
   control: no request, no expiry                 feasible=True
 
 --------------------------------------------------------------------------
-SEMANTICS II (accountability preservation)          -> Theorem 2
+SEMANTICS II (accountability preservation)          -> Proposition 2
 --------------------------------------------------------------------------
 records invalidated        : 138/200
   ground = GDPR Art 17(1)  : 52
@@ -1831,7 +1831,7 @@ Produced by command 5. Reproduces Table 5.2a: the infeasibility survives the ext
 Generated 200 records (100 cross-border, 100 SPE access-log)
 
 --------------------------------------------------------------------------
-SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Theorem 1
+SEMANTICS I  (plaintext verifiability:  V = alpha)   -> Proposition 1
 --------------------------------------------------------------------------
 records with >=1 violation : 90/200
   cross-border (F=120)     : 37/100
@@ -1857,7 +1857,7 @@ INDEPENDENT CROSS-CHECK: exhaustive search over alpha assignments
   control: no request, no expiry                 feasible=True
 
 --------------------------------------------------------------------------
-SEMANTICS II (accountability preservation)          -> Theorem 2
+SEMANTICS II (accountability preservation)          -> Proposition 2
 --------------------------------------------------------------------------
 records invalidated        : 138/200
   ground = GDPR Art 17(1)  : 52
