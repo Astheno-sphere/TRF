@@ -55,7 +55,7 @@ def make_salt(rid: int) -> bytes:
     """Per-record 16-byte salt. By default derived from the record id so that every run
     reproduces exactly; that derivation is for reproducibility only and gives no hiding
     against an adversary who knows it. --random-salts draws each salt from os.urandom,
-    which is what a deployment must do (Appendix A, A.4)."""
+    which is what a deployment must do (Appendix A, A.6)."""
     if RANDOM_SALTS:
         return os.urandom(16)
     return bytes([(rid * 7 + i) % 256 for i in range(16)])
@@ -494,7 +494,7 @@ if __name__ == "__main__":
 
 
 # ----------------------------------------------------------------------
-# Extended response period witness (Chapter 5, Section 5.5a)
+# Extended response period witness (Chapter 5, Section 5.6)
 # GDPR Art 12(3) permits extension of the one-month response period by a
 # further two months. The propositions are stated for arbitrary finite delta;
 # this runs the model at delta = 3 to witness that claim rather than assert it.

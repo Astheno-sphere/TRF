@@ -4,7 +4,7 @@ TRF Feasibility Checker — online demonstration (viewer over the verified artef
 THESIS INTEGRITY NOTE
   Tab 1 executes trf_checker.py UNMODIFIED under seed 20260915. Every figure it
   shows is the figure reported in Chapter 5. Tab 3 executes the Synthea realism
-  layer unmodified and reproduces Table 5.4. Tab 2 is a teaching aid that varies
+  layer unmodified and reproduces Table 5.7. Tab 2 is a teaching aid that varies
   population parameters and is NOT part of any thesis claim.
 
   The app is a viewer over the artefact, never a source of results. If a number
@@ -24,14 +24,16 @@ st.set_page_config(page_title="TRF Feasibility Checker", layout="wide")
 
 st.title("Tri-Lateral Retention Feasibility Model")
 st.caption(
-    "Live demonstration of the executable witness for Propositions 1 and 2. "
+    "Live demonstration of the executable witness for Propositions 1 and 2, "
+    "with an explorer for Proposition 3. "
     "Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
     "Seed 20260915 throughout the thesis run."
 )
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
     ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer",
-     "Norwegian context — illustrative", "Robustness and cross-checks"]
+     "Norwegian context — illustrative", "Robustness and cross-checks",
+     "Where the ceiling is anchored"]
 )
 
 
@@ -76,7 +78,8 @@ def measure(records):
 with tab1:
     st.subheader("Thesis configuration — seed 20260915, n = 200")
     st.info(
-        "Executes the checker exactly as reported in Chapter 5, Tables 5.1 to 5.3. "
+        "Executes the checker exactly as reported in Chapter 5, Tables 5.3 and 5.6, "
+        "and the audit-log integrity check of Section 5.7. "
         "Deterministic: this run is byte-identical to the one in the thesis."
     )
 
@@ -90,7 +93,7 @@ with tab1:
         c3.metric("Corollary 1.2 witnesses", M["cor12"])
         c4.metric("Violations — Semantics II", M["sem2_total"])
 
-        st.markdown("**Table 5.1 — violations under Semantics I**")
+        st.markdown("**Table 5.3 — violations under Semantics I**")
         st.table({
             "Record class": ["Cross-border audit (F = 120)",
                              "SPE access log (F = 12)", "Total"],
@@ -102,13 +105,14 @@ with tab1:
         st.markdown(
             "**Corollary 1.2 — infeasible with no erasure request whatsoever.** "
             "These records received no Article 17 request. The collision is between "
-            "Article 73(1)(e) and Article 68(12) alone, conditional on the reading "
-            "of Article 68(12) defended in Chapter 4, Section 4.6."
+            "Article 73(1)(e) and Article 68(12) alone, on the broad reading of "
+            "Article 68(12) and for logs kept at patient-record granularity "
+            "(Chapter 4, Section 4.6). On the narrow reading these witnesses lapse."
         )
         for w in M["witnesses"]:
             st.code(w["detail"], language="text")
 
-        st.markdown("**Table 5.3 — Semantics II**")
+        st.markdown("**Table 5.6 — Semantics II**")
         st.table({
             "Measure": ["Records invalidated", "— ground: GDPR Art. 17(1)",
                         "— ground: EHDS Art. 68(12)", "Records with violation",
@@ -133,11 +137,41 @@ with tab1:
             language="text",
         )
 
-        if M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39:
+        st.markdown("**Audit-log integrity — Chapter 5, Section 5.7**")
+        st.write(
+            "Every access, invalidation and subject-link removal is a leaf of an "
+            "append-only Merkle log (RFC 6962 hashing). A record counts as verifiable "
+            "under Semantics II only if each of its entries passes an inclusion proof "
+            "against the log root. Leaves hold the accessor fields and the commitment, "
+            "never the payload or the patient link, so the log never needs erasing."
+        )
+        n_ok = sum(1 for r in records if trf.integrity(r)[0])
+        saved = demo.m["actor"]
+        demo.m["actor"] = "R-999"
+        ok_t, why_t = trf.V_II(demo, demo.t_a)
+        demo.m["actor"] = saved
+        saved_g = demo.iota["ground"]
+        demo.iota["ground"] = "none"
+        ok_g, why_g = trf.V_II(demo, demo.t_a)
+        demo.iota["ground"] = saved_g
+        ok_r = trf.V_II(demo, demo.t_a)[0]
+        i1, i2, i3 = st.columns(3)
+        i1.metric("Records verifying", f"{n_ok}/{len(records)}")
+        i2.metric("Tamper: actor altered", "fails" if not ok_t else "PASSES")
+        i3.metric("Tamper: ground altered", "fails" if not ok_g else "PASSES")
+        st.code(
+            f"rid={demo.rid} actor R-008 -> R-999 : V_II={ok_t}  ({why_t})\n"
+            f"rid={demo.rid} ground -> 'none'    : V_II={ok_g}  ({why_g})\n"
+            f"after restoring both          : V_II={ok_r}",
+            language="text",
+        )
+
+        if (M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39
+                and n_ok == len(records) and not ok_t and not ok_g and ok_r):
             st.success(
                 "Matches the thesis: 95 violations across 90 records under "
                 "Semantics I, 39 Corollary 1.2 witnesses, 0 violations under "
-                "Semantics II."
+                "Semantics II, 200/200 records verifying, both tamper tests failing."
             )
         else:
             st.error(
@@ -239,7 +273,7 @@ with tab3:
                     ("invalidated", "Records invalidated"),
                     ("sem2_records", "Semantics II — records with violation"),
                     ("sem2_total", "Semantics II — total violations")]
-            st.markdown("**Table 5.4 — constructed against Synthea payloads**")
+            st.markdown("**Table 5.7 — constructed against Synthea payloads**")
             st.table({
                 "Measure": [label for _, label in keys],
                 "Constructed": [Mb[k] for k, _ in keys],
@@ -336,7 +370,7 @@ with tab4:
                     "invalidated": sum(1 for r in sub if r.iota),
                     "Sem II violations": sum(len(v2[r.rid]) for r in sub),
                 })
-            st.dataframe(rows, use_container_width=True, hide_index=True)
+            st.dataframe(rows, width="stretch", hide_index=True)
 
             st.markdown("**One case per class**")
             for k in sorted({r.m["klasse"] for r in recs}):
@@ -412,7 +446,7 @@ with tab4:
 
 
 # ----------------------------------------------------------------------
-# Tab 5 — Robustness and cross-checks (Chapter 5 §5.4 and §5.5a)
+# Tab 5 — Robustness and cross-checks (Chapter 5 §5.5, §5.6 and §5.8)
 # ----------------------------------------------------------------------
 
 with tab5:
@@ -423,7 +457,7 @@ with tab5:
         "implementation, or on one arbitrary parameter."
     )
 
-    st.markdown("**Independent exhaustive cross-check — Chapter 5 §5.4**")
+    st.markdown("**Independent exhaustive cross-check — Chapter 5 §5.5**")
     st.write(
         "`brute_force_semantics_I()` is written separately from "
         "`check_semantics_I()`. It takes the constraint definitions directly and "
@@ -456,7 +490,7 @@ with tab5:
                              "expected": expected,
                              "agrees": "yes" if got == expected else "NO"})
                 ok = ok and got == expected
-        st.dataframe(rows, use_container_width=True, hide_index=True)
+        st.dataframe(rows, width="stretch", hide_index=True)
         if ok:
             st.success(
                 "Both implementations agree on every case, and the control "
@@ -471,7 +505,7 @@ with tab5:
             )
 
     st.divider()
-    st.markdown("**Erasure response period — Chapter 5 §5.5a**")
+    st.markdown("**Erasure response period — Chapter 5 §5.6**")
     st.write(
         "The model sets δ, the controller's response period for an erasure "
         "request, to one month. GDPR Article 12(3) allows an extension to three "
@@ -490,7 +524,7 @@ with tab5:
               "Corollary 1.2 witnesses": r["cor12"],
               "invalidated": r["invalidated"],
               "Sem II violations": r["sem2_total"]} for r in rows],
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )
         if all(r["sem2_total"] == 0 for r in rows) and all(
                 r["sem1_total"] > 0 for r in rows):
@@ -502,29 +536,136 @@ with tab5:
             )
         else:
             st.warning(
-                "The pattern differs from what Chapter 5 §5.5a reports. Check "
+                "The pattern differs from what Chapter 5 §5.6 reports. Check "
                 "the module before citing this.",
                 icon="⚠️",
             )
+
+    st.divider()
+    st.markdown("**Real envelope encryption — optional module, Chapter 5 §5.8**")
+    st.write(
+        "The checker models key destruction as removing a reference. This module "
+        "repeats the lifecycle with real AES-256-GCM: each record under its own data "
+        "key, each data key wrapped under a key-encrypting key, and the wrapped key "
+        "destroyed at the record's invalidation month. Keys are random on every run; "
+        "the counts are not."
+    )
+    if st.button("Run envelope encryption", key="run_crypto"):
+        try:
+            import crypto_envelope as ce
+
+            with st.spinner("Encrypting 200 records, destroying keys, decrypting ..."):
+                recs = trf.generate()
+                custody = ce.Custody()
+                store = {r.rid: ce.encrypt(custody, r.rid, r.payload) for r in recs}
+                inval = [r for r in recs if r.t_invalidation() < trf.INF]
+                for r in inval:
+                    custody.destroy(r.rid)
+                readable = refused = 0
+                for r in recs:
+                    try:
+                        ce.decrypt(custody, r.rid, *store[r.rid])
+                        readable += 1
+                    except KeyError:
+                        refused += 1
+            e1, e2, e3 = st.columns(3)
+            e1.metric("Records encrypted", len(recs))
+            e2.metric("Refused after key destruction", refused)
+            e3.metric("Still readable", readable)
+            if refused == len(inval) == 138 and readable == 62:
+                st.success(
+                    "Exactly the 138 invalidated records refuse to decrypt and the "
+                    "other 62 read, as Appendix A.22 records. Unreadability follows "
+                    "from destruction; that destruction happened in hardware is still "
+                    "an attestation (Chapter 6, Section 6.3).",
+                    icon="✅",
+                )
+            else:
+                st.error("Counts differ from Appendix A.22. Investigate before citing.")
+        except ImportError:
+            st.info("The `cryptography` package is not installed in this deployment.")
 
     st.divider()
     st.markdown("**What this artefact does not do**")
     st.write(
         "It does not connect to any National Contact Point, implement the "
         "OpenNCP transmission flow, evaluate consent policies, or implement any "
-        "zero-knowledge proof system. Key destruction is simulated by removing a "
-        "reference in program state: that demonstrates the mechanism's logic and "
+        "zero-knowledge proof system, and it does not implement the terminal "
+        "transition at floor expiry. Key destruction is simulated by removing a "
+        "reference in program state, or in the optional module by discarding a "
+        "wrapped key in memory: either demonstrates the mechanism's logic and "
         "says nothing about whether destruction can be assured in deployment. "
-        "Chapter 5 §5.7 and Chapter 6 state these limits in full."
+        "Chapter 5 §5.8 and Chapter 6 state these limits in full."
     )
+
+
+
+# ----------------------------------------------------------------------
+# Tab 6 — Proposition 3: where the ceiling is anchored (Chapter 4, Section 4.6)
+# ----------------------------------------------------------------------
+
+with tab6:
+    st.subheader("Where the ceiling is anchored — Proposition 3")
+    st.write(
+        "A retention floor of F months runs from the record's creation t(a). A deletion "
+        "ceiling of L months runs from an event e(a) at or after creation. Under plaintext "
+        "verifiability the two collide for a record exactly when e(a) + L <= t(a) + F. "
+        "A collision therefore needs L <= F; where the ceiling is anchored decides "
+        "whether the collision can be read from the text or only from each record's history."
+    )
+    preset = st.radio(
+        "Preset",
+        ["EHDS Art 73(1)(e) floor, Art 68(12) ceiling", "politiregisterloven § 17",
+         "Free"], horizontal=True)
+    if preset.startswith("EHDS"):
+        F0, L0, same0 = 12, 6, False
+    elif preset.startswith("politi"):
+        F0, L0, same0 = 12, 36, True
+    else:
+        F0, L0, same0 = 24, 12, False
+    F = st.slider("Floor F (months, from creation)", 1, 120, F0, key=f"F_{preset}")
+    L = st.slider("Ceiling L (months, from its anchor)", 1, 120, L0, key=f"L_{preset}")
+    same = st.checkbox("Ceiling anchored to creation, the same event as the floor",
+                       value=same0, key=f"same_{preset}")
+    if same:
+        if L > F:
+            st.success(f"L = {L} > F = {F}: no record collides. The two limits bound one "
+                       "retention window, readable from the text alone.", icon="✅")
+        else:
+            st.error(f"L = {L} <= F = {F}: every record collides, and the text "
+                     "contradicts itself on its face.", icon="🚨")
+    else:
+        if L > F:
+            st.success(f"L = {L} > F = {F}: no record collides, wherever its anchor "
+                       "event falls.", icon="✅")
+        else:
+            gap = F - L
+            st.warning(
+                f"L = {L} <= F = {F}: a record collides exactly when its anchor event "
+                f"falls within {gap} month(s) of creation (e(a) - t(a) <= {gap}). "
+                "Nothing in the text says which records those are; each record's "
+                "history does.", icon="⚠️")
+            offsets = list(range(0, F + 1))
+            st.bar_chart(
+                {"months of collision": [max(0, (t0 + F) - (t0 + d + L) + 1)
+                                         for t0, d in [(0, d) for d in offsets]]},
+                x_label="anchor event, months after creation",
+                y_label="months in which both apply")
+    st.caption(
+        "Article 68(12) is of the external-anchor kind: six months from permit expiry "
+        "against twelve from the log entry, so logs whose permit expires within six "
+        "months of the entry collide (Corollary 1.2). Section 17 of politiregisterloven "
+        "measures both limbs from the log entry with the ceiling longer, so it bounds a "
+        "window instead (Chapter 6, Section 6.10).")
 
 
 st.divider()
 st.caption(
     "This application is a viewer over the verified artefact. It is not a source "
     "of results. Tab 1, Tab 3 and Tab 5 reproduce figures reported in Chapter 5; "
-    "Tab 2 is outside the thesis claims, and Tab 4 is illustrative of the "
-    "Norwegian setting and not a thesis claim either. Source: trf_checker.py and "
+    "Tab 2 is outside the thesis claims, Tab 4 is illustrative of the "
+    "Norwegian setting and not a thesis claim either, and Tab 6 evaluates the "
+    "condition of Proposition 3 for any floor and ceiling you set. Source: trf_checker.py and "
     "synthea_layer.py, both unmodified, plus the Norwegian modules, which "
     "import the checker without modifying it."
 )

@@ -1,2 +1,2 @@
-streamlit>=1.30
+streamlit>=1.45
 cryptography>=42

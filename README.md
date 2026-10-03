@@ -23,13 +23,13 @@ Expected output, which must match `docs/expected_trf_output.txt` byte for byte:
 
 Seed 20260915 is fixed in the module header. If a number differs, the file has changed.
 
-Extended erasure response period, Chapter 5 §5.5a:
+Extended erasure response period, Chapter 5 §5.6:
 
 ```bash
 python3 trf_checker.py --delta-witness
 ```
 
-Reproduces Table 5.2a: 90 records and 95 violations at δ = 1, against 89 and 94 at δ = 3, with 39 Corollary 1.2 witnesses and zero Semantics II violations at both. The infeasibility is structural, not a consequence of the one-month response period.
+Reproduces Table 5.5: 90 records and 95 violations at δ = 1, against 89 and 94 at δ = 3, with 39 Corollary 1.2 witnesses and zero Semantics II violations at both. The infeasibility is structural, not a consequence of the one-month response period.
 
 Every recorded run lives in `docs/`, one file per command, for diffing:
 
@@ -70,14 +70,14 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 |---|---|---|
 | `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 533 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
-| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks | 530 |
+| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks (including real envelope encryption), Tab 6 where the ceiling is anchored (Proposition 3) | 671 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |
 | `data/synthea_subset/` | 8 untrimmed Synthea FHIR R4 bundles, seed 20260915 | 8 files |
 | `docs/Appendix_A.md` | Appendix A: provenance, commands, full source listings, console output | — |
 | `docs/expected_trf_output.txt` | The recorded checker run, to diff against | — |
-| `docs/expected_delta_witness_output.txt` | Recorded δ = 1 against δ = 3 run, Chapter 5 §5.5a | — |
+| `docs/expected_delta_witness_output.txt` | Recorded δ = 1 against δ = 3 run, Chapter 5 §5.6 | — |
 | `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset | — |
 | `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run | — |
 | `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | — |
@@ -95,7 +95,7 @@ Yields 98 usable bundles from 100 requested. Synthea's default export is US Core
 
 ## Robustness
 
-Tab 5 of the app runs two checks the thesis reports and the other tabs do not show.
+Tab 1 of the app also shows the audit-log integrity check and both tamper tests (Chapter 5 §5.7). Tab 5 runs the checks the thesis reports and the other tabs do not show, and the optional envelope-encryption module. Tab 6 evaluates the condition of Proposition 3 for any floor and ceiling.
 
 The **exhaustive cross-check** enumerates all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon using `brute_force_semantics_I()`, which is written independently of `check_semantics_I()`. Agreement between two separate implementations is worth more than confidence in either. The control case, where neither the erasure right nor the ceiling is active, returns feasible, so the search can succeed when it should.
 
