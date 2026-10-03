@@ -1,0 +1,13 @@
+==========================================================================
+           ENVELOPE ENCRYPTION (AES-256-GCM, wrapped data keys)           
+==========================================================================
+records encrypted                     : 200
+decrypt and match before invalidation : 200/200
+data keys destroyed (t_I finite)      : 138
+decryptable after invalidation        : 62  (expected 62)
+refused, key destroyed                : 138  (expected 138)
+rid=3 ciphertext tried under 62 surviving keys : opened 0
+ciphertexts kept after deletion       : 62
+==========================================================================
+RESULT: every invalidated record is unrecoverable; every other record reads
+==========================================================================

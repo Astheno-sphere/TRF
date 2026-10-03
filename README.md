@@ -73,6 +73,7 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 | `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks | 530 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
+| `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |
 | `data/synthea_subset/` | 8 untrimmed Synthea FHIR R4 bundles, seed 20260915 | 8 files |
 | `docs/Appendix_A.md` | Appendix A: provenance, commands, full source listings, console output | — |
 | `docs/expected_trf_output.txt` | The recorded checker run, to diff against | — |
@@ -128,4 +129,9 @@ Made in answer to the supervisor's review of 30 September. No reported figure ch
   checking that fields exist. The run prints two tamper tests under which `V_II` fails.
 - The dead `os.urandom(16) if False` branch is replaced by `make_salt()`; run with
   `--random-salts` to draw salts from `os.urandom`. Results are the same.
+- New optional module `crypto_envelope.py`: every record encrypted under its own AES-256-GCM key,
+  keys wrapped under a key-encrypting key, wrapped keys destroyed at each record's invalidation
+  month. After the 138 scheduled destructions exactly those 138 records refuse to decrypt and the
+  other 62 still read (`docs/expected_crypto_envelope_output.txt`). Keys are destroyed in program
+  memory, not hardware.
 
