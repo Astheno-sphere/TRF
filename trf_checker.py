@@ -19,15 +19,16 @@ Run:  python trf_checker.py            (reproducible: salts derived from the rec
       python trf_checker.py --random-salts   (salts from os.urandom, as a deployment must)
 Deterministic by default: fixed seed, identical output on every run.
 
-Revised 3 Oct 2026 for the supervisor review of 30 Sept (thesis patches P04, P06; D-15..D-17):
+Beyond the constraint check itself:
   - metadata split into accessor fields and subject fields (Ch4 s4.3); the subject link is
     removed at the deletion ceiling and the removal is logged (Ch4 s4.7, step 4)
   - payload ciphertext deleted with key and salt at invalidation (Ch4 s4.8)
   - payloads modelled per record class: the ITI-55 patient-discovery query for cross-border
     records, the logged activity for SPE records (Ch4 s4.3)
   - V_II tests integrity against an append-only Merkle log (RFC 6962 hashing), with a tamper
-    test, instead of checking only that fields are present (supervisor's M4)
-  - the dead `os.urandom(16) if False` branch replaced by make_salt() and --random-salts
+    test, instead of checking only that fields are present
+  - make_salt() derives salts from the record id for reproducibility; --random-salts draws them
+    from os.urandom, as a deployment must
 """
 
 import hashlib
@@ -40,7 +41,7 @@ from itertools import product
 SEED = 20260915
 DELTA = 1          # GDPR Art 12(3) baseline response period, months
 CEILING = 6        # EHDS Art 68(12), months after permit expiry
-FLOOR_XBORDER = 120  # eHDSI deployment baseline, months
+FLOOR_XBORDER = 120  # eHDSI baseline as reported; illustrative (Ch4 s4.3)
 FLOOR_SPE = 12       # EHDS Art 73(1)(e), months
 INF = float("inf")
 RANDOM_SALTS = "--random-salts" in sys.argv

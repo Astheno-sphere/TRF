@@ -3,7 +3,7 @@
 *Thesis:* Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space
 *Author:* Arshad Akhtar Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde
 *Supervisor:* Prof. João Ferreira
-*Artefact date:* 18 September 2026
+*Artefact date:* 18 September 2026; revised 3–4 October 2026
 
 This appendix contains every piece of code written for the thesis, the exact commands used to produce every reported result, and the provenance of all data. Nothing reported in Chapters 4 or 5 was produced by code not listed here.
 
@@ -18,7 +18,7 @@ The artefact is publicly available in two forms.
 | Source repository | https://github.com/Astheno-sphere/TRF |
 | Live demonstration | https://trfhimolde.streamlit.app/ |
 
-The repository is the citable artefact. It contains five Python modules, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its first tab asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
+The repository is the citable artefact. It contains six Python modules, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its first tab asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
 
 The demonstration presents six tabs. Tab 1 runs the thesis configuration, reproduces Tables 5.3 and 5.6, and shows the audit-log integrity check and both tamper tests of Section 5.7. Tab 2 varies population parameters as a teaching aid and is explicitly outside the thesis claims. Tab 3 runs the realism layer and reproduces Table 5.7. Tab 4 runs the Norwegian context modules, which are illustrative and report no thesis figure. Tab 5 runs the robustness checks: the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6, and the optional envelope-encryption module of Section 5.8. Tab 6 evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets.
 
@@ -144,7 +144,7 @@ The same form applies to each of the five recorded runs listed in A.2. A differe
 
 Implements the TRF Model of Chapter 4 directly. Records are the seven-element tuples of Section 4.3, with the metadata split into accessor fields and subject fields. A Secure Processing Environment record carries a researcher and a permit rather than a clinician and a contact point, and its payload stands for the logged activity; a cross-border record's payload stands for the demographic query that the IHE patient-discovery transaction puts into the audit message. Two record classes are generated: cross-border audit records with a 120-month floor, and Secure Processing Environment access-log records with a 12-month floor and the Article 68(12) ceiling. Generation parameters are listed in full in Chapter 5, Table 5.2.
 
-Three components matter for the thesis's claims:
+Four components matter for the thesis's claims:
 
 - `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Proposition 1.
 - `check_semantics_II()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
@@ -235,15 +235,16 @@ Run:  python trf_checker.py            (reproducible: salts derived from the rec
       python trf_checker.py --random-salts   (salts from os.urandom, as a deployment must)
 Deterministic by default: fixed seed, identical output on every run.
 
-Revised 3 Oct 2026 for the supervisor review of 30 Sept (thesis patches P04, P06; D-15..D-17):
+Beyond the constraint check itself:
   - metadata split into accessor fields and subject fields (Ch4 s4.3); the subject link is
     removed at the deletion ceiling and the removal is logged (Ch4 s4.7, step 4)
   - payload ciphertext deleted with key and salt at invalidation (Ch4 s4.8)
   - payloads modelled per record class: the ITI-55 patient-discovery query for cross-border
     records, the logged activity for SPE records (Ch4 s4.3)
   - V_II tests integrity against an append-only Merkle log (RFC 6962 hashing), with a tamper
-    test, instead of checking only that fields are present (supervisor's M4)
-  - the dead `os.urandom(16) if False` branch replaced by make_salt() and --random-salts
+    test, instead of checking only that fields are present
+  - make_salt() derives salts from the record id for reproducibility; --random-salts draws them
+    from os.urandom, as a deployment must
 """
 
 import hashlib
@@ -256,7 +257,7 @@ from itertools import product
 SEED = 20260915
 DELTA = 1          # GDPR Art 12(3) baseline response period, months
 CEILING = 6        # EHDS Art 68(12), months after permit expiry
-FLOOR_XBORDER = 120  # eHDSI deployment baseline, months
+FLOOR_XBORDER = 120  # eHDSI baseline as reported; illustrative (Ch4 s4.3)
 FLOOR_SPE = 12       # EHDS Art 73(1)(e), months
 INF = float("inf")
 RANDOM_SALTS = "--random-salts" in sys.argv
@@ -1980,7 +1981,7 @@ if __name__ == "__main__":
 
 ## A.16 Console output of the reported run
 
-Verbatim output of `python3 trf_checker.py` under seed 20260915. Every figure in Chapter 5, Tables 5.3 to 5.6, appears here.
+Verbatim output of `python3 trf_checker.py` under seed 20260915. Every figure in Chapter 5, Tables 5.3, 5.4 and 5.6 appears here, with the δ = 1 row of Table 5.5; its δ = 3 row is in A.18.
 
 ```text
 ==========================================================================
@@ -2052,9 +2053,7 @@ RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
 
 ## A.17 Console output of the payload-provenance comparison, full cohort
 
-Produced by command 4 against the regenerated 98-bundle cohort. This is the run Chapter 5, Section 5.8 reports at a mean payload of 1,006 bytes. It was recorded on 28 September 2026, before the code revision of 3 October, and its constructed-payload mean (35 bytes) reflects the earlier constructed strings; no measure in it depends on them, as the subset run in A.21, recorded after the revision, shows. Reproducing it requires regenerating the cohort with command 3, because the full cohort is 314 MB and is not committed.
-
-Verbatim output of `python3 synthea_layer.py` against the full 98-bundle cohort. This is the source of Chapter 5, Table 5.7.
+Produced by command 4 against the regenerated 98-bundle cohort. Verbatim output of `python3 synthea_layer.py` against the full 98-bundle cohort, the source of Chapter 5, Table 5.7, which Section 5.8 reports at a mean payload of 1,006 bytes. It was recorded on 28 September 2026, before the code revision of 3 October, and its constructed-payload mean (35 bytes) reflects the earlier constructed strings; no measure in it depends on them, as the subset run in A.21, recorded after the revision, shows. Reproducing it requires regenerating the cohort with command 3, because the full cohort is 314 MB and is not committed.
 
 ```text
 ==========================================================================

@@ -19,7 +19,7 @@ Expected output, which must match `docs/expected_trf_output.txt` byte for byte:
 | Corollary 1.2 witnesses, no erasure request | 39 |
 | Records invalidated | 138 (52 under GDPR Art 17(1), 86 under EHDS Art 68(12)) |
 | Semantics II, total violations | 0 |
-| Reference commitment, record 100 | `11087780fd192c8f…` |
+| Reference commitment, record 100 | `678ade47c1e6dc03…` |
 
 Seed 20260915 is fixed in the module header. If a number differs, the file has changed.
 
