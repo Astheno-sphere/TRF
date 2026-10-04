@@ -74,6 +74,7 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |
+| `z3_check.py` | Optional: bounded SMT check of Propositions 1–3 with the Z3 solver; every parameter combination within stated bounds (floor up to 120 months), with mutation checks that must fail. Needs `z3-solver` (`pip install z3-solver`); recorded run in `docs/expected_z3_check_output.txt` | 153 |
 | `data/synthea_subset/` | 8 untrimmed Synthea FHIR R4 bundles, seed 20260915 | 8 files |
 | `docs/Appendix_A.md` | Appendix A: provenance, commands, full source listings, console output | — |
 | `docs/expected_trf_output.txt` | The recorded checker run, to diff against | — |
