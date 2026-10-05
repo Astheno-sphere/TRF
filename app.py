@@ -2,10 +2,11 @@
 TRF Feasibility Checker — online demonstration (viewer over the verified artefact).
 
 THESIS INTEGRITY NOTE
-  Tab 1 executes trf_checker.py UNMODIFIED under seed 20260915. Every figure it
-  shows is the figure reported in Chapter 5. Tab 3 executes the Synthea realism
-  layer unmodified and reproduces Table 5.7. Tab 2 is a teaching aid that varies
-  population parameters and is NOT part of any thesis claim.
+  "Thesis run" executes trf_checker.py UNMODIFIED under seed 20260915. Every figure it
+  shows is the figure reported in Chapter 5. "Synthea realism" executes the realism
+  layer unmodified and reproduces Table 5.7. "Explore" varies population parameters and
+  is NOT part of any thesis claim. "Witness a record" draws one record of the thesis
+  population through its life using the checker's own functions; ui.py only draws.
 
   The app is a viewer over the artefact, never a source of results. If a number
   here disagrees with the thesis, either the thesis text is wrong or the app is
@@ -19,26 +20,14 @@ import json
 import streamlit as st
 
 import trf_checker as trf
+import ui
 
-st.set_page_config(page_title="TRF Feasibility Checker", layout="wide")
-
-st.title("Tri-Lateral Retention Feasibility Model")
-st.caption(
-    "Live demonstration of the executable witness for Propositions 1 and 2, "
-    "with an explorer for Proposition 3. "
-    "Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
-    "Seed 20260915 throughout the thesis run."
-)
-
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-    ["Thesis run", "Exploration — not thesis claims", "Synthea realism layer",
-     "Norwegian context — illustrative", "Robustness and cross-checks",
-     "Where the ceiling is anchored"]
-)
+st.set_page_config(page_title="TRF Feasibility Checker", layout="wide", page_icon="🔏")
+ui.theme()
 
 
 # ----------------------------------------------------------------------
-# Shared measurement, used by tabs 1 and 3 so both report identically
+# Shared measurement, used by the thesis run and the realism layer
 # ----------------------------------------------------------------------
 
 def measure(records):
@@ -71,11 +60,139 @@ def measure(records):
     return out, records
 
 
+@st.cache_resource
+def thesis_population():
+    """The seed-20260915 population, checked under Semantics I before invalidation and
+    under Semantics II after it, exactly as trf_checker.main() does."""
+    recs = trf.generate()
+    v1 = {r.rid: trf.check_semantics_I(r) for r in recs}
+    plan = {r.rid: (r.t_invalidation(), r.erasure_deadline(), r.ceiling_deadline()) for r in recs}
+    for r in recs:
+        trf.apply_invalidation(r)
+    v2 = {r.rid: trf.check_semantics_II(r) for r in recs}
+    return recs, v1, v2, plan
+
+
+# ----------------------------------------------------------------------
+# Witness a record: the life strip and the live mechanism diagram
+# ----------------------------------------------------------------------
+
+def page_witness():
+    recs, v1, v2, plan = thesis_population()
+    by = {r.rid: r for r in recs}
+    st.title("Watch one audit record live through its retention window")
+    st.markdown(
+        '<p class="lede">Three rules act on every record below. A floor says it must stay '
+        'verifiable. An erasure request, or the end of a research permit, says its payload '
+        'must go. Read <i>verifiable</i> as <i>readable</i> and the rules contradict each '
+        'other inside the floor. Read it as <i>accountable</i> and they do not. Pick a record, '
+        'move through its months, and watch which part of the mechanism acts.</p>',
+        unsafe_allow_html=True)
+
+    cor12 = next(r.rid for r in recs if r.sigma == "secondary" and r.t_r == trf.INF and v1[r.rid])
+    xb = next(r.rid for r in recs if r.sigma == "primary" and r.t_r < trf.INF and v1[r.rid])
+    spe_req = next(r.rid for r in recs if r.sigma == "secondary" and r.t_r < trf.INF and v1[r.rid])
+    quiet = next(r.rid for r in recs if r.sigma == "primary" and r.t_r == trf.INF)
+    presets = {
+        f"Research log, no erasure request (Corollary 1.2), record {cor12}": cor12,
+        f"Cross-border record with an erasure request, record {xb}": xb,
+        f"Research log with an erasure request, record {spe_req}": spe_req,
+        f"Cross-border record nobody asks to erase, record {quiet}": quiet,
+    }
+    c1, c2 = st.columns([3, 1])
+    choice = c1.selectbox("Record", list(presets) + ["Any record by number"])
+    rid = presets.get(choice) if choice in presets else c2.number_input("Record number", 0, len(recs) - 1, 100)
+    r = by[int(rid)]
+    t_I, d_er, d_ceil = plan[r.rid]
+    deadline = min(d_er, d_ceil)
+    end = r.t_a + r.floor
+    horizon = int(min(max(end, deadline if deadline < trf.INF else 0) + 3, 130))
+    focus = int(t_I) if t_I < trf.INF else r.t_a
+    now = st.slider("Month", 0, horizon, focus, help="Move through the record's life")
+
+    pathway = "cross-border" if r.sigma == "primary" else "research log"
+    ui.facts([
+        (("NCPeH audit repository" if r.sigma == "primary" else "SPE access log"), pathway),
+        ("created", f"month {r.t_a}"),
+        ("floor runs to", f"month {end}"),
+        ("erasure deadline", "none" if d_er == trf.INF else f"month {int(d_er)}"),
+        ("deletion ceiling", "none" if d_ceil == trf.INF else f"month {int(d_ceil)}"),
+    ])
+    st.altair_chart(ui.life_strip(r, t_I, deadline, horizon, now), width="stretch", height=300, theme=None)
+
+    if v1[r.rid]:
+        w = v1[r.rid][0]
+        ui.verdict(f"<b>Semantics I fails.</b> {w['detail']}. No assignment of readability "
+                   "satisfies both (Proposition 1).", ui.REVOKE)
+    else:
+        ui.verdict("<b>Semantics I holds for this record:</b> no deadline falls inside its floor.", ui.FLOOR)
+    ui.verdict("<b>Semantics II holds.</b> " + (
+        "0 violations: the payload goes at the deadline, the invalidation entry is logged, "
+        "and the record stays verifiable through the floor (Proposition 2)."
+        if not v2[r.rid] else f"{len(v2[r.rid])} violation(s): investigate before citing."),
+        ui.SEAL if not v2[r.rid] else ui.REVOKE)
+
+    trigger = "erasure" if d_er <= d_ceil else "permit"
+    if now < r.t_a:
+        active, msg = (), "Before the access event: nothing exists yet."
+    elif now == r.t_a:
+        active = ("access", "writer", "commit", "kms", "store", "merkle")
+        msg = ("Access event. The writer splits accessor and subject fields, encrypts the payload "
+               "under its own key, commits to it, and appends the accessor fields and commitment "
+               "to the Merkle log.")
+    elif t_I == trf.INF or now < t_I:
+        active = ("store", "kms", "merkle", "auditor")
+        msg = "Retained. The payload is readable under its key; the auditor can open the commitment."
+    elif now == t_I:
+        active = (trigger, "scheduler", "kms", "store", "registry", "merkle")
+        msg = (f"Invalidation at month {int(t_I)} on the ground {r.iota['ground']}: key, salt and "
+               "ciphertext destroyed, the entry appended to the registry and the log.")
+    else:
+        active = ("auditor", "merkle", "registry", "commit")
+        msg = ("After invalidation. The auditor sees who acted, when, the commitment and the "
+               "invalidation entry, each proved against the log root, and cannot read the payload.")
+    if now > end:
+        msg += " The floor has run out; the terminal transition is specified (§4.8) but not implemented."
+    st.subheader("Which part of the mechanism acts this month")
+    st.write(msg)
+    ui.diagram("cei-mechanism.html", active, ui.REVOKE if now == t_I else ui.SEAL, height=720)
+
+    with st.expander("What the auditor holds for this record now"):
+        ok, why = trf.integrity(r)
+        idx = r.log_idx["access"]
+        proof = trf.AUDIT_LOG.proof(idx)
+        st.code(
+            f"accessor fields   : actor={r.m['actor']}  "
+            f"{'permit=' + r.m['permit'] if 'permit' in r.m else 'ncp=' + r.m.get('ncp', '-')}  outcome={r.m['outcome']}\n"
+            f"subject link      : {'removed month ' + str(r.iota_subj['month']) if r.iota_subj else 'present'}\n"
+            f"commitment c(a)   : {r.c[:40]}...\n"
+            f"key, salt, payload: {'destroyed at month ' + str(int(t_I)) if r.iota else 'held'}\n"
+            f"invalidation entry: {r.iota['ground'] + ', month ' + str(r.iota['month']) if r.iota else 'none'}\n"
+            f"inclusion proof   : {len(proof)} hashes to root {trf.AUDIT_LOG.root().hex()[:24]}...  "
+            f"verifies={ok} {why}",
+            language="text")
+
+
+def page_architecture():
+    st.title("How the artefact is built")
+    st.markdown(
+        '<p class="lede">Two drawings, both interactive: drag to pan, scroll to zoom, click a '
+        'component to trace its connections. The first is the mechanism of Chapter 4 at the audit '
+        'boundary (Figure 4.1). The second is the code you are running (Figure 5.1).</p>',
+        unsafe_allow_html=True)
+    st.subheader("The mechanism at the audit boundary")
+    ui.diagram("cei-mechanism.html", height=640)
+    st.subheader("The modules behind this app")
+    ui.diagram("trf-artefact.html", height=660)
+    st.caption("Drawn with Archify from candidate JSON kept in the repository; each passed "
+               "Archify's validation, layout and browser checks.")
+
+
 # ----------------------------------------------------------------------
 # Tab 1 — the thesis run
 # ----------------------------------------------------------------------
 
-with tab1:
+def page_thesis_run():
     st.subheader("Thesis configuration — seed 20260915, n = 200")
     st.info(
         "Executes the checker exactly as reported in Chapter 5, Tables 5.3 and 5.6, "
@@ -184,7 +301,7 @@ with tab1:
 # Tab 2 — parameter exploration, explicitly outside the thesis
 # ----------------------------------------------------------------------
 
-with tab2:
+def page_explore():
     st.subheader("Exploration — how the violation rate responds to parameters")
     st.warning(
         "Not a thesis claim. The thesis reports the seed-20260915 configuration "
@@ -235,7 +352,7 @@ with tab2:
 # Tab 3 — Synthea realism layer
 # ----------------------------------------------------------------------
 
-with tab3:
+def page_synthea():
     st.subheader("Synthea realism layer — payload-provenance invariance")
     st.write(
         "Replaces constructed payloads with committed Synthea FHIR R4 resources "
@@ -322,7 +439,7 @@ with tab3:
 # Tab 4 — Norwegian context modules (parallel to the thesis, illustrative)
 # ----------------------------------------------------------------------
 
-with tab4:
+def page_norway():
     st.subheader("Norwegian context — plug-and-play modules")
     st.write(
         "These modules import `trf_checker.py` unmodified and change nothing the "
@@ -449,7 +566,7 @@ with tab4:
 # Tab 5 — Robustness and cross-checks (Chapter 5 §5.5, §5.6 and §5.8)
 # ----------------------------------------------------------------------
 
-with tab5:
+def page_robustness():
     st.subheader("Robustness and cross-checks")
     st.write(
         "Two results the thesis reports that the other tabs do not show. Both "
@@ -604,7 +721,7 @@ with tab5:
 # Tab 6 — Proposition 3: where the ceiling is anchored (Chapter 4, Section 4.6)
 # ----------------------------------------------------------------------
 
-with tab6:
+def page_anchor():
     st.subheader("Where the ceiling is anchored — Proposition 3")
     st.write(
         "A retention floor of F months runs from the record's creation t(a). A deletion "
@@ -659,13 +776,29 @@ with tab6:
         "window instead (Chapter 6, Section 6.10).")
 
 
-st.divider()
-st.caption(
-    "This application is a viewer over the verified artefact. It is not a source "
-    "of results. Tab 1, Tab 3 and Tab 5 reproduce figures reported in Chapter 5; "
-    "Tab 2 is outside the thesis claims, Tab 4 is illustrative of the "
-    "Norwegian setting and not a thesis claim either, and Tab 6 evaluates the "
-    "condition of Proposition 3 for any floor and ceiling you set. Source: trf_checker.py and "
-    "synthea_layer.py, both unmodified, plus the Norwegian modules, which "
-    "import the checker without modifying it."
-)
+
+# ----------------------------------------------------------------------
+# Navigation
+# ----------------------------------------------------------------------
+
+PAGES = {
+    "Witness a record": page_witness,
+    "How it is built": page_architecture,
+    "Thesis run": page_thesis_run,
+    "Where the ceiling is anchored": page_anchor,
+    "Robustness and cross-checks": page_robustness,
+    "Synthea realism": page_synthea,
+    "Norwegian context (illustrative)": page_norway,
+    "Explore (not a thesis claim)": page_explore,
+}
+
+with st.sidebar:
+    st.markdown("### Tri-Lateral Retention Feasibility")
+    page = st.radio("Go to", list(PAGES), label_visibility="collapsed")
+    st.caption("Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
+               "Seed 20260915 throughout the thesis run.")
+    st.caption("A viewer over the verified artefact, never a source of results. Thesis run, "
+               "Synthea realism and Robustness reproduce Chapter 5; Explore and Norwegian "
+               "context are not thesis claims.")
+
+PAGES[page]()

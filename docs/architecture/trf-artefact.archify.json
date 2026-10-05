@@ -1,0 +1,323 @@
+{
+ "schema_version": 1,
+ "diagram_type": "architecture",
+ "meta": {
+  "title": "The TRF artefact: modules and data path",
+  "output": ".archify/architecture-trf-artefact-20261005/trf-artefact.html",
+  "quality_profile": "showcase"
+ },
+ "components": [
+  {
+   "id": "gen",
+   "type": "external",
+   "label": "generate()",
+   "sublabel": "100 + 100 records, seed",
+   "pos": [
+    40,
+    200
+   ],
+   "size": [
+    160,
+    68
+   ]
+  },
+  {
+   "id": "syn",
+   "type": "external",
+   "label": "synthea_layer",
+   "sublabel": "FHIR R4 payloads",
+   "pos": [
+    40,
+    300
+   ],
+   "size": [
+    160,
+    68
+   ]
+  },
+  {
+   "id": "nor",
+   "type": "external",
+   "label": "norwegian_layer",
+   "sublabel": "NCPeH, SPE, journal",
+   "pos": [
+    40,
+    400
+   ],
+   "size": [
+    160,
+    68
+   ]
+  },
+  {
+   "id": "xs",
+   "type": "external",
+   "label": "cross_sector_check",
+   "sublabel": "politiregisterloven § 17",
+   "pos": [
+    40,
+    500
+   ],
+   "size": [
+    160,
+    68
+   ]
+  },
+  {
+   "id": "rec",
+   "type": "backend",
+   "label": "Record",
+   "sublabel": "m_acc, m_subj, p, c, k, t_a, F, σ",
+   "pos": [
+    290,
+    300
+   ],
+   "size": [
+    190,
+    168
+   ]
+  },
+  {
+   "id": "inv",
+   "type": "backend",
+   "label": "apply_invalidation()",
+   "sublabel": "t_I, ι(a), subject removal",
+   "pos": [
+    580,
+    330
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "sem2",
+   "type": "backend",
+   "label": "check_semantics_II()",
+   "sublabel": "C1 under V_II, C2, C3",
+   "pos": [
+    860,
+    330
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "merkle",
+   "type": "database",
+   "label": "MerkleLog",
+   "sublabel": "RFC 6962, tamper tests",
+   "pos": [
+    860,
+    130
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "sem1",
+   "type": "backend",
+   "label": "check_semantics_I()",
+   "sublabel": "+ brute-force cross-check",
+   "pos": [
+    580,
+    560
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "crypto",
+   "type": "security",
+   "label": "crypto_envelope",
+   "sublabel": "AES-256-GCM, optional",
+   "pos": [
+    580,
+    700
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "meas",
+   "type": "backend",
+   "label": "Measures",
+   "sublabel": "violations, proofs, invalidations",
+   "pos": [
+    1140,
+    330
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "app",
+   "type": "frontend",
+   "label": "Streamlit app",
+   "sublabel": "app.py, six tabs",
+   "pos": [
+    1420,
+    330
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "cons",
+   "type": "frontend",
+   "label": "Console results",
+   "sublabel": "run_all.sh, results/",
+   "pos": [
+    1420,
+    700
+   ],
+   "size": [
+    170,
+    68
+   ]
+  },
+  {
+   "id": "z3",
+   "type": "security",
+   "label": "z3_check",
+   "sublabel": "bounded SMT, P1–P3",
+   "pos": [
+    1420,
+    860
+   ],
+   "size": [
+    170,
+    68
+   ]
+  }
+ ],
+ "boundaries": [
+  {
+   "kind": "region",
+   "label": "trf_checker.py",
+   "wraps": [
+    "rec",
+    "inv",
+    "sem2",
+    "merkle",
+    "sem1",
+    "meas"
+   ]
+  }
+ ],
+ "connections": [
+  {
+   "from": "gen",
+   "to": "rec",
+   "label": "records",
+   "variant": "emphasis"
+  },
+  {
+   "from": "syn",
+   "to": "rec",
+   "label": "payloads"
+  },
+  {
+   "from": "nor",
+   "to": "rec",
+   "label": "records"
+  },
+  {
+   "from": "xs",
+   "to": "rec",
+   "label": "F=12, L=36"
+  },
+  {
+   "from": "rec",
+   "to": "inv",
+   "label": "t_r, t_π",
+   "variant": "emphasis"
+  },
+  {
+   "from": "inv",
+   "to": "sem2",
+   "label": "trajectory",
+   "variant": "emphasis"
+  },
+  {
+   "from": "sem2",
+   "to": "meas",
+   "label": "V_II",
+   "variant": "emphasis"
+  },
+  {
+   "from": "inv",
+   "to": "merkle",
+   "label": "append ι",
+   "fromSide": "top",
+   "toSide": "left"
+  },
+  {
+   "from": "sem2",
+   "to": "merkle",
+   "label": "inclusion proof",
+   "fromSide": "top",
+   "toSide": "bottom"
+  },
+  {
+   "from": "rec",
+   "to": "sem1",
+   "label": "V = α",
+   "fromSide": "bottom",
+   "toSide": "left"
+  },
+  {
+   "from": "rec",
+   "to": "crypto",
+   "label": "keys at t_I",
+   "fromSide": "bottom",
+   "toSide": "left"
+  },
+  {
+   "from": "sem1",
+   "to": "meas",
+   "label": "violations",
+   "fromSide": "right",
+   "toSide": "bottom"
+  },
+  {
+   "from": "crypto",
+   "to": "cons",
+   "label": "138/138 refuse",
+   "fromSide": "right",
+   "toSide": "left"
+  },
+  {
+   "from": "meas",
+   "to": "cons",
+   "label": "print",
+   "fromSide": "bottom",
+   "toSide": "top"
+  },
+  {
+   "from": "meas",
+   "to": "app",
+   "label": "live"
+  },
+  {
+   "from": "z3",
+   "to": "cons",
+   "label": "9/9 unsat",
+   "fromSide": "top",
+   "toSide": "bottom"
+  }
+ ]
+}

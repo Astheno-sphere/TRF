@@ -60,7 +60,7 @@ python3 norwegian_layer.py       # NO-XB, NO-SPE, NO-JOURNAL classes with case w
 python3 cross_sector_check.py    # politiregisterloven § 17: floor 12 months, ceiling 36
 ```
 
-The same two modules drive Tab 4 of the app. See `norwegian_docs/NORWEGIAN_MODULE_README.md` for what is varied, what is not, and the limits, and `norwegian_docs/HOW_TO_RUN.md` for a step-by-step guide and a demonstration script.
+The same two modules drive the Norwegian context page of the app. See `norwegian_docs/NORWEGIAN_MODULE_README.md` for what is varied, what is not, and the limits, and `norwegian_docs/HOW_TO_RUN.md` for a step-by-step guide and a demonstration script.
 
 All Python files sit at the repository root, because Streamlit Cloud runs `app.py` from there and imports its neighbours.
 
@@ -68,9 +68,9 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 
 | Path | What it is | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 533 |
+| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 534 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
-| `app.py` | Streamlit viewer over the artefact, never a source of results. Tab 1 the thesis run, Tab 2 exploration, Tab 3 payload independence, Tab 4 Norwegian context, Tab 5 robustness and cross-checks (including real envelope encryption), Tab 6 where the ceiling is anchored (Proposition 3) | 671 |
+| `app.py`, `ui.py` | Streamlit viewer over the artefact, never a source of results. Eight pages: Witness a record (one record's months, with the acting components of the mechanism lit on Figure 4.1), How it is built (both Archify diagrams, interactive), Thesis run, Where the ceiling is anchored (Proposition 3), Robustness and cross-checks, Synthea realism, Norwegian context, Explore. `ui.py` is presentation only | 804 + 133 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |
@@ -96,7 +96,9 @@ Yields 98 usable bundles from 100 requested. Synthea's default export is US Core
 
 ## Robustness
 
-Tab 1 of the app also shows the audit-log integrity check and both tamper tests (Chapter 5 §5.7). Tab 5 runs the checks the thesis reports and the other tabs do not show, and the optional envelope-encryption module. Tab 6 evaluates the condition of Proposition 3 for any floor and ceiling.
+The Thesis run page also shows the audit-log integrity check and both tamper tests (Chapter 5 §5.7). Robustness and cross-checks runs the checks the thesis reports and the other pages do not show, and the optional envelope-encryption module. Where the ceiling is anchored evaluates the condition of Proposition 3 for any floor and ceiling.
+
+Architecture diagrams (Figures 4.1 and 5.1) were drawn with [Archify](https://github.com/tt-a1i/archify); their source JSON is in `docs/architecture/`, the rendered HTML and PNG in `assets/`.
 
 The **exhaustive cross-check** enumerates all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon using `brute_force_semantics_I()`, which is written independently of `check_semantics_I()`. Agreement between two separate implementations is worth more than confidence in either. The control case, where neither the erasure right nor the ceiling is active, returns feasible, so the search can succeed when it should.
 
