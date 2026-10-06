@@ -49,7 +49,7 @@ python3 synthea_layer.py
 
 It reads `synthea_run/output/fhir/` if you have regenerated the full cohort, and otherwise falls back to the eight bundles in `data/synthea_subset/`.
 
-Every reported figure is identical to the constructed-payload run while all 200 commitments differ. Mean payload rises from 43 bytes to 891 with this 8-bundle subset, and to 1,006 with the full 98-bundle cohort (that run was recorded on 28 September, before the constructed payloads were revised, and shows 35 bytes on the constructed side). The model reads timing and accessibility, never payload content.
+Every reported figure is identical to the constructed-payload run while all 200 commitments differ. Mean payload rises from 43 bytes to 891 with this 8-bundle subset, and to 1,002 with the full 98-bundle cohort (that run was recorded on 28 September, before the constructed payloads were revised, and shows 35 bytes on the constructed side). The model reads timing and accessibility, never payload content.
 
 ## Norwegian context modules
 
@@ -68,9 +68,9 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 
 | Path | What it is | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 534 |
+| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 551 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
-| `app.py`, `ui.py` | Streamlit viewer over the artefact, never a source of results. Eight pages: Witness a record (one record's months, with the acting components of the mechanism lit on Figure 4.1), How it is built (both Archify diagrams, interactive), Thesis run, Where the ceiling is anchored (Proposition 3), Robustness and cross-checks, Synthea realism, Norwegian context, Explore. `ui.py` is presentation only | 804 + 133 |
+| `app.py`, `ui.py` | Streamlit viewer over the artefact, never a source of results. Eight pages: Witness a record (one record's months, with the acting components of the mechanism lit on Figure 4.1), How it is built (both Archify diagrams, interactive), Thesis run, Where the ceiling is anchored (Proposition 3), Robustness and cross-checks, Synthea realism, Norwegian context, Explore. `ui.py` is presentation only | 825 + 133 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |
@@ -96,7 +96,7 @@ Yields 98 usable bundles from 100 requested. Synthea's default export is US Core
 
 ## Robustness
 
-The Thesis run page also shows the audit-log integrity check and both tamper tests (Chapter 5 §5.7). Robustness and cross-checks runs the checks the thesis reports and the other pages do not show, and the optional envelope-encryption module. Where the ceiling is anchored evaluates the condition of Proposition 3 for any floor and ceiling.
+The Thesis run page also shows the audit-log integrity check and all three tamper tests (Chapter 5 §5.7). Robustness and cross-checks runs the checks the thesis reports and the other pages do not show, and the optional envelope-encryption module. Where the ceiling is anchored evaluates the condition of Proposition 3 for any floor and ceiling.
 
 Architecture diagrams (Figures 4.1 and 5.1) were drawn with [Archify](https://github.com/tt-a1i/archify); their source JSON is in `docs/architecture/`, the rendered HTML and PNG in `assets/`.
 
@@ -129,7 +129,7 @@ Made in answer to the supervisor's review of 30 September. No reported figure ch
   the logged activity for SPE records. The constructed mean payload is therefore 43 bytes.
 - At invalidation the key, the salt and the payload ciphertext all go.
 - `V_II` checks each record against an append-only Merkle log (RFC 6962 hashing) instead of only
-  checking that fields exist. The run prints two tamper tests under which `V_II` fails.
+  checking that fields exist. The run prints three tamper tests under which `V_II` fails: an altered accessor field, an altered invalidation ground, and an altered patient link, which no longer opens the salted commitment its log leaf carries.
 - The dead `os.urandom(16) if False` branch is replaced by `make_salt()`; run with
   `--random-salts` to draw salts from `os.urandom`. Results are the same.
 - New optional module `crypto_envelope.py`: every record encrypted under its own AES-256-GCM key,

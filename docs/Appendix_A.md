@@ -3,7 +3,7 @@
 *Thesis:* Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space
 *Author:* Arshad Akhtar Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde
 *Supervisor:* Prof. João Ferreira
-*Artefact date:* 18 September 2026; revised 3–4 October 2026
+*Artefact date:* 18 September 2026; revised 3–6 October 2026
 
 This appendix contains every piece of code written for the thesis, the exact commands used to produce every reported result, and the provenance of all data. Nothing reported in Chapters 4 or 5 was produced by code not listed here.
 
@@ -20,7 +20,7 @@ The artefact is publicly available in two forms.
 
 The repository is the citable artefact. It contains seven Python modules, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its Thesis run page asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
 
-The demonstration has eight pages. *Witness a record* draws one record of the thesis population through its months, showing where Semantics I contradicts itself and where Semantics II holds, and lights the components of Figure 4.1 that act in each month. *How it is built* embeds Figures 4.1 and 5.1 as interactive diagrams. *Thesis run* reproduces Tables 5.3 and 5.6 and shows the audit-log integrity check and both tamper tests of Section 5.7. *Where the ceiling is anchored* evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets. *Robustness and cross-checks* runs the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6 and the optional envelope-encryption module of Section 5.8. *Synthea realism* reproduces Table 5.7. *Norwegian context* runs the illustrative Norwegian modules, and *Explore* varies population parameters as a teaching aid; neither reports a thesis figure.
+The demonstration has eight pages. *Witness a record* draws one record of the thesis population through its months, showing where Semantics I contradicts itself and where Semantics II holds, and lights the components of Figure 4.1 that act in each month. *How it is built* embeds Figures 4.1 and 5.1 as interactive diagrams. *Thesis run* reproduces Tables 5.3 and 5.6 and shows the audit-log integrity check and all three tamper tests of Section 5.7. *Where the ceiling is anchored* evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets. *Robustness and cross-checks* runs the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6 and the optional envelope-encryption module of Section 5.8. *Synthea realism* reproduces Table 5.7. *Norwegian context* runs the illustrative Norwegian modules, and *Explore* varies population parameters as a teaching aid; neither reports a thesis figure.
 
 A note on durability. Hosted applications are not archival objects: the live demonstration may be withdrawn or may sleep after inactivity, and no claim in this thesis depends on its availability. Every result reported here is reproducible from the code listed below by executing a single command on any machine with Python installed, which is the form in which the artefact should be assessed.
 
@@ -28,11 +28,11 @@ A note on durability. Hosted applications are not archival objects: the live dem
 
 | File | Purpose | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker — executable witness for Propositions 1 and 2, including the independent exhaustive cross-check and the audit-log integrity check | 533 |
+| `trf_checker.py` | Feasibility checker — executable witness for Propositions 1 and 2, including the independent exhaustive cross-check and the audit-log integrity check | 551 |
 | `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run | 152 |
 | `norwegian_layer.py` | Three Norwegian record classes, parallel to the thesis and reporting no thesis figure | 135 |
 | `cross_sector_check.py` | Cross-sector instance drawn from politiregisterloven § 17 | 110 |
-| `app.py`, `ui.py` | Eight-page demonstration viewer with live architecture diagrams (Figures 4.1 and 5.1), never a source of results | 804 + 133 |
+| `app.py`, `ui.py` | Eight-page demonstration viewer with live architecture diagrams (Figures 4.1 and 5.1), never a source of results | 825 + 133 |
 | `crypto_envelope.py` | Optional: the same lifecycle with real AES-256-GCM envelope encryption; needs the `cryptography` package and reports no thesis figure | 118 |
 | `z3_check.py` | Optional: bounded SMT check of Propositions 1–3 with the Z3 solver; needs the `z3-solver` package | 153 |
 | `data/synthea_subset/` | Eight untrimmed Synthea bundles from the reported cohort, so a reader can run the realism layer without regenerating it | 8 files, 40 MB |
@@ -43,7 +43,6 @@ A note on durability. Hosted applications are not archival objects: the live dem
 | `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | — |
 | `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison | — |
 | `requirements.txt` | `streamlit>=1.50`, `cryptography>=42`; the checker itself needs nothing | 2 |
-| `build_substrate_patch1.py`, `build_substrate_patch2.py` | Generators for the research-substrate patch workbooks; no thesis result depends on them | — |
 
 Every command has a recorded run committed beside it. A reader who executes a command and diffs the result against its recorded file can distinguish a changed file from a changed result, which is the distinction that matters when a figure disagrees with the text.
 
@@ -59,7 +58,7 @@ The synthetic cohort was generated by the official Synthea release jar, download
 OS            Ubuntu 24.04
 Python        3.x, standard library only (hashlib, random, itertools, glob, json, os)
 Java          OpenJDK 21.0.10 (required for Synthea only)
-Dependencies  none for the checker; openpyxl for the substrate patch generators
+Dependencies  none for the checker; cryptography for crypto_envelope.py and z3-solver for z3_check.py, both optional
 ```
 
 The checker has no third-party dependencies. This is deliberate: a reader should be able to run it on any machine with Python installed, without a package manager, and confirm the thesis's central results for themselves.
@@ -81,21 +80,25 @@ Deterministic. Seed 20260915 is set in the module header. Output is byte-identic
 ```bash
 curl -sL -o synthea.jar \
   https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar
+unzip -p synthea.jar version.txt   # must print d9d07a6
+sha256sum synthea.jar              # 018ad7f04f7aacb995804d7d4781c76d5fc714f7f23257ba50daa9eefae224ac on 6 Oct 2026
 ```
+
+`master-branch-latest` is a moving release. The cohort was generated with Synthea commit `d9d07a6eef91ee5144293b42ab64224d84d124f8`, the version every bundle records; if the jar's `version.txt` prints anything else, build that commit from source.
 
 *3. Generate the synthetic cohort:*
 
 ```bash
 mkdir -p synthea_run && cd synthea_run
 java -jar ../synthea.jar \
-  -s 20260915 -cs 20260915 -p 100 \
+  -s 20260915 -cs 20260915 -r 20260916 -p 100 \
   --exporter.fhir.export=true \
   --exporter.hospital.fhir.export=false \
   --exporter.practitioner.fhir.export=false \
   --generate.only_alive_patients=true
 ```
 
-`-s` sets the population seed and `-cs` the clinician seed; both are fixed to the thesis seed so the cohort is reproducible. The run yields 98 usable patient bundles from 100 requested. Output lands in `synthea_run/output/fhir/`.
+`-s` sets the population seed and `-cs` the clinician seed; both are fixed to the thesis seed. `-r` fixes the reference date. Synthea anchors the simulated timeline to the clock time of the run, so a regeneration reproduces the patients and their clinical events but not byte-identical files: regenerated on 6 October 2026, seven of the eight committed patients reappeared with the same events and timestamps shifted by a constant time of day, and every measure of Table 5.7 was unchanged. The run yields 98 usable patient bundles from 100 requested. Output lands in `synthea_run/output/fhir/`.
 
 *4. Run the realism layer and the payload-provenance comparison (produces Table 5.7):*
 
@@ -135,7 +138,7 @@ streamlit run app.py
 python3 trf_checker.py | diff - docs/expected_trf_output.txt && echo identical
 ```
 
-The same form applies to each of the five recorded runs listed in A.2. A difference means a file changed, not that the result changed.
+The same form applies to every recorded run in docs/. A difference means a file changed, not that the result changed.
 
 ---
 
@@ -148,8 +151,8 @@ Implements the TRF Model of Chapter 4 directly. Records are the seven-element tu
 Four components matter for the thesis's claims:
 
 - `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Proposition 1.
-- `check_semantics_II()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
-- `integrity()` and the `MerkleLog` class give condition (i) of Semantics II real content. Every access event, invalidation and subject-link removal is appended to an append-only Merkle log using RFC 6962 hashing, and `V_II` checks each of a record's entries against the current root with an inclusion proof. The run includes two tamper tests, an altered accessor field and an altered invalidation ground, under which `V_II` fails, and a restore after which it holds.
+- `check_semantics_II()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`, the artefact running with no payload retention period; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
+- `integrity()` and the `MerkleLog` class give condition (i) of Semantics II real content. Every access event, invalidation and subject-link removal is appended to an append-only Merkle log using RFC 6962 hashing, and `V_II` checks each of a record's entries against the current root with an inclusion proof. The run includes three tamper tests, an altered accessor field and an altered invalidation ground of record 100 and an altered patient link of record 3, under each of which `V_II` fails, and a restore after which it holds.
 - `brute_force_semantics_I()` is written independently of the first function, taking the constraint definitions directly and enumerating all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon. It exists so that the infeasibility results do not rest on the correctness of a single implementation. The control case, in which neither C2 nor C3 is active, returns feasible: confirming the search can succeed when it should.
 
 Cryptographic operations use `hashlib` only. Commitments are salted (`SHA-256(salt ‖ payload)`) because Chapter 4, Section 4.9 establishes that an unsalted hash of a low-entropy clinical payload would itself remain personal data. By default `make_salt()` derives each salt from the record identifier so that runs reproduce exactly; `--random-salts` draws them from `os.urandom` instead and gives the same results. The derivation is for reproducibility only: a production deployment must draw each salt from a cryptographically secure random source, since a salt derivable from the record identifier offers no hiding against an adversary who knows the derivation.
@@ -160,7 +163,7 @@ Key destruction is modelled as setting the key reference to `None`, and deletion
 
 Replaces the constructed payload strings with real FHIR R4 resources drawn from Synthea bundles (one clinical resource per bundle, from `Condition`, `Observation`, `MedicationRequest`, `AllergyIntolerance`, `Immunization`, or `Procedure`), recomputes each commitment over the real payload, and leaves every timing quantity untouched. It then runs both populations through the same checks and prints them side by side.
 
-The expected result, and the observed one, is that every reported figure is identical while all 200 commitments differ. Mean payload size rises from 43 bytes to 891 with the committed subset (to 1,006 with the full cohort, recorded on 28 September when the constructed payloads averaged 35 bytes; see A.17). The model reads timing and accessibility, never payload content; running the comparison rather than asserting the invariance lets a reader see the claim tested against inputs that demonstrably changed.
+The expected result, and the observed one, is that every reported figure is identical while all 200 commitments differ. Mean payload size rises from 43 bytes to 891 with the committed subset (to 1,002 with the full cohort; see A.17). The model reads timing and accessibility, never payload content; running the comparison rather than asserting the invariance lets a reader see the claim tested against inputs that demonstrably changed.
 
 ---
 
@@ -170,7 +173,7 @@ All data used anywhere in this thesis is synthetic. No real patient data was req
 
 The cohort is generated by Synthea (Walonoski et al., 2018), an open-source synthetic patient generator. Synthea's default export conforms to the *US Core* implementation guide with United States demographic, geographic, and care-pattern parameters. The FHIR version is *R4*, which matches the version the Norwegian basisprofiler constrain; the *profiles* are not Norwegian, and no claim of Norwegian clinical representativeness is made for these records. The invariance result of Table 5.7 establishes that this mismatch cannot affect any reported figure. The thesis's Norwegian grounding rests on the infrastructure analysis of Chapter 4, Section 4.11.
 
-The eight bundles in `data/synthea_subset/` are untrimmed output from that cohort. With the subset the mean payload is 891 bytes rather than the 1,006 bytes of the full cohort, because a different set of clinical resources is drawn; Chapter 5, Section 5.8 reports both and every other figure is identical.
+The eight bundles in `data/synthea_subset/` are untrimmed output from that cohort. With the subset the mean payload is 891 bytes rather than the 1,002 bytes of the full cohort, because a different set of clinical resources is drawn; Chapter 5, Section 5.8 reports both and every other figure is identical.
 
 ---
 
@@ -190,7 +193,7 @@ Results reported in Chapters 4 and 5 and confirmed by execution:
 | Semantics II — total violations | 0 | Table 5.6 |
 | Synthea comparison — figures changed | none | Table 5.7 |
 | Synthea comparison — commitments changed | 200 / 200 | Table 5.7 |
-| Audit-log integrity | 200 / 200 records verify; both tamper tests fail V_II | §5.7 |
+| Audit-log integrity | 200 / 200 records verify; all three tamper tests fail V_II | §5.7 |
 | Reference commitment, record 100 | `678ade47c1e6dc03…` | §5.7 |
 
 The reference commitment is included so that a reader re-running the checker can confirm in one glance that their run matches the one reported. It changed once, on 3 October 2026, when the Secure Processing Environment payload was redefined as the logged activity (Chapter 4, Section 4.3). Under `--random-salts` it differs on every run, by design.
@@ -212,7 +215,7 @@ Stated here so that they are not inferred from silence:
 
 ## A.10 Source listing: `trf_checker.py`
 
-The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 534.
+The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 551.
 
 ```python
 """
@@ -1192,7 +1195,7 @@ if __name__ == "__main__":
 
 ## A.14 The demonstration viewer: `app.py` and `ui.py`
 
-Not reproduced here, because the viewer is never a source of results: every figure it displays comes from executing one of the modules listed in this appendix, unmodified. `app.py` (804 lines) holds the pages and the self-checks; `ui.py` (133 lines) holds only presentation: the theme, the record life strip and the embedding of the two Archify diagrams. The Thesis run page asserts the reported figures and shows a failure notice rather than results if the run disagrees with Chapter 5. Both files are in the repository (https://github.com/Astheno-sphere/TRF).
+Not reproduced here, because the viewer is never a source of results: every figure it displays comes from executing one of the modules listed in this appendix, unmodified. `app.py` (825 lines) holds the pages and the self-checks; `ui.py` (133 lines) holds only presentation: the theme, the record life strip and the embedding of the two Archify diagrams. The Thesis run page asserts the reported figures and shows a failure notice rather than results if the run disagrees with Chapter 5. Both files are in the repository (https://github.com/Astheno-sphere/TRF).
 
 ## A.15 Source listing: `crypto_envelope.py`
 
@@ -1396,7 +1399,7 @@ RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
 
 ## A.17 Console output of the payload-provenance comparison, full cohort
 
-Produced by command 4 against the regenerated 98-bundle cohort. Verbatim output of `python3 synthea_layer.py` against the full 98-bundle cohort, the source of Chapter 5, Table 5.7, which Section 5.8 reports at a mean payload of 1,006 bytes. It was recorded on 28 September 2026, before the code revision of 3 October, and its constructed-payload mean (35 bytes) reflects the earlier constructed strings; no measure in it depends on them, as the subset run in A.21, recorded after the revision, shows. Reproducing it requires regenerating the cohort with command 3, because the full cohort is 314 MB and is not committed.
+Produced by command 4 against the 98-bundle cohort regenerated on 6 October 2026 with the pinned jar (commands 2 and 3) and the final code. It is the source of Chapter 5, Table 5.7, at a mean payload of 1,002 bytes; the September cohort it replaces gave the same six measures at 1,006 bytes. Reproducing it requires regenerating the cohort with command 3, because the full cohort is about 315 MB and is not committed.
 
 ```text
 ==========================================================================
@@ -1406,7 +1409,7 @@ Produced by command 4 against the regenerated 98-bundle cohort. Verbatim output 
 Synthea bundles read : 98
 clinical payloads    : 98
 records              : 200
-payload bytes (mean) : constructed=35  synthea=1006
+payload bytes (mean) : constructed=43  synthea=1002
 
 --------------------------------------------------------------------------
 measure                                       constructed        synthea
@@ -1589,7 +1592,7 @@ design question this module does not answer.
 
 ## A.21 Console output of the payload-provenance comparison, committed subset
 
-Produced by command 4 against the eight bundles committed at `data/synthea_subset/`, which is what a reader who clones the repository obtains without regenerating anything. Chapter 5, Section 5.8 reports both cohort sizes because one figure changes and the rest do not: the mean payload is 891 bytes here against 1,006 for the full cohort, while all six measures and all 200 differing commitments are identical. That the measures hold across cohort size and across payload repetition frequency is a stronger result than a single substitution would give.
+Produced by command 4 against the eight bundles committed at `data/synthea_subset/`, which is what a reader who clones the repository obtains without regenerating anything. Chapter 5, Section 5.8 reports both cohort sizes because one figure changes and the rest do not: the mean payload is 891 bytes here against 1,002 for the full cohort, while all six measures and all 200 differing commitments are identical. That the measures hold across cohort size and across payload repetition frequency is a stronger result than a single substitution would give.
 
 ```text
 ==========================================================================

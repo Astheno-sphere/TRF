@@ -4,7 +4,23 @@
  "meta": {
   "title": "Crypto-Erasure by Invalidation: the mechanism at the audit boundary",
   "output": ".archify/architecture-cei-mechanism-20261005/cei-mechanism.html",
-  "quality_profile": "showcase"
+  "quality_profile": "showcase",
+  "legend": {
+   "entries": {
+    "external": {
+     "label": "Triggers and parties"
+    },
+    "backend": {
+     "label": "Mechanism steps"
+    },
+    "database": {
+     "label": "Stores and log"
+    },
+    "security": {
+     "label": "Key custody"
+    }
+   }
+  }
  },
  "components": [
   {
@@ -14,7 +30,7 @@
    "sublabel": "ITI-55 query / SPE activity",
    "pos": [
     40,
-    80
+    250
    ],
    "size": [
     150,
@@ -27,8 +43,8 @@
    "label": "Audit writer",
    "sublabel": "accessor / subject split",
    "pos": [
-    310,
-    80
+    290,
+    250
    ],
    "size": [
     150,
@@ -41,8 +57,8 @@
    "label": "Commitment",
    "sublabel": "c(a) = Commit(p, r)",
    "pos": [
-    580,
-    80
+    540,
+    250
    ],
    "size": [
     150,
@@ -53,10 +69,10 @@
    "id": "merkle",
    "type": "database",
    "label": "Merkle audit log",
-   "sublabel": "RFC 6962, append-only",
+   "sublabel": "m_acc, c, c_subj, ι leaves",
    "pos": [
-    850,
-    80
+    790,
+    250
    ],
    "size": [
     150,
@@ -69,8 +85,8 @@
    "label": "Auditor",
    "sublabel": "checks V_II",
    "pos": [
-    1120,
-    80
+    1040,
+    250
    ],
    "size": [
     150,
@@ -83,8 +99,8 @@
    "label": "Key custody",
    "sublabel": "per-record k(a) under KEK",
    "pos": [
-    310,
-    270
+    290,
+    440
    ],
    "size": [
     150,
@@ -95,10 +111,10 @@
    "id": "store",
    "type": "database",
    "label": "Record store",
-   "sublabel": "ciphertext, salt, m_subj",
+   "sublabel": "ciphertext, salts, m_subj",
    "pos": [
-    580,
-    270
+    540,
+    440
    ],
    "size": [
     150,
@@ -111,8 +127,8 @@
    "label": "Invalidation registry",
    "sublabel": "month, ground, actor",
    "pos": [
-    850,
-    270
+    790,
+    440
    ],
    "size": [
     150,
@@ -126,7 +142,7 @@
    "sublabel": "GDPR Art. 17",
    "pos": [
     40,
-    460
+    630
    ],
    "size": [
     150,
@@ -137,10 +153,10 @@
    "id": "scheduler",
    "type": "backend",
    "label": "Invalidation",
-   "sublabel": "t_I = min(t_r+δ, t_π+6)",
+   "sublabel": "min(t_r+δ, t_π+6, t+P)",
    "pos": [
-    580,
-    460
+    540,
+    630
    ],
    "size": [
     150,
@@ -153,8 +169,36 @@
    "label": "Permit expiry",
    "sublabel": "HDAB, EHDS Art. 68(12)",
    "pos": [
-    580,
-    640
+    540,
+    810
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "holder",
+   "type": "external",
+   "label": "Opening holder",
+   "sublabel": "patient / home NCP",
+   "pos": [
+    540,
+    20
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "proactive",
+   "type": "external",
+   "label": "Payload period P(a)",
+   "sublabel": "GDPR Art. 5(1)(c),(e)",
+   "pos": [
+    290,
+    810
    ],
    "size": [
     150,
@@ -203,14 +247,14 @@
    "id": "e3",
    "from": "commit",
    "to": "merkle",
-   "label": "m_acc+c(a) leaf",
+   "label": "leaf",
    "variant": "emphasis"
   },
   {
    "id": "e4",
    "from": "auditor",
    "to": "merkle",
-   "label": "inclusion proof"
+   "label": "proof"
   },
   {
    "id": "e5",
@@ -281,6 +325,24 @@
    "from": "scheduler",
    "to": "registry",
    "label": "append ι(a)",
+   "fromSide": "right",
+   "toSide": "bottom"
+  },
+  {
+   "id": "e14",
+   "from": "commit",
+   "to": "holder",
+   "label": "opening",
+   "variant": "dashed",
+   "fromSide": "top",
+   "toSide": "bottom"
+  },
+  {
+   "id": "e15",
+   "from": "proactive",
+   "to": "scheduler",
+   "label": "t+P",
+   "variant": "dashed",
    "fromSide": "right",
    "toSide": "bottom"
   }

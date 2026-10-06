@@ -4,7 +4,26 @@
  "meta": {
   "title": "The TRF artefact: modules and data path",
   "output": ".archify/architecture-trf-artefact-20261005/trf-artefact.html",
-  "quality_profile": "showcase"
+  "quality_profile": "showcase",
+  "legend": {
+   "entries": {
+    "external": {
+     "label": "Record sources"
+    },
+    "backend": {
+     "label": "Checker functions"
+    },
+    "database": {
+     "label": "Audit log"
+    },
+    "security": {
+     "label": "Optional modules"
+    },
+    "frontend": {
+     "label": "Outputs"
+    }
+   }
+  }
  },
  "components": [
   {
