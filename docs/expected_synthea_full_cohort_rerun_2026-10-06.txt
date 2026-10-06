@@ -1,0 +1,26 @@
+==========================================================================
+     SYNTHEA REALISM LAYER — comparison against constructed payloads      
+==========================================================================
+
+Synthea bundles read : 98
+clinical payloads    : 98
+records              : 200
+payload bytes (mean) : constructed=43  synthea=1002
+
+--------------------------------------------------------------------------
+measure                                       constructed        synthea
+--------------------------------------------------------------------------
+Semantics I: records with violation                    90             90
+Semantics I: total violations                          95             95
+Corollary 1.2 witnesses (no request)                   39             39
+Records invalidated                                   138            138
+Semantics II: records with violation                    0              0
+Semantics II: total violations                          0              0
+--------------------------------------------------------------------------
+
+commitments differing between the two runs: 200/200   (expected 200 — same salt, different payload)
+
+==========================================================================
+   RESULT: every reported figure is IDENTICAL under real FHIR payloads,   
+   while every commitment differs. The model reads timing, not content.   
+==========================================================================

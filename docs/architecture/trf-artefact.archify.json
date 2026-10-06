@@ -109,7 +109,7 @@
    "id": "merkle",
    "type": "database",
    "label": "MerkleLog",
-   "sublabel": "RFC 6962, tamper tests",
+   "sublabel": "RFC 6962, three tamper tests",
    "pos": [
     860,
     130
@@ -165,7 +165,7 @@
    "id": "app",
    "type": "frontend",
    "label": "Streamlit app",
-   "sublabel": "app.py, six tabs",
+   "sublabel": "app.py + ui.py, eight pages",
    "pos": [
     1420,
     330

@@ -26,7 +26,7 @@ java -jar ../synthea.jar \
 
 This produced 98 usable patient bundles totalling 314 MB. Two of the hundred requested patients did not survive to the end of their simulated lifetime and were therefore not exported, which is the behaviour the `only_alive_patients` flag produces. Every figure reported in Chapter 5 comes from that cohort.
 
-A Linux container is a Linux environment. Running the official jar there is the same act as running it under WSL or on a university terminal, and produces byte-identical output under the same seeds, because Synthea is deterministic.
+A Linux container is a Linux environment. Running the official jar there is the same act as running it under WSL or on a university terminal. The jar that produced the cohort is Synthea commit `d9d07a6`, recorded in every bundle. Same-seed regeneration reproduces the patients and their clinical events but not byte-identical files, because Synthea anchors the simulated timeline to the clock time of the run (checked 6 October 2026; see `data/synthea_subset/README.md`).
 
 ## Evidence, independently checkable
 

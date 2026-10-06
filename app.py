@@ -259,8 +259,9 @@ def page_thesis_run():
             "Every access, invalidation and subject-link removal is a leaf of an "
             "append-only Merkle log (RFC 6962 hashing). A record counts as verifiable "
             "under Semantics II only if each of its entries passes an inclusion proof "
-            "against the log root. Leaves hold the accessor fields and the commitment, "
-            "never the payload or the patient link, so the log never needs erasing."
+            "against the log root. Leaves hold the accessor fields, the payload commitment "
+            "and a salted commitment to the patient link, never the payload or the link "
+            "itself, so the log never needs erasing and a changed link is still caught."
         )
         n_ok = sum(1 for r in records if trf.integrity(r)[0])
         saved = demo.m["actor"]
@@ -271,24 +272,31 @@ def page_thesis_run():
         demo.iota["ground"] = "none"
         ok_g, why_g = trf.V_II(demo, demo.t_a)
         demo.iota["ground"] = saved_g
-        ok_r = trf.V_II(demo, demo.t_a)[0]
-        i1, i2, i3 = st.columns(3)
+        xb = next(r for r in records if r.sigma == "primary" and r.iota is not None)
+        saved_p = xb.m["patient_pseudonym"]
+        xb.m["patient_pseudonym"] = "PSN-9999"
+        ok_p, why_p = trf.V_II(xb, xb.t_a)
+        xb.m["patient_pseudonym"] = saved_p
+        ok_r = trf.V_II(demo, demo.t_a)[0] and trf.V_II(xb, xb.t_a)[0]
+        i1, i2, i3, i4 = st.columns(4)
         i1.metric("Records verifying", f"{n_ok}/{len(records)}")
         i2.metric("Tamper: actor altered", "fails" if not ok_t else "PASSES")
         i3.metric("Tamper: ground altered", "fails" if not ok_g else "PASSES")
+        i4.metric("Tamper: patient link altered", "fails" if not ok_p else "PASSES")
         st.code(
             f"rid={demo.rid} actor R-008 -> R-999 : V_II={ok_t}  ({why_t})\n"
             f"rid={demo.rid} ground -> 'none'    : V_II={ok_g}  ({why_g})\n"
-            f"after restoring both          : V_II={ok_r}",
+            f"rid={xb.rid} patient link altered  : V_II={ok_p}  ({why_p})\n"
+            f"after restoring all three     : V_II={ok_r}",
             language="text",
         )
 
         if (M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39
-                and n_ok == len(records) and not ok_t and not ok_g and ok_r):
+                and n_ok == len(records) and not ok_t and not ok_g and not ok_p and ok_r):
             st.success(
                 "Matches the thesis: 95 violations across 90 records under "
                 "Semantics I, 39 Corollary 1.2 witnesses, 0 violations under "
-                "Semantics II, 200/200 records verifying, both tamper tests failing."
+                "Semantics II, 200/200 records verifying, all three tamper tests failing."
             )
         else:
             st.error(

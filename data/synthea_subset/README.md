@@ -23,8 +23,22 @@ were therefore not exported, which is what `only_alive_patients` does. The
 eight bundles here are the first eight in file order, copied without
 modification. The full cohort is not committed because of its size.
 
-Synthea is deterministic, so the same command under the same seeds reproduces
-the same bundles on any platform.
+## Version pin and what a regeneration reproduces
+
+Every bundle records the generator that wrote it: `Version identifier: d9d07a6`,
+i.e. Synthea commit `d9d07a6eef91ee5144293b42ab64224d84d124f8`
+(https://github.com/synthetichealth/synthea/commit/d9d07a6eef91ee5144293b42ab64224d84d124f8).
+`master-branch-latest` is a moving release; use that commit, or check `version.txt`
+inside the jar (`unzip -p synthea.jar version.txt`) before regenerating.
+
+Synthea's simulation is seeded, but it anchors the simulated timeline to the clock
+time of the run. Regenerated on 6 October 2026 with the pinned jar, the seeds above
+and reference date `-r 20260916`, the cohort had the same 98 patients except one,
+the same clinical events, and timestamps shifted by a constant time-of-day offset; no
+bundle was byte-identical. The thesis figures do not depend on this: re-running
+`synthea_layer.py` on that regenerated cohort with the final code gives the same six
+measures and 200/200 differing commitments, with a mean payload of 1,002 bytes
+against 1,006 for the September cohort (`docs/expected_synthea_full_cohort_rerun_2026-10-06.txt`).
 
 ## Provenance markers, checkable by opening any file
 

@@ -53,11 +53,12 @@ Auditor view of rid=100 after invalidation:
 AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
 --------------------------------------------------------------------------
 log entries                : 438
-log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+log root                   : a91c07936a4eb9752b58c6483ca93d7d...
 records verifying          : 200/200
 tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
 tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
-after restoring both       : V_II=True
+tamper test, rid=3 link altered  : V_II=False  (patient link does not open its logged commitment (altered))
+after restoring all three  : V_II=True
 
 ==========================================================================
 RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE

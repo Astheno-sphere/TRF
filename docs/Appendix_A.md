@@ -242,6 +242,8 @@ Beyond the constraint check itself:
   - payload ciphertext deleted with key and salt at invalidation (Ch4 s4.8)
   - payloads modelled per record class: the ITI-55 patient-discovery query for cross-border
     records, the logged activity for SPE records (Ch4 s4.3)
+  - each log leaf also holds a salted commitment to the patient link, so a changed link no longer
+    opens it, while the leaf still never holds the subject fields themselves
   - V_II tests integrity against an append-only Merkle log (RFC 6962 hashing), with a tamper
     test, instead of checking only that fields are present
   - make_salt() derives salts from the record id for reproducibility; --random-salts draws them
@@ -333,7 +335,8 @@ def _creation_entry(rec) -> bytes:
     """What the floor protects: accessor fields, commitment, creation month (not m_subj)."""
     m_acc = {k: v for k, v in rec.m.items() if k not in SUBJECT_FIELDS}
     return json.dumps({"event": "access", "rid": rec.rid, "t_a": rec.t_a,
-                       "m_acc": m_acc, "c": rec.c}, sort_keys=True).encode()
+                       "m_acc": m_acc, "c": rec.c, "c_subj": rec.c_subj},
+                      sort_keys=True).encode()
 
 
 def _entry(obj) -> bytes:
@@ -350,6 +353,10 @@ def integrity(rec):
     idx = getattr(rec, "log_idx", None)
     if not idx:
         return False, "record not in the audit log"
+    if any(f in rec.m for f in SUBJECT_FIELDS):                # the link, while it is held
+        link = _entry({f: rec.m.get(f) for f in SUBJECT_FIELDS})
+        if rec.subj_salt is None or commit(link, rec.subj_salt) != rec.c_subj:
+            return False, "patient link does not open its logged commitment (altered)"
     root = AUDIT_LOG.root()
     checks = [("access", _creation_entry(rec))]
     if rec.iota is not None:
@@ -397,6 +404,9 @@ class Record:
         self.salt = make_salt(rid)
         self.payload = payload                # stands for the ciphertext of p(a)
         self.c = commit(payload, self.salt)   # survives invalidation
+        # salted commitment to the patient link, logged with the accessor fields (Ch4 s4.8)
+        self.subj_salt = make_salt(rid + 100000)
+        self.c_subj = commit(_entry({f: self.m[f] for f in SUBJECT_FIELDS}), self.subj_salt)
         self.k = f"KEY-{rid:06d}"             # destroyed at invalidation
         self.iota = None                      # invalidation entry
         self.iota_subj = None                 # subject-link removal entry (SPE, ceiling)
@@ -467,6 +477,7 @@ def apply_invalidation(rec):
     if t_S < INF and any(f in rec.m for f in SUBJECT_FIELDS):
         for f in SUBJECT_FIELDS:          # beta = 0 from the ceiling (Ch4 s4.7, steps 2 and 4)
             rec.m.pop(f, None)
+        rec.subj_salt = None              # the link's salt goes with the link
         rec.iota_subj = {"rid": rec.rid, "month": t_S, "removed": list(SUBJECT_FIELDS),
                          "ground": "EHDS Art 68(12)", "authorised_by": "DPO"}
         rec.log_idx["subject_link"] = AUDIT_LOG.append(_entry(rec.iota_subj))
@@ -697,7 +708,13 @@ def main():
     ok_g, why_g = V_II(demo, demo.t_a)
     demo.iota["ground"] = saved_g
     print(f"tamper test, rid={demo.rid} ground altered: V_II={ok_g}  ({why_g})")
-    print(f"after restoring both       : V_II={V_II(demo, demo.t_a)[0]}")
+    xb = next(r for r in prim if r.iota is not None)          # a cross-border record keeps its link
+    saved_p = xb.m["patient_pseudonym"]
+    xb.m["patient_pseudonym"] = "PSN-9999"                    # tamper with the patient link
+    ok_p, why_p = V_II(xb, xb.t_a)
+    xb.m["patient_pseudonym"] = saved_p
+    print(f"tamper test, rid={xb.rid} link altered  : V_II={ok_p}  ({why_p})")
+    print(f"after restoring all three  : V_II={V_II(demo, demo.t_a)[0] and V_II(xb, xb.t_a)[0]}")
 
     print("\n" + "=" * 74)
     print(f"RESULT  Semantics I : {total_v} violations across {n_bad} records  "
@@ -1364,11 +1381,12 @@ Auditor view of rid=100 after invalidation:
 AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
 --------------------------------------------------------------------------
 log entries                : 438
-log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+log root                   : a91c07936a4eb9752b58c6483ca93d7d...
 records verifying          : 200/200
 tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
 tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
-after restoring both       : V_II=True
+tamper test, rid=3 link altered  : V_II=False  (patient link does not open its logged commitment (altered))
+after restoring all three  : V_II=True
 
 ==========================================================================
 RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE
@@ -1471,11 +1489,12 @@ Auditor view of rid=100 after invalidation:
 AUDIT-LOG INTEGRITY (Merkle log, RFC 6962 hashing)     -> V_II condition (i)
 --------------------------------------------------------------------------
 log entries                : 438
-log root                   : dd3fb5bd864103842db4c37cb6bb4fd3...
+log root                   : a91c07936a4eb9752b58c6483ca93d7d...
 records verifying          : 200/200
 tamper test, rid=100 actor altered : V_II=False  (access entry fails its inclusion proof (altered))
 tamper test, rid=100 ground altered: V_II=False  (invalidation entry fails its inclusion proof (altered))
-after restoring both       : V_II=True
+tamper test, rid=3 link altered  : V_II=False  (patient link does not open its logged commitment (altered))
+after restoring all three  : V_II=True
 
 ==========================================================================
 RESULT  Semantics I : 95 violations across 90 records  -> INFEASIBLE
