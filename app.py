@@ -197,125 +197,125 @@ def page_thesis_run():
     st.info(
         "Executes the checker exactly as reported in Chapter 5, Tables 5.3 and 5.6, "
         "and the audit-log integrity check of Section 5.7. "
-        "Deterministic: this run is byte-identical to the one in the thesis."
+        "Deterministic: this run is byte-identical to the one in the thesis. "
+        "It executes each time this page opens."
     )
 
-    if st.button("Run thesis configuration", key="run_thesis"):
-        with st.spinner("Executing trf_checker.py ..."):
-            M, records = measure(trf.generate())
+    with st.spinner("Executing trf_checker.py ..."):
+        M, records = measure(trf.generate())
 
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Violations — Semantics I", M["sem1_total"])
-        c2.metric("Records infeasible", f"{M['sem1_records']}/{M['records']}")
-        c3.metric("Corollary 1.2 witnesses", M["cor12"])
-        c4.metric("Violations — Semantics II", M["sem2_total"])
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Violations — Semantics I", M["sem1_total"])
+    c2.metric("Records infeasible", f"{M['sem1_records']}/{M['records']}")
+    c3.metric("Corollary 1.2 witnesses", M["cor12"])
+    c4.metric("Violations — Semantics II", M["sem2_total"])
 
-        st.markdown("**Table 5.3 — violations under Semantics I**")
-        st.table({
-            "Record class": ["Cross-border audit (F = 120)",
-                             "SPE access log (F = 12)", "Total"],
-            "Records": [100, 100, 200],
-            "With ≥1 violation": [M["sem1_primary"], M["sem1_secondary"],
-                                  M["sem1_records"]],
-        })
+    st.markdown("**Table 5.3 — violations under Semantics I**")
+    st.table({
+        "Record class": ["Cross-border audit (F = 120)",
+                         "SPE access log (F = 12)", "Total"],
+        "Records": [100, 100, 200],
+        "With ≥1 violation": [M["sem1_primary"], M["sem1_secondary"],
+                              M["sem1_records"]],
+    })
 
-        st.markdown(
-            "**Corollary 1.2 — infeasible with no erasure request whatsoever.** "
-            "These records received no Article 17 request. The collision is between "
-            "Article 73(1)(e) and Article 68(12) alone, on the broad reading of "
-            "Article 68(12) and for logs kept at patient-record granularity "
-            "(Chapter 4, Section 4.6). On the narrow reading these witnesses lapse."
+    st.markdown(
+        "**Corollary 1.2 — infeasible with no erasure request whatsoever.** "
+        "These records received no Article 17 request. The collision is between "
+        "Article 73(1)(e) and Article 68(12) alone, on the broad reading of "
+        "Article 68(12) and for logs kept at patient-record granularity "
+        "(Chapter 4, Section 4.6). On the narrow reading these witnesses lapse."
+    )
+    for w in M["witnesses"]:
+        st.code(w["detail"], language="text")
+
+    st.markdown("**Table 5.6 — Semantics II**")
+    st.table({
+        "Measure": ["Records invalidated", "— ground: GDPR Art. 17(1)",
+                    "— ground: EHDS Art. 68(12)", "Records with violation",
+                    "Total violations"],
+        "Value": [M["invalidated"], M["ground_art17"], M["ground_art68"],
+                  M["sem2_records"], M["sem2_total"]],
+    })
+
+    demo = next(r for r in records if r.rid == 100)
+    st.markdown("**Auditor's view of record 100 after invalidation**")
+    st.code(
+        f"accessor fields      : {trf.integrity(demo)[0]}   actor={demo.m['actor']}  "
+        f"permit={demo.m.get('permit', '-')}  outcome={demo.m['outcome']}\n"
+        f"subject link         : "
+        f"{'removed month ' + str(demo.iota_subj['month']) if demo.iota_subj else 'present'}\n"
+        f"commitment c(a)      : {demo.c[:32]}...\n"
+        f"payload key k(a)     : {demo.k}   <- destroyed\n"
+        f"salt, ciphertext     : {demo.salt}, {demo.payload}   <- destroyed, deleted\n"
+        f"invalidation iota(a) : month={demo.iota['month']}  "
+        f"ground={demo.iota['ground']}\n"
+        f"payload readable     : {bool(trf.alpha(demo, demo.t_a + demo.floor))}",
+        language="text",
+    )
+
+    st.markdown("**Audit-log integrity — Chapter 5, Section 5.7**")
+    st.write(
+        "Every access, invalidation and subject-link removal is a leaf of an "
+        "append-only Merkle log (RFC 6962 hashing). A record counts as verifiable "
+        "under Semantics II only if each of its entries passes an inclusion proof "
+        "against the log root. Leaves hold the accessor fields, the payload commitment "
+        "and a salted commitment to the patient link, never the payload or the link "
+        "itself, so the log never needs erasing and a changed link is still caught."
+    )
+    n_ok = sum(1 for r in records if trf.integrity(r)[0])
+    saved = demo.m["actor"]
+    demo.m["actor"] = "R-999"
+    ok_t, why_t = trf.V_II(demo, demo.t_a)
+    demo.m["actor"] = saved
+    saved_g = demo.iota["ground"]
+    demo.iota["ground"] = "none"
+    ok_g, why_g = trf.V_II(demo, demo.t_a)
+    demo.iota["ground"] = saved_g
+    xb = next(r for r in records if r.sigma == "primary" and r.iota is not None)
+    saved_p = xb.m["patient_pseudonym"]
+    xb.m["patient_pseudonym"] = "PSN-9999"
+    ok_p, why_p = trf.V_II(xb, xb.t_a)
+    xb.m["patient_pseudonym"] = saved_p
+    ok_r = trf.V_II(demo, demo.t_a)[0] and trf.V_II(xb, xb.t_a)[0]
+    i1, i2, i3, i4 = st.columns(4)
+    i1.metric("Records verifying", f"{n_ok}/{len(records)}")
+    i2.metric("Tamper: actor altered", "fails" if not ok_t else "PASSES")
+    i3.metric("Tamper: ground altered", "fails" if not ok_g else "PASSES")
+    i4.metric("Tamper: patient link altered", "fails" if not ok_p else "PASSES")
+    st.code(
+        f"rid={demo.rid} actor R-008 -> R-999 : V_II={ok_t}  ({why_t})\n"
+        f"rid={demo.rid} ground -> 'none'    : V_II={ok_g}  ({why_g})\n"
+        f"rid={xb.rid} patient link altered  : V_II={ok_p}  ({why_p})\n"
+        f"after restoring all three     : V_II={ok_r}",
+        language="text",
+    )
+
+    if (M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39
+            and n_ok == len(records) and not ok_t and not ok_g and not ok_p and ok_r):
+        st.success(
+            "Matches the thesis: 95 violations across 90 records under "
+            "Semantics I, 39 Corollary 1.2 witnesses, 0 violations under "
+            "Semantics II, 200/200 records verifying, all three tamper tests failing."
         )
-        for w in M["witnesses"]:
-            st.code(w["detail"], language="text")
-
-        st.markdown("**Table 5.6 — Semantics II**")
-        st.table({
-            "Measure": ["Records invalidated", "— ground: GDPR Art. 17(1)",
-                        "— ground: EHDS Art. 68(12)", "Records with violation",
-                        "Total violations"],
-            "Value": [M["invalidated"], M["ground_art17"], M["ground_art68"],
-                      M["sem2_records"], M["sem2_total"]],
-        })
-
-        demo = next(r for r in records if r.rid == 100)
-        st.markdown("**Auditor's view of record 100 after invalidation**")
-        st.code(
-            f"accessor fields      : {trf.integrity(demo)[0]}   actor={demo.m['actor']}  "
-            f"permit={demo.m.get('permit', '-')}  outcome={demo.m['outcome']}\n"
-            f"subject link         : "
-            f"{'removed month ' + str(demo.iota_subj['month']) if demo.iota_subj else 'present'}\n"
-            f"commitment c(a)      : {demo.c[:32]}...\n"
-            f"payload key k(a)     : {demo.k}   <- destroyed\n"
-            f"salt, ciphertext     : {demo.salt}, {demo.payload}   <- destroyed, deleted\n"
-            f"invalidation iota(a) : month={demo.iota['month']}  "
-            f"ground={demo.iota['ground']}\n"
-            f"payload readable     : {bool(trf.alpha(demo, demo.t_a + demo.floor))}",
-            language="text",
+    else:
+        st.error(
+            "This run does NOT match the figures reported in Chapter 5. "
+            "Do not present these numbers — investigate the discrepancy first."
         )
-
-        st.markdown("**Audit-log integrity — Chapter 5, Section 5.7**")
-        st.write(
-            "Every access, invalidation and subject-link removal is a leaf of an "
-            "append-only Merkle log (RFC 6962 hashing). A record counts as verifiable "
-            "under Semantics II only if each of its entries passes an inclusion proof "
-            "against the log root. Leaves hold the accessor fields, the payload commitment "
-            "and a salted commitment to the patient link, never the payload or the link "
-            "itself, so the log never needs erasing and a changed link is still caught."
-        )
-        n_ok = sum(1 for r in records if trf.integrity(r)[0])
-        saved = demo.m["actor"]
-        demo.m["actor"] = "R-999"
-        ok_t, why_t = trf.V_II(demo, demo.t_a)
-        demo.m["actor"] = saved
-        saved_g = demo.iota["ground"]
-        demo.iota["ground"] = "none"
-        ok_g, why_g = trf.V_II(demo, demo.t_a)
-        demo.iota["ground"] = saved_g
-        xb = next(r for r in records if r.sigma == "primary" and r.iota is not None)
-        saved_p = xb.m["patient_pseudonym"]
-        xb.m["patient_pseudonym"] = "PSN-9999"
-        ok_p, why_p = trf.V_II(xb, xb.t_a)
-        xb.m["patient_pseudonym"] = saved_p
-        ok_r = trf.V_II(demo, demo.t_a)[0] and trf.V_II(xb, xb.t_a)[0]
-        i1, i2, i3, i4 = st.columns(4)
-        i1.metric("Records verifying", f"{n_ok}/{len(records)}")
-        i2.metric("Tamper: actor altered", "fails" if not ok_t else "PASSES")
-        i3.metric("Tamper: ground altered", "fails" if not ok_g else "PASSES")
-        i4.metric("Tamper: patient link altered", "fails" if not ok_p else "PASSES")
-        st.code(
-            f"rid={demo.rid} actor R-008 -> R-999 : V_II={ok_t}  ({why_t})\n"
-            f"rid={demo.rid} ground -> 'none'    : V_II={ok_g}  ({why_g})\n"
-            f"rid={xb.rid} patient link altered  : V_II={ok_p}  ({why_p})\n"
-            f"after restoring all three     : V_II={ok_r}",
-            language="text",
-        )
-
-        if (M["sem1_total"] == 95 and M["sem2_total"] == 0 and M["cor12"] == 39
-                and n_ok == len(records) and not ok_t and not ok_g and not ok_p and ok_r):
-            st.success(
-                "Matches the thesis: 95 violations across 90 records under "
-                "Semantics I, 39 Corollary 1.2 witnesses, 0 violations under "
-                "Semantics II, 200/200 records verifying, all three tamper tests failing."
-            )
-        else:
-            st.error(
-                "This run does NOT match the figures reported in Chapter 5. "
-                "Do not present these numbers — investigate the discrepancy first."
-            )
-            st.dataframe([
-                {"check": "Semantics I violations", "expected": 95, "got": M["sem1_total"]},
-                {"check": "Semantics II violations", "expected": 0, "got": M["sem2_total"]},
-                {"check": "Corollary 1.2 witnesses", "expected": 39, "got": M["cor12"]},
-                {"check": "records verifying", "expected": len(records), "got": n_ok},
-                {"check": "tamper: actor altered fails", "expected": True, "got": not ok_t},
-                {"check": "tamper: ground altered fails", "expected": True, "got": not ok_g},
-                {"check": "tamper: patient link altered fails", "expected": True, "got": not ok_p},
-                {"check": "all restored verify", "expected": True, "got": ok_r},
-            ], hide_index=True)
-            if not hasattr(records[0], "c_subj"):
-                st.warning("The checker module loaded here predates the patient-link commitment. "
-                           "The deployment is running a stale copy of trf_checker.py: reboot the app.")
+        st.dataframe([
+            {"check": "Semantics I violations", "expected": 95, "got": M["sem1_total"]},
+            {"check": "Semantics II violations", "expected": 0, "got": M["sem2_total"]},
+            {"check": "Corollary 1.2 witnesses", "expected": 39, "got": M["cor12"]},
+            {"check": "records verifying", "expected": len(records), "got": n_ok},
+            {"check": "tamper: actor altered fails", "expected": True, "got": not ok_t},
+            {"check": "tamper: ground altered fails", "expected": True, "got": not ok_g},
+            {"check": "tamper: patient link altered fails", "expected": True, "got": not ok_p},
+            {"check": "all restored verify", "expected": True, "got": ok_r},
+        ], hide_index=True)
+        if not hasattr(records[0], "c_subj"):
+            st.warning("The checker module loaded here predates the patient-link commitment. "
+                       "The deployment is running a stale copy of trf_checker.py: reboot the app.")
 
 
 # ----------------------------------------------------------------------
@@ -799,13 +799,296 @@ def page_anchor():
 
 
 # ----------------------------------------------------------------------
+# The walk: Start here, The four propositions, Claim ledger
+# Added for the examiner's walk-through. Every number below is computed by
+# trf_checker.py, z3_check.py or crypto_envelope.py, unmodified; the text of each
+# proposition is quoted verbatim from Chapter 4 (checked by tests/test_app.py).
+# ----------------------------------------------------------------------
+
+DOI = "10.5281/zenodo.23819275"
+
+
+def goto(name):
+    st.session_state["page"] = name
+
+
+def walk_step(n, title, text, page):
+    c1, c2 = st.columns([5, 1.4], vertical_alignment="center")
+    c1.markdown(f"**{n}. {title}**  \n{text}")
+    c2.button("Open", key=f"walk_{n}", on_click=goto, args=(page,), width="stretch")
+
+
+def page_start():
+    st.title("Three legal clocks run on one audit record")
+    st.markdown(
+        '<p class="lede">When a patient\'s health record crosses a European border, or a researcher '
+        'opens it in a secure environment, an audit record is written. Three obligations then act on '
+        'that one record at once, and no instrument reconciles them. This app lets you check, in the '
+        'running code, what the thesis claims about that collision, and see where its claims stop.</p>',
+        unsafe_allow_html=True)
+    ui.facts([
+        ("retention floor: must stay verifiable", "Art 73(1)(e)"),
+        ("erasure right: payload must go", "GDPR Art 17"),
+        ("deletion ceiling: SPE data must go", "Art 68(12)"),
+    ])
+    ui.verdict("<b>Read <i>verifiable</i> as <i>readable</i></b> and the three cannot be met "
+               "together whenever an erasure or deletion deadline falls inside the retention window: "
+               "some month requires the payload to be both readable and gone (Proposition 1).", ui.REVOKE)
+    ui.verdict("<b>Read <i>verifiable</i> as <i>accountable</i></b>, keeping who acted, when, a "
+               "commitment to the payload and a logged, grounded invalidation entry, and they can always "
+               "be met together; destroying a per-record key is the mechanism that does it "
+               "(Proposition 2).", ui.SEAL)
+    st.subheader("The walk, in the order of the thesis")
+    walk_step(1, "Watch the collision on one record",
+              "One record of the thesis population, month by month, under both readings.",
+              "Witness a record")
+    walk_step(2, "Read the four propositions, then try to break them",
+              "Each statement verbatim from Chapter 4, what it does not establish, its live evidence, "
+              "and a Z3 run that must refute deliberately broken variants.", "The four propositions")
+    walk_step(3, "See where the ceiling is anchored",
+              "Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17.",
+              "Where the ceiling is anchored")
+    walk_step(4, "See the mechanism and the code",
+              "Figure 4.1 (Crypto-Erasure by Invalidation) and Figure 5.1 (the artefact), interactive.",
+              "How it is built")
+    walk_step(5, "Check every number in Chapter 5",
+              "Each reported figure beside the same figure recomputed now.", "Claim ledger")
+    walk_step(6, "Stress the result",
+              "Independent exhaustive search, a longer erasure response period, real AES-256-GCM, "
+              "and real Synthea FHIR payloads.", "Robustness and cross-checks")
+    with st.expander("What the thesis does not claim"):
+        st.markdown(
+            "No novel cryptographic primitive or construction. No novel formal method. No first-ever "
+            "framework for anything. No deployed system, no performance result, no connection to any "
+            "National Contact Point. No proof that key destruction occurred, as distinct from an "
+            "attestation that it did. No empirical estimate of how often the conflict arises in "
+            "practice. No regulatory authority for either of the two interpretive steps the argument "
+            "depends upon, both of which are identified in Chapter 6 and proposed for resolution in "
+            "Chapter 7.")
+        st.caption("Front Matter, Statement of Contribution. The data are synthetic; the counts depend "
+                   "on the generator and are not estimates of real frequency.")
+    st.caption(f"Archived release of this code: version 1.0.1, DOI "
+               f"[{DOI}](https://doi.org/{DOI}). Source: "
+               "[github.com/Astheno-sphere/TRF](https://github.com/Astheno-sphere/TRF).")
+
+
+PROPOSITIONS = [
+    ("Proposition 1", "Infeasibility under plaintext verifiability", "Chapter 4, Section 4.6",
+     r"""*Proposition 1.* Under Semantics I, the constraint system $\{C1, C2, C3\}$ is infeasible for any record $a$ such that
+
+$$
+t_r(a) + \delta \le t(a) + F(a) \quad\text{or}\quad t_\pi(a) + 6 \le t(a) + F(a).
+$$""",
+     [r"""Propositions 1 and 3 follow almost immediately from the definitions, each resolving to a month in which $\alpha$ must be both 1 and 0, and the thesis states this plainly rather than presenting them as hard-won.""",
+      r"""How often data subjects exercise Article 17 is an empirical question that the model does not answer (Chapter 3, Section 3.7)."""]),
+    ("Proposition 2", "Feasibility under accountability-preserving verifiability", "Chapter 4, Section 4.7",
+     r"""*Proposition 2.* Under Semantics II, the constraint system $\{C1, C2, C3\}$ is jointly satisfiable for every record $a \in A$, for every arrival pattern of erasure requests $\{t_r(a)\}$ and permit expiries $\{t_\pi(a)\}$, and for every floor parameter $F(a) \in \mathbb{N}$.""",
+     [r"""It does not establish that the exhibited solution is lawful (that depends on whether the residue it leaves clears the legal threshold, which Section 4.9 addresses) nor that key destruction can be verified by an external party, which Section 4.9 and Chapter 6, Section 6.3 concede it cannot.""",
+      r"""The legal defensibility of Semantics II is argued in Section 4.2 and its want of authority is confronted in Chapter 6, Section 6.2; it is not established by the proposition, and no reader should take the proposition as establishing it."""]),
+    ("Proposition 3", "Where the ceiling is anchored", "Chapter 4, Section 4.6",
+     r"""*Proposition 3 (anchoring).* Let a record's floor of $F$ months run from its creation month $t(a)$, and let a ceiling of $L$ months run from an event at month $e(a) \ge t(a)$. Under Semantics I, the floor and the ceiling are jointly satisfiable for $a$ if and only if $e(a) + L > t(a) + F$. Hence (i) if the ceiling is anchored to the same event as the floor, $e(a) = t(a)$, they are satisfiable for every record if and only if $L > F$, a condition decidable from the text alone; and (ii) if the ceiling is anchored to an external event, then whenever $L \le F$ they fail for exactly those records with $e(a) - t(a) \le F - L$, a set that the text does not reveal and each record's history determines.""",
+     [r"""The corollary holds if, and only if, the deletion obligation of Article 68(12) reaches the identifiable access logs that Article 73(1)(e) requires to be kept.""",
+      r"""The model makes no claim about how often this occurs in practice; the collision's existence, not its frequency, is what Corollary 1.2 asserts."""]),
+    ("Proposition 4", "Location and right", "Chapter 4, Section 4.10",
+     r"""*Proposition 4 (location and right).* *This result depends on a legal premise stated here as an explicit assumption, not derived from the model: that a controller receiving a relocated record receives the erasure obligation of Article 17(1) GDPR with it.* Let a ceiling be anchored to a location, requiring data to be absent from that location after a deadline, and let a right be anchored to the data subject, requiring data to be inaccessible to any controller holding them after a deadline. Under Semantics I, and granting that assumption, relocating a record before the ceiling's deadline satisfies the ceiling and the floor together, while the floor and the right remain infeasible for every record satisfying the first disjunct of Proposition 1.""",
+     [r"""The right quantifies over the controller: Article 17(1) obliges the controller holding the data to erase them, and, as a legal premise rather than a mathematical consequence, a controller receiving the record receives the obligation with it."""]),
+]
+
+
+@st.cache_data(show_spinner=False)
+def z3_run():
+    """Run z3_check.main() unmodified and return its console output, or None without z3."""
+    import contextlib
+    import io
+    try:
+        import z3_check
+    except ImportError:
+        return None
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        z3_check.main()
+    return buf.getvalue()
+
+
+def show_z3(only=None):
+    out = z3_run()
+    if out is None:
+        st.info("The z3-solver package is not installed in this deployment; "
+                "run `python3 z3_check.py` locally.")
+        return
+    rows = [l for l in out.splitlines() if l[:2] in ("P1", "P2", "P3", "mu", "sa")]
+    if only:
+        rows = [l for l in rows if l.startswith(only) or l.startswith("mutation")]
+    st.code("\n".join(rows), language="text")
+    if "9/9 checks found no counterexample; sanity and mutation checks passed" in out:
+        ui.verdict("<b>Z3 found no counterexample</b> within the bounds, and it <b>did</b> find "
+                   "counterexamples to each deliberately broken variant, so the check has teeth. "
+                   "Bounded, not a proof for all instances (Chapter 5, Section 5.5).", ui.SEAL)
+    else:
+        ui.verdict("<b>The Z3 run differs from Appendix A.</b> Investigate before citing.", ui.REVOKE)
+
+
+def page_propositions():
+    recs, v1, v2, _ = thesis_population()
+    st.title("The four propositions, and the evidence for each")
+    st.markdown(
+        '<p class="lede">Each statement is quoted from Chapter 4. Below it: what the thesis says it '
+        'does not establish, then what the running code shows. The proofs in Chapter 4 carry the '
+        'general claim; the code checks instances and bounded cases, and says so.</p>',
+        unsafe_allow_html=True)
+    tabs = st.tabs([name for name, *_ in PROPOSITIONS])
+    for tab, (name, title, where, statement, limits) in zip(tabs, PROPOSITIONS):
+        with tab:
+            st.subheader(f"{name}: {title}")
+            st.caption(where)
+            st.markdown("> " + statement.replace("\n", "\n> "))
+            st.markdown("**What it does not establish**")
+            for q in limits:
+                st.markdown(f"> {q}")
+            st.markdown("**What the code shows**")
+            if name == "Proposition 1":
+                n_rec = sum(1 for k in v1 if v1[k])
+                n_tot = sum(len(x) for x in v1.values())
+                ui.facts([("records infeasible under Semantics I", f"{n_rec}/{len(recs)}"),
+                          ("constraint violations", n_tot),
+                          ("of which need no erasure request (Corollary 1.2)",
+                           sum(1 for r in recs if r.sigma == "secondary" and r.t_r == trf.INF and v1[r.rid]))])
+                st.code(v1[100][0]["detail"], language="text")
+                st.caption("Record 100: the month in which C1 requires the payload readable and C3 requires it gone.")
+                st.button("Watch record 100 month by month", on_click=goto, args=("Witness a record",), key="p1_go")
+                show_z3("P1")
+            elif name == "Proposition 2":
+                ok = sum(1 for r in recs if trf.integrity(r)[0])
+                ui.facts([("records invalidated", sum(1 for r in recs if r.iota is not None)),
+                          ("violations under Semantics II", sum(len(x) for x in v2.values())),
+                          ("records verifying against the log root", f"{ok}/{len(recs)}")])
+                st.caption("Same 200 records, after the invalidation schedule of the proof has run.")
+                show_z3("P2")
+            elif name == "Proposition 3":
+                st.button("Evaluate the condition for any floor and ceiling", on_click=goto,
+                          args=("Where the ceiling is anchored",), key="p3_go")
+                show_z3("P3")
+            else:
+                ui.verdict("<b>Not executed by the artefact.</b> Proposition 4 turns on a legal premise "
+                           "about who holds the erasure obligation after relocation, which code cannot "
+                           "check. It is argued in Chapter 4, Section 4.10, against six rival designs.",
+                           ui.FLOOR)
+
+
+@st.cache_resource(show_spinner="Recomputing every Chapter 5 figure ...")
+def ledger_rows():
+    """Each row: (where in the thesis, claim, reported value, value computed now)."""
+    rows = []
+    M, recs = measure(trf.generate())
+    prim = [r for r in recs if r.sigma == "primary"]
+    sec = [r for r in recs if r.sigma == "secondary"]
+    # measure() ran invalidation; recount Semantics I per class on a fresh population
+    fresh = trf.generate()
+    s1 = {r.rid: trf.check_semantics_I(r) for r in fresh}
+    rows += [
+        ("Table 5.3", "Cross-border records with a violation", "37/100",
+         f"{sum(1 for r in fresh if r.sigma == 'primary' and s1[r.rid])}/{len(prim)}"),
+        ("Table 5.3", "SPE access-log records with a violation", "53/100",
+         f"{sum(1 for r in fresh if r.sigma == 'secondary' and s1[r.rid])}/{len(sec)}"),
+        ("Table 5.3", "Records with a violation, Semantics I", "90/200", f"{M['sem1_records']}/{M['records']}"),
+        ("Table 5.3", "Total violations, Semantics I", "95", str(M["sem1_total"])),
+        ("Section 5.4", "Corollary 1.2 witnesses (no erasure request)", "39", str(M["cor12"])),
+    ]
+    for label, args, exp in [
+            ("SPE, no erasure request, permit 3 months", (0, 12, trf.INF, 3, "secondary", 14), False),
+            ("SPE, erasure request at t = 2", (0, 12, 2, 9, "secondary", 14), False),
+            ("Cross-border (floor scaled to 12), erasure at t = 4", (0, 12, 4, trf.INF, "primary", 14), False),
+            ("Control: no request, no expiry", (0, 12, trf.INF, trf.INF, "primary", 14), True)]:
+        rows.append(("Table 5.4", f"Feasible assignment exists? {label}", str(exp),
+                     str(trf.brute_force_semantics_I(*args))))
+    for d in trf.delta_witness():
+        rows += [(f"Table 5.5", f"δ = {d['delta']}: records with a violation, Semantics I",
+                  {1: "90", 3: "89"}[d["delta"]], str(d["sem1_records"])),
+                 (f"Table 5.5", f"δ = {d['delta']}: total violations, Semantics I",
+                  {1: "95", 3: "94"}[d["delta"]], str(d["sem1_total"])),
+                 (f"Table 5.5", f"δ = {d['delta']}: violations, Semantics II", "0", str(d["sem2_total"]))]
+    rows += [
+        ("Table 5.6", "Records invalidated", "138", str(M["invalidated"])),
+        ("Table 5.6", "— on ground GDPR Article 17(1)", "52", str(M["ground_art17"])),
+        ("Table 5.6", "— on ground EHDS Article 68(12)", "86", str(M["ground_art68"])),
+        ("Table 5.6", "Records with a violation, Semantics II", "0", str(M["sem2_records"])),
+        ("Table 5.6", "Total violations, Semantics II", "0", str(M["sem2_total"])),
+        ("Section 5.7", "Records verifying against the Merkle log root", "200/200",
+         f"{sum(1 for r in recs if trf.integrity(r)[0])}/{len(recs)}"),
+    ]
+    try:
+        import synthea_layer as sl
+        real, _, _ = sl.generate_with_synthea()
+        base = trf.generate()
+        diff_c = sum(1 for x, y in zip(base, real) if x.c != y.c)
+        Mr, _ = measure(real)
+        rows += [("Table 5.7", "Synthea payloads: total violations, Semantics I", "95", str(Mr["sem1_total"])),
+                 ("Table 5.7", "Synthea payloads: violations, Semantics II", "0", str(Mr["sem2_total"])),
+                 ("Table 5.7", "Commitments differing between runs", "200/200", f"{diff_c}/{len(base)}")]
+    except FileNotFoundError:
+        rows.append(("Table 5.7", "Synthea payloads", "see Synthea realism page", "bundles not deployed"))
+    try:
+        import crypto_envelope as ce
+        cr = trf.generate()
+        custody = ce.Custody()
+        store = {r.rid: ce.encrypt(custody, r.rid, r.payload) for r in cr}
+        for r in cr:
+            if r.t_invalidation() < trf.INF:
+                custody.destroy(r.rid)
+        refused = 0
+        for r in cr:
+            try:
+                ce.decrypt(custody, r.rid, *store[r.rid])
+            except KeyError:
+                refused += 1
+        rows += [("Section 5.8", "AES-256-GCM: records refusing to decrypt after key destruction", "138", str(refused)),
+                 ("Section 5.8", "AES-256-GCM: records still readable", "62", str(len(cr) - refused))]
+    except ImportError:
+        rows.append(("Section 5.8", "AES-256-GCM module", "138 / 62", "cryptography not installed"))
+    out = z3_run()
+    rows.append(("Section 5.5", "Bounded Z3 check: checks with no counterexample", "9/9",
+                 "9/9" if out and "9/9 checks found no counterexample" in out else ("not installed" if out is None else "differs")))
+    return rows
+
+
+def page_ledger():
+    st.title("Claim ledger: every number in Chapter 5, recomputed now")
+    st.markdown(
+        '<p class="lede">Left, the figure as the thesis reports it. Right, the same figure computed '
+        'by the unmodified checker when this page opened. A thesis is only as good as the trail '
+        'from its numbers to the code that produced them; this is that trail.</p>',
+        unsafe_allow_html=True)
+    rows = ledger_rows()
+    table = [{"where": w, "claim": c, "thesis": t, "now": n,
+              "": "✓" if t == n else ("—" if "not" in n else "✗")} for w, c, t, n in rows]
+    ok = sum(1 for r in table if r[""] == "✓")
+    bad = sum(1 for r in table if r[""] == "✗")
+    ui.facts([("figures matching the thesis", f"{ok}/{len(table)}"),
+              ("figures differing", bad),
+              ("seed", "20260915")])
+    if bad:
+        ui.verdict("<b>At least one figure differs from the thesis.</b> Do not cite this deployment "
+                   "until the difference is explained.", ui.REVOKE)
+    else:
+        ui.verdict("<b>Every recomputed figure equals the reported one.</b> Rows marked — could not "
+                   "run in this deployment and are reproduced by the commands in Appendix A.5.", ui.SEAL)
+    st.dataframe(table, hide_index=True, width="stretch", height=36 * (len(table) + 1))
+    st.caption(f"Code: version 1.0.1, DOI [{DOI}](https://doi.org/{DOI}). Locally: "
+               "`python3 trf_checker.py` and `python3 z3_check.py`, diffed against `docs/expected_*.txt`.")
+
+
+
+# ----------------------------------------------------------------------
 # Navigation
 # ----------------------------------------------------------------------
 
 PAGES = {
+    "Start here": page_start,
     "Witness a record": page_witness,
+    "The four propositions": page_propositions,
     "How it is built": page_architecture,
     "Thesis run": page_thesis_run,
+    "Claim ledger": page_ledger,
     "Where the ceiling is anchored": page_anchor,
     "Robustness and cross-checks": page_robustness,
     "Synthea realism": page_synthea,
@@ -815,7 +1098,7 @@ PAGES = {
 
 with st.sidebar:
     st.markdown("### Tri-Lateral Retention Feasibility")
-    page = st.radio("Go to", list(PAGES), label_visibility="collapsed")
+    page = st.radio("Go to", list(PAGES), label_visibility="collapsed", key="page")
     st.caption("Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
                "Seed 20260915 throughout the thesis run.")
     st.caption("A viewer over the verified artefact, never a source of results. Thesis run, "

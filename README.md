@@ -8,6 +8,15 @@ Executable artefact for the MSc thesis *Verifiable Crypto-Erasure for Cross-Bord
 
 Python 3, standard library only for the checker and the Norwegian modules. No packages needed to reproduce the thesis result.
 
+## Check everything at once
+
+```bash
+pip install -r requirements.txt pytest
+python3 -m pytest -q tests/
+```
+
+21 checks: every recorded run in `docs/` reproduces byte for byte, every page of the app renders, the app's claim ledger matches all 27 Chapter 5 figures, and (when the thesis repository sits beside this one) every proposition the app quotes is verbatim from Chapter 4. The same tests run on every push.
+
 ## Reproduce the thesis result
 
 ```bash
