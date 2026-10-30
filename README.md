@@ -1,5 +1,9 @@
 # TRF — Tri-Lateral Retention Feasibility Model
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23819275.svg)](https://doi.org/10.5281/zenodo.23819275)
+
+Cite the archived release: Abbasia, A. A. (2026). *TRF: Tri-Lateral Retention Feasibility Model — executable artefact* (Version 1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.23819275
+
 Executable artefact for the MSc thesis *Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space* (Arshad Akhtar Abbasia, Høgskolen i Molde, 2026). Supervisor: Prof. João Ferreira.
 
 Python 3, standard library only for the checker and the Norwegian modules. No packages needed to reproduce the thesis result.

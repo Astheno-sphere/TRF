@@ -5,6 +5,7 @@ type: software
 version: 1.0.1
 date-released: 2026-10-31
 license: MIT
+doi: 10.5281/zenodo.23819275
 authors:
   - family-names: Abbasia
     given-names: Arshad Akhtar
