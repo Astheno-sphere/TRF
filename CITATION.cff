@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "TRF: Tri-Lateral Retention Feasibility Model — executable artefact"
 type: software
-version: 1.0.0
+version: 1.0.1
 date-released: 2026-10-31
 license: MIT
 authors:
