@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "TRF: Tri-Lateral Retention Feasibility Model — executable artefact"
+type: software
+version: 1.0.0
+date-released: 2026-10-31
+license: MIT
+authors:
+  - family-names: Abbasia
+    given-names: Arshad Akhtar
+    affiliation: "Høgskolen i Molde (Molde University College)"
+    email: arshad.a.abbasia@himolde.no
+repository-code: "https://github.com/Astheno-sphere/TRF"
+url: "https://trfhimolde.streamlit.app/"
+abstract: >-
+  Executable artefact for the MSc thesis "Verifiable Crypto-Erasure for
+  Cross-Border Health Data Audit Trails under the European Health Data Space"
+  (Høgskolen i Molde, 2026). A constraint checker for the Tri-Lateral
+  Retention Feasibility (TRF) Model over 200 synthetic records (seed
+  20260915), with an exhaustive cross-check, a bounded Z3 SMT check, a
+  Synthea FHIR R4 realism layer, a cryptographic envelope module and a
+  Streamlit viewer. Results are checked on generated data; key destruction
+  is simulated and treated as attested, not proven.
+keywords:
+  - European Health Data Space
+  - GDPR Article 17
+  - cryptographic erasure
+  - audit trail
+  - data retention
+  - constraint satisfaction
+  - design science research
