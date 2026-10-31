@@ -1,8 +1,8 @@
 # TRF — Tri-Lateral Retention Feasibility Model
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23819275.svg)](https://doi.org/10.5281/zenodo.23819275)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23819274.svg)](https://doi.org/10.5281/zenodo.23819274)
 
-Cite the archived release: Abbasia, A. A. (2026). *TRF: Tri-Lateral Retention Feasibility Model — executable artefact* (Version 1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.23819275
+Cite the archived release: Abbasia, A. A. (2026). *TRF: Tri-Lateral Retention Feasibility Model — executable artefact* (Version 1.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.23819274
 
 Executable artefact for the MSc thesis *Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space* (Arshad Akhtar Abbasia, Høgskolen i Molde, 2026). Supervisor: Prof. João Ferreira.
 
@@ -83,7 +83,7 @@ All Python files sit at the repository root, because Streamlit Cloud runs `app.p
 |---|---|---|
 | `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, with an independently written exhaustive cross-check and an audit-log integrity check (Merkle log, tamper test) | 551 |
 | `synthea_layer.py` | Realism layer and payload-provenance comparison | 152 |
-| `app.py`, `ui.py` | Streamlit viewer over the artefact, never a source of results. Eight pages: Witness a record (one record's months, with the acting components of the mechanism lit on Figure 4.1), How it is built (both Archify diagrams, interactive), Thesis run, Where the ceiling is anchored (Proposition 3), Robustness and cross-checks, Synthea realism, Norwegian context, Explore. `ui.py` is presentation only | 825 + 133 |
+| `app.py`, `ui.py` | Streamlit viewer over the artefact, never a source of results. Eleven pages: Start here (the walk through the thesis, with Previous/Next along it), Witness a record (one record's months, with the acting components of the mechanism lit on Figure 4.1), The four propositions (statements verbatim from Chapter 4, their stated limits, live evidence and a live Z3 run), How it is built (both Archify diagrams, interactive), Thesis run, Claim ledger (every Chapter 5 figure beside its live recomputation), Where the ceiling is anchored (Proposition 3), Robustness and cross-checks, Synthea realism, Norwegian context, Explore. `ui.py` is presentation only | 1122 + 133 |
 | `norwegian_layer.py` | Three Norwegian record classes | 135 |
 | `cross_sector_check.py` | Cross-sector instance from Norwegian police register law | 110 |
 | `crypto_envelope.py` | Optional: the same record lifecycle with real AES-256-GCM envelope encryption; shows that exactly the invalidated records become unreadable. Needs `cryptography`; reports no thesis figure | 118 |

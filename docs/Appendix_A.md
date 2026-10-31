@@ -15,12 +15,13 @@ The artefact is publicly available in two forms.
 
 | Form | Location |
 |---|---|
+| Archived release (cite this) | Version 1.1.0, Zenodo, https://doi.org/10.5281/zenodo.23819274 (resolves to the latest version; version 1.0.1, https://doi.org/10.5281/zenodo.23819275, has the same result modules) |
 | Source repository | https://github.com/Astheno-sphere/TRF |
 | Live demonstration | https://trfhimolde.streamlit.app/ |
 
-The repository is the citable artefact. It contains seven Python modules, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its Thesis run page asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
+The archived release is the citable artefact: version 1.1.0 of the repository, deposited on Zenodo, is the exact code whose outputs this thesis reports and the viewer described below, and its result modules are identical to those of version 1.0.1, whereas the repository's default branch may change after submission. It contains eight Python files, the checker and seven further modules as Chapter 5, Section 5.2 counts them, the viewer among them split across `app.py` and `ui.py`, together with the eight-bundle Synthea subset the realism layer reads, a recorded console run for every command, and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its Thesis run page asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice rather than results if it does not.
 
-The demonstration has eight pages. *Witness a record* draws one record of the thesis population through its months, showing where Semantics I contradicts itself and where Semantics II holds, and lights the components of Figure 4.1 that act in each month. *How it is built* embeds Figures 4.1 and 5.1 as interactive diagrams. *Thesis run* reproduces Tables 5.3 and 5.6 and shows the audit-log integrity check and all three tamper tests of Section 5.7. *Where the ceiling is anchored* evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets. *Robustness and cross-checks* runs the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6 and the optional envelope-encryption module of Section 5.8. *Synthea realism* reproduces Table 5.7. *Norwegian context* runs the illustrative Norwegian modules, and *Explore* varies population parameters as a teaching aid; neither reports a thesis figure.
+The demonstration has eleven pages. *Start here* states the problem and sets out a walk through the remaining pages in the order of the thesis. *The four propositions* quotes each proposition from Chapter 4 with the limits the thesis states for it, shows the corresponding figures from the checker, and runs the bounded SMT check of Section 5.5, including the deliberately broken variants it must refute; Proposition 4, which rests on a legal premise, is marked as argued and not executed. *Claim ledger* sets each figure reported in Chapter 5 beside the same figure recomputed when the page opens. *Witness a record* draws one record of the thesis population through its months, showing where Semantics I contradicts itself and where Semantics II holds, and lights the components of Figure 4.1 that act in each month. *How it is built* embeds Figures 4.1 and 5.1 as interactive diagrams. *Thesis run* reproduces, on opening, Tables 5.3 and 5.6 and shows the audit-log integrity check and all three tamper tests of Section 5.7. *Where the ceiling is anchored* evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets. *Robustness and cross-checks* runs the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6 and the optional envelope-encryption module of Section 5.8. *Synthea realism* reproduces Table 5.7. *Norwegian context* runs the illustrative Norwegian modules, and *Explore* varies population parameters as a teaching aid; neither reports a thesis figure.
 
 A note on durability. Hosted applications are not archival objects: the live demonstration may be withdrawn or may sleep after inactivity, and no claim in this thesis depends on its availability. Every result reported here is reproducible from the code listed below by executing a single command on any machine with Python installed, which is the form in which the artefact should be assessed.
 
@@ -32,7 +33,7 @@ A note on durability. Hosted applications are not archival objects: the live dem
 | `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run | 152 |
 | `norwegian_layer.py` | Three Norwegian record classes, parallel to the thesis and reporting no thesis figure | 135 |
 | `cross_sector_check.py` | Cross-sector instance drawn from politiregisterloven § 17 | 110 |
-| `app.py`, `ui.py` | Eight-page demonstration viewer with live architecture diagrams (Figures 4.1 and 5.1), never a source of results | 825 + 133 |
+| `app.py`, `ui.py` | Eleven-page demonstration viewer with live architecture diagrams (Figures 4.1 and 5.1), never a source of results | 1122 + 133 |
 | `crypto_envelope.py` | Optional: the same lifecycle with real AES-256-GCM envelope encryption; needs the `cryptography` package and reports no thesis figure | 118 |
 | `z3_check.py` | Optional: bounded SMT check of Propositions 1–3 with the Z3 solver; needs the `z3-solver` package | 153 |
 | `data/synthea_subset/` | Eight untrimmed Synthea bundles from the reported cohort, so a reader can run the realism layer without regenerating it | 8 files, 40 MB |
@@ -50,7 +51,7 @@ Two files are *not* included and the reason is stated rather than omitted: the f
 
 ## A.3 Environment and generation provenance
 
-The synthetic cohort was generated by the official Synthea release jar, downloaded from the project's own GitHub releases and executed with the command in Section A.5. Generation was carried out in a Linux environment with OpenJDK 21 rather than under Windows PowerShell, which does not affect the output: Synthea is deterministic under fixed population and clinician seeds, and produces byte-identical bundles in any environment with a compatible JVM. The bundles carry Synthea's own resource-identifier namespace, its `disability-adjusted-life-years` Patient extension, US Core profile conformance and its default Massachusetts demographics, all of which are verifiable by inspecting any bundle.
+The synthetic cohort was generated by the official Synthea release jar, downloaded from the project's own GitHub releases and executed with the command in Section A.5. Generation was carried out in a Linux environment with OpenJDK 21 rather than under Windows PowerShell, which does not affect the output: Synthea is deterministic under fixed population and clinician seeds, and reproduces the same patients and clinical events in any environment with a compatible JVM, although file timestamps differ between runs (Section A.5). The bundles carry Synthea's own resource-identifier namespace, its `disability-adjusted-life-years` Patient extension, US Core profile conformance and its default Massachusetts demographics, all of which are verifiable by inspecting any bundle.
 
 ## A.4 Software environment
 
@@ -67,13 +68,13 @@ The checker has no third-party dependencies. This is deliberate: a reader should
 
 ## A.5 Exact commands
 
-*1. Run the feasibility checker (produces every figure in Chapter 5, Sections 5.3–5.7):*
+*1. Run the feasibility checker (produces every figure in Chapter 5, Sections 5.3–5.5 and 5.7; Section 5.6 needs `--delta-witness`):*
 
 ```bash
 python3 trf_checker.py
 ```
 
-Deterministic. Seed 20260915 is set in the module header. Output is byte-identical across runs and across machines. Runtime measured at 0.019 s.
+Deterministic. Seed 20260915 is set in the module header. Output is byte-identical across runs and across machines.
 
 *2. Obtain Synthea (required only for the realism layer):*
 
@@ -1195,7 +1196,7 @@ if __name__ == "__main__":
 
 ## A.14 The demonstration viewer: `app.py` and `ui.py`
 
-Not reproduced here, because the viewer is never a source of results: every figure it displays comes from executing one of the modules listed in this appendix, unmodified. `app.py` (825 lines) holds the pages and the self-checks; `ui.py` (133 lines) holds only presentation: the theme, the record life strip and the embedding of the two Archify diagrams. The Thesis run page asserts the reported figures and shows a failure notice rather than results if the run disagrees with Chapter 5. Both files are in the repository (https://github.com/Astheno-sphere/TRF).
+Not reproduced here, because the viewer is never a source of results: every figure it displays comes from executing one of the modules listed in this appendix, unmodified. `app.py` (1122 lines) holds the pages and the self-checks; `ui.py` (133 lines) holds only presentation: the theme, the record life strip and the embedding of the two Archify diagrams. The Thesis run page asserts the reported figures and shows a failure notice rather than results if the run disagrees with Chapter 5. Both files are in the repository (https://github.com/Astheno-sphere/TRF).
 
 ## A.15 Source listing: `crypto_envelope.py`
 

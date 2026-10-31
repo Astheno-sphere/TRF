@@ -2,10 +2,10 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 title: "TRF: Tri-Lateral Retention Feasibility Model — executable artefact"
 type: software
-version: 1.0.1
+version: 1.1.0
 date-released: 2026-10-31
 license: MIT
-doi: 10.5281/zenodo.23819275
+doi: 10.5281/zenodo.23819274
 authors:
   - family-names: Abbasia
     given-names: Arshad Akhtar
