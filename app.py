@@ -836,8 +836,8 @@ def page_start():
                "some month requires the payload to be both readable and gone (Proposition 1).", ui.REVOKE)
     ui.verdict("<b>Read <i>verifiable</i> as <i>accountable</i></b>, keeping who acted, when, a "
                "commitment to the payload and a logged, grounded invalidation entry, and they can always "
-               "be met together; destroying a per-record key is the mechanism that does it "
-               "(Proposition 2).", ui.SEAL)
+               "be met together: the payload goes at the deadline and the record stays checkable "
+               "(Proposition 2). Per-record key destruction covers copies that cannot be deleted at once.", ui.SEAL)
     st.subheader("The walk, in the order of the thesis")
     walk_step(1, "Watch the collision on one record",
               "One record of the thesis population, month by month, under both readings.",
@@ -861,7 +861,8 @@ def page_start():
             "No novel cryptographic primitive or construction. No novel formal method. No first-ever "
             "framework for anything. No deployed system, no performance result, no connection to any "
             "National Contact Point. No proof that key destruction occurred, as distinct from an "
-            "attestation that it did. No empirical estimate of how often the conflict arises in "
+            "attestation that it did. No authority that key destruction discharges the erasure "
+            "obligation for copies that cannot be deleted at once. No empirical estimate of how often the conflict arises in "
             "practice. No regulatory authority for either of the two interpretive steps the argument "
             "depends upon, both of which are identified in Chapter 6 and proposed for resolution in "
             "Chapter 7.")
@@ -1106,3 +1107,16 @@ with st.sidebar:
                "context are not thesis claims.")
 
 PAGES[page]()
+
+# Previous / next along the walk set out on Start here, so the pages read as one journey.
+WALK = ["Start here", "Witness a record", "The four propositions", "Where the ceiling is anchored",
+        "How it is built", "Claim ledger", "Robustness and cross-checks"]
+if page in WALK:
+    i = WALK.index(page)
+    st.divider()
+    st.caption(f"Walk: step {i} of {len(WALK) - 1}" if i else "Walk: start")
+    b1, b2 = st.columns(2)
+    if i > 0:
+        b1.button(f"← {WALK[i - 1]}", on_click=goto, args=(WALK[i - 1],), key="walk_prev", width="stretch")
+    if i < len(WALK) - 1:
+        b2.button(f"{WALK[i + 1]} →", on_click=goto, args=(WALK[i + 1],), key="walk_next", width="stretch")

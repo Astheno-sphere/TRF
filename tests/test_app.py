@@ -82,3 +82,24 @@ def test_propositions_verbatim():
         assert statement in chapter, name
         for q in limits:
             assert q in chapter, (name, q[:60])
+
+
+def test_walk_next_buttons_chain():
+    order = ["Start here", "Witness a record", "The four propositions", "Where the ceiling is anchored",
+             "How it is built", "Claim ledger", "Robustness and cross-checks"]
+    at = _app()
+    at.session_state["page"] = order[0]
+    at.run()
+    for nxt in order[1:]:
+        at.button(key="walk_next").click().run()
+        assert at.session_state["page"] == nxt and not at.exception
+
+
+FM = CH4.parent / "Front_Matter_v1.md"
+
+
+@pytest.mark.skipif(not FM.exists(), reason="thesis repository not present")
+def test_not_claimed_quote_verbatim():
+    quote = re.search(r"\*What is not claimed\.\* (.*)", FM.read_text(encoding="utf-8")).group(1).strip()
+    src = re.sub(r'"\s*\n\s*"', "", (ROOT / "app.py").read_text(encoding="utf-8"))
+    assert quote in src
