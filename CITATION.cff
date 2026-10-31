@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
-title: "TRF: Tri-Lateral Retention Feasibility Model — executable artefact"
+title: "TRF: Tri-Lateral Retention Feasibility Model. Executable artefact for EHDS and GDPR audit-log retention and erasure"
 type: software
 version: 1.1.0
 date-released: 2026-10-31
@@ -23,10 +23,32 @@ abstract: >-
   Streamlit viewer. Results are checked on generated data; key destruction
   is simulated and treated as attested, not proven.
 keywords:
-  - European Health Data Space
-  - GDPR Article 17
-  - cryptographic erasure
-  - audit trail
-  - data retention
-  - constraint satisfaction
-  - design science research
+  - "European Health Data Space"
+  - "EHDS"
+  - "Regulation (EU) 2025/327"
+  - "GDPR Article 17"
+  - "right to erasure"
+  - "cryptographic erasure"
+  - "crypto-shredding"
+  - "audit trail"
+  - "audit log retention"
+  - "data retention"
+  - "secure processing environment"
+  - "MyHealth@EU"
+  - "NCPeH"
+  - "health data governance"
+  - "privacy engineering"
+  - "constraint satisfaction"
+  - "formal verification"
+  - "Z3"
+  - "Merkle tree"
+  - "FHIR"
+  - "design science research"
+  - "information logistics"
+  - "Norway"
+  - "Helsedataservice"
+  - "helsedata"
+  - "personvern"
+  - "sletting"
+  - "revisjonslogg"
+  - "Høgskolen i Molde"
