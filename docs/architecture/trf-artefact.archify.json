@@ -17,7 +17,7 @@
      "label": "Audit log"
     },
     "security": {
-     "label": "Optional modules"
+     "label": "Cross-checks"
     },
     "frontend": {
      "label": "Outputs"
@@ -184,7 +184,7 @@
    "id": "app",
    "type": "frontend",
    "label": "Streamlit app",
-   "sublabel": "app.py + ui.py, eight pages",
+   "sublabel": "app.py + ui.py, eleven pages",
    "pos": [
     1420,
     330

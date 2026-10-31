@@ -195,7 +195,7 @@
    "id": "proactive",
    "type": "external",
    "label": "Payload period P(a)",
-   "sublabel": "GDPR Art. 5(1)(c),(e)",
+   "sublabel": "GDPR Art. 5(1)(c),(e); specified, not run",
    "pos": [
     290,
     810
