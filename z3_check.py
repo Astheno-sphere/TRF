@@ -147,7 +147,9 @@ def main():
     print("=" * 100)
     print(f"RESULT: {sum(ok)}/{len(ok)} checks found no counterexample; sanity and mutation checks {'passed' if sanity else 'FAILED'}")
     print("=" * 100)
+    return 0 if all(ok) and sanity else 1
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(main())

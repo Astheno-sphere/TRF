@@ -221,7 +221,8 @@ class Record:
 
 def check_semantics_I(rec):
     """C1 demands alpha=1 across the window; C2/C3 demand alpha=0 from their
-    deadlines. Report every month where both are demanded at once."""
+    deadlines. Report, per conflicting constraint (C2, C3), the first month at which
+    both are demanded at once; a violation is a (record, constraint) pair."""
     violations = []
     for deadline, constraint in ((rec.erasure_deadline(), "C2"),
                                  (rec.ceiling_deadline(), "C3")):
@@ -249,7 +250,7 @@ def apply_invalidation(rec):
     if t_I < INF:
         ground = ("GDPR Art 17(1)" if rec.erasure_deadline() <= rec.ceiling_deadline()
                   else "EHDS Art 68(12)")
-        rec.k = None                      # irreversible key destruction
+        rec.k = None                      # simulated key destruction: reference removed (attested, not proven)
         rec.salt = None                   # salt destroyed with the key (Ch4 s4.8)
         rec.payload = None                # ciphertext deleted with the key (Ch4 s4.8, D-17)
         rec.iota = {"rid": rec.rid, "month": t_I, "ground": ground,
@@ -501,14 +502,15 @@ def main():
 
     print("\n" + "=" * 74)
     print(f"RESULT  Semantics I : {total_v} violations across {n_bad} records  "
-          f"-> INFEASIBLE")
+          f"-> {'INFEASIBLE' if total_v else 'FEASIBLE'}")
     print(f"RESULT  Semantics II: {total_v2} violations across {n_bad2} records  "
-          f"-> FEASIBLE")
+          f"-> {'INFEASIBLE' if total_v2 else 'FEASIBLE'}")
     print("=" * 74)
+    return 0 if total_v2 == 0 else 1     # Proposition 2: any Semantics II violation is a failure
 
 
 if __name__ == "__main__":
-    main()
+    _status = main()          # exit status is set at the end of the file, after the optional delta witness
 
 
 # ----------------------------------------------------------------------
@@ -549,3 +551,7 @@ if __name__ == "__main__" and "--delta-witness" in __import__("sys").argv:
         print(f"{r['delta']:>6}{r['sem1_records']:>11}{r['sem1_total']:>11}"
               f"{r['cor12']:>9}{r['sem2_records']:>12}{r['sem2_total']:>12}"
               f"{r['invalidated']:>13}")
+
+
+if __name__ == "__main__":
+    __import__("sys").exit(_status)

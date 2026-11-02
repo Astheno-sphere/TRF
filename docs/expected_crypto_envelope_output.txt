@@ -9,5 +9,5 @@ refused, key destroyed                : 138  (expected 138)
 rid=3 ciphertext tried under 62 surviving keys : opened 0
 ciphertexts kept after deletion       : 62
 ==========================================================================
-RESULT: every invalidated record is unrecoverable; every other record reads
+RESULT: no invalidated record decrypts through custody; every other record reads
 ==========================================================================

@@ -15,7 +15,7 @@ pip install -r requirements.txt pytest
 python3 -m pytest -q tests/
 ```
 
-23 checks: every recorded run in `docs/` reproduces byte for byte, every page of the app renders, the app's claim ledger matches all 27 Chapter 5 figures, and (when the thesis repository sits beside this one) every proposition the app quotes is verbatim from Chapter 4. The same tests run on every push.
+54 checks: every recorded run in `docs/` reproduces byte for byte, every page of the app renders, the app's claim ledger matches all 27 Chapter 5 figures, the exhaustive cross-check agrees with the checker at every boundary month, and (when the thesis repository sits beside this one) every proposition the app quotes is verbatim from Chapter 4. The same tests run on every push.
 
 ## Reproduce the thesis result
 
@@ -113,7 +113,7 @@ The Thesis run page also shows the audit-log integrity check and all three tampe
 
 Architecture diagrams (Figures 4.1 and 5.1) were drawn with [Archify](https://github.com/tt-a1i/archify); their source JSON is in `docs/architecture/`, the rendered HTML and PNG in `assets/`.
 
-The **exhaustive cross-check** enumerates all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon using `brute_force_semantics_I()`, which is written independently of `check_semantics_I()`. Agreement between two separate implementations is worth more than confidence in either. The control case, where neither the erasure right nor the ceiling is active, returns feasible, so the search can succeed when it should.
+The **exhaustive cross-check** enumerates all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon using `brute_force_semantics_I()`, a separate function from `check_semantics_I()` that shares only the constants `DELTA` and `CEILING`. `tests/test_props.py` compares the two on 31 cases, including every boundary month of a twelve-month window, so a boundary error in either shows up as a disagreement. The control case, where neither the erasure right nor the ceiling is active, returns feasible, so the search can succeed when it should.
 
 The **δ witness** re-runs the population at δ = 1 and δ = 3, the extension Article 12(3) GDPR allows for complex requests, and shows the infeasibility surviving the longer period.
 

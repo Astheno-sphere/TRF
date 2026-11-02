@@ -3,7 +3,9 @@ Envelope encryption with real AES-256-GCM (optional module)
 ===========================================================
 The feasibility checker (trf_checker.py) models key destruction as removing a reference and
 uses the standard library only. This module shows the same lifecycle with real cryptography,
-so that "rendered unrecoverable" (TEHDAS2 D7.4, OPR-6) is executed rather than asserted:
+so that "rendered unrecoverable" (TEHDAS2 D7.4, OPR-6) is exercised in code rather than only
+asserted. Destruction itself is attested, not proven: deleting a key object in Python does not
+show that no copy exists elsewhere.
 
   - each record's payload is encrypted under its own random 256-bit data key (AES-256-GCM,
     record id as associated data);
@@ -110,9 +112,11 @@ def main():
     ok = (ok_before == len(records) and refused == len(invalidated)
           and readable == len(records) - len(invalidated) and opened == 0)
     print("=" * 74)
-    print(f"RESULT: {'every invalidated record is unrecoverable; every other record reads' if ok else 'MISMATCH'}")
+    print(f"RESULT: {'no invalidated record decrypts through custody; every other record reads' if ok else 'MISMATCH'}")
     print("=" * 74)
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(main())
