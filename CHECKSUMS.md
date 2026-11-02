@@ -38,7 +38,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `norwegian_docs/HOW_TO_RUN.md` | 70bce00b2315 | 103 |
 | `norwegian_docs/NORWEGIAN_MODULE_README.md` | 75a47ac43d91 | 81 |
 | `norwegian_layer.py` | 3e2ff91225ac | 135 |
-| `README.md` | 08ba3d1e7f6d | 153 |
+| `README.md` | 4bdcf0d0c84a | 148 |
 | `requirements.txt` | e53d86d42c41 | 3 |
 | `synthea_layer.py` | 2b4a53730227 | 152 |
 | `tests/test_app.py` | 90e612942afe | 105 |
