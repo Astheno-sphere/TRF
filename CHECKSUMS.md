@@ -16,7 +16,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `assets/fig4_1_cei_mechanism.png` | 93e674403d49 | — |
 | `assets/fig5_1_trf_artefact.png` | eff6f61b5b5e | — |
 | `assets/trf-artefact.html` | 46d82d2748c4 | 13881 |
-| `CHANGE_TRAIL.md` | 14dfe6d030ac | 269 |
+| `CHANGE_TRAIL.md` | 78d2034cfe6f | 270 |
 | `CITATION.cff` | dc72f407d06e | 54 |
 | `cross_sector_check.py` | 86deaf873464 | 110 |
 | `crypto_envelope.py` | e2191bdc0656 | 118 |
