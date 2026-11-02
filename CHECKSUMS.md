@@ -7,6 +7,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | File | md5 | Lines |
 |---|---|---|
 | `.devcontainer/devcontainer.json` | 8f4e3db3a537 | 32 |
+| `.gitattributes` | 4bdecba1ae5d | 2 |
 | `.github/workflows/tests.yml` | b79c695e8108 | 12 |
 | `.gitignore` | cb73318af08d | 3 |
 | `.streamlit/config.toml` | 60d6313e30a6 | 9 |
