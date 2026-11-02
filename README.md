@@ -15,7 +15,7 @@ pip install -r requirements.txt pytest
 python3 -m pytest -q tests/
 ```
 
-21 checks: every recorded run in `docs/` reproduces byte for byte, every page of the app renders, the app's claim ledger matches all 27 Chapter 5 figures, and (when the thesis repository sits beside this one) every proposition the app quotes is verbatim from Chapter 4. The same tests run on every push.
+23 checks: every recorded run in `docs/` reproduces byte for byte, every page of the app renders, the app's claim ledger matches all 27 Chapter 5 figures, and (when the thesis repository sits beside this one) every proposition the app quotes is verbatim from Chapter 4. The same tests run on every push.
 
 ## Reproduce the thesis result
 

@@ -805,7 +805,7 @@ def page_anchor():
 # proposition is quoted verbatim from Chapter 4 (checked by tests/test_app.py).
 # ----------------------------------------------------------------------
 
-DOI = "10.5281/zenodo.23819275"
+DOI = "10.5281/zenodo.23819274"  # concept DOI: resolves to the latest archived version
 
 
 def goto(name):
@@ -863,12 +863,13 @@ def page_start():
             "National Contact Point. No proof that key destruction occurred, as distinct from an "
             "attestation that it did. No authority that key destruction discharges the erasure "
             "obligation for copies that cannot be deleted at once. No empirical estimate of how often the conflict arises in "
-            "practice. No regulatory authority for either of the two interpretive steps the argument "
-            "depends upon, both of which are identified in Chapter 6 and proposed for resolution in "
-            "Chapter 7.")
+            "practice. No regulatory authority for either of the two principal interpretive steps the "
+            "argument depends upon, both of which are identified in Chapter 6 and proposed for "
+            "resolution in Chapter 7, or for the four subsidiary premises listed in Chapter 3, "
+            "Section 3.7.")
         st.caption("Front Matter, Statement of Contribution. The data are synthetic; the counts depend "
                    "on the generator and are not estimates of real frequency.")
-    st.caption(f"Archived release of this code: version 1.0.1, DOI "
+    st.caption(f"Archived releases of this code (all versions): DOI "
                f"[{DOI}](https://doi.org/{DOI}). Source: "
                "[github.com/Astheno-sphere/TRF](https://github.com/Astheno-sphere/TRF).")
 
@@ -1074,7 +1075,7 @@ def page_ledger():
         ui.verdict("<b>Every recomputed figure equals the reported one.</b> Rows marked — could not "
                    "run in this deployment and are reproduced by the commands in Appendix A.5.", ui.SEAL)
     st.dataframe(table, hide_index=True, width="stretch", height=36 * (len(table) + 1))
-    st.caption(f"Code: version 1.0.1, DOI [{DOI}](https://doi.org/{DOI}). Locally: "
+    st.caption(f"Code archive (all versions): DOI [{DOI}](https://doi.org/{DOI}). Locally: "
                "`python3 trf_checker.py` and `python3 z3_check.py`, diffed against `docs/expected_*.txt`.")
 
 

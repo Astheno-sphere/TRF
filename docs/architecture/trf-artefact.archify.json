@@ -198,7 +198,7 @@
    "id": "cons",
    "type": "frontend",
    "label": "Console results",
-   "sublabel": "run_all.sh, results/",
+   "sublabel": "docs/expected_*.txt",
    "pos": [
     1420,
     700
