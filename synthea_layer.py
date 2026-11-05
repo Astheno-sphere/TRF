@@ -30,7 +30,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 # shipped in the repository. The first directory that contains bundles wins.
 SYNTHEA_DIRS = [os.path.join(_HERE, "synthea_run", "output", "fhir"),
                 os.path.join(_HERE, "data", "synthea_subset"),
-                os.path.join(_HERE, "synthea_subset")]
+                os.path.join(_HERE, "synthea_subset"),
+                # the thesis repository keeps one copy of the subset, beside demo_app/ and code_artefacts/
+                os.path.join(_HERE, os.pardir, "repro_package", "data", "synthea_subset")]
 
 
 def _resolve_dir():

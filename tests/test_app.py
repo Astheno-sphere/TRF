@@ -67,7 +67,18 @@ def test_thesis_run_matches_on_load():
     assert any("Matches the thesis" in s.value for s in at.success)
 
 
-CH4 = pathlib.Path(os.environ.get("TRF_THESIS", ROOT.parent / "trf-thesis")) / "Chapter4_TRF_Model_v1.md"
+def _thesis_dir():
+    """The thesis repository: $TRF_THESIS, a sibling checkout, or the parent when these tests
+    run from demo_app/ inside the thesis repository itself."""
+    if "TRF_THESIS" in os.environ:
+        return pathlib.Path(os.environ["TRF_THESIS"])
+    for d in (ROOT.parent / "trf-thesis", ROOT.parent / "TRF-thesis", ROOT.parent):
+        if (d / "Chapter4_TRF_Model_v1.md").exists():
+            return d
+    return ROOT.parent / "trf-thesis"
+
+
+CH4 = _thesis_dir() / "Chapter4_TRF_Model_v1.md"
 
 
 @pytest.mark.skipif(not CH4.exists(), reason="thesis repository not present")
