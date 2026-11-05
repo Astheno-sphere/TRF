@@ -26,3 +26,20 @@ def test_brute_force_rejects_short_horizon():
     """The cross-check refuses a horizon that would leave retention months unexamined."""
     with pytest.raises(ValueError):
         brute_force_semantics_I(0, 120, 5, INF, "primary", 14)
+
+
+def test_each_population_keeps_its_own_log():
+    """A later population, or the Norwegian and cross-sector builds, never write into an earlier log."""
+    import cross_sector_check
+    import norwegian_layer
+    import trf_checker as trf
+    first = trf.generate()
+    for r in first:
+        trf.apply_invalidation(r)
+    size = len(first[0].log.leaves)
+    norwegian_layer.build()
+    cross_sector_check.build()
+    for r in trf.generate():
+        trf.apply_invalidation(r)
+    assert len(first[0].log.leaves) == size
+    assert all(trf.integrity(r)[0] for r in first)

@@ -5,8 +5,10 @@ PLUG-AND-PLAY. Imports trf_checker unmodified.
 
 Why this exists. Chapter 6 s 6.9 and Chapter 7 s 7.5 say the structure the TRF
 Model captures — a retention floor, a subject-triggered erasure right, and a
-deletion ceiling — is probably not specific to health, and flag the question as
-uninvestigated. Norwegian law supplies a genuine instance outside health.
+deletion ceiling — is probably not specific to health. Norwegian law supplies a
+genuine instance outside health (Chapter 6, Section 6.10). Illustrative: the
+records reuse the health model's invalidation grounds and field names, and C3 here
+tests payload and patient link only, not the whole log entry the s 17 limit reaches.
 
   Politiregisterloven (LOV-2010-05-28-16) s 17, kravet til sporbarhet:
     information about use of the system shall be registered and stored for at
@@ -57,6 +59,7 @@ CEILING_POLITI = 36    # politiregisterloven s 17: deleted at the latest after 3
 
 def build(n=60, seed=trf.SEED):
     rng = random.Random(seed)
+    log = trf.new_log()                   # this population's own audit log
     recs = []
     for rid in range(900, 900 + n):
         t_a = rng.randint(0, 11)
@@ -64,7 +67,7 @@ def build(n=60, seed=trf.SEED):
         t_pi = t_a + CEILING_POLITI - trf.CEILING
         t_r = t_a + rng.randint(1, 40) if rng.random() < 0.30 else trf.INF
         payload = f"<politiloggpost> bruker=POL-{rid % 97:03d} oppslag=register".encode()
-        r = trf.Record(rid, t_a, FLOOR_POLITI, "secondary", payload, t_r=t_r, t_pi=t_pi)
+        r = trf.Record(rid, t_a, FLOOR_POLITI, "secondary", payload, t_r=t_r, t_pi=t_pi, log=log)
         r.m.update({"klasse": "POLITI-LOG", "doc_category": "SystemUseLog",
                     "legal_basis": "politiregisterloven s 17"})
         recs.append(r)

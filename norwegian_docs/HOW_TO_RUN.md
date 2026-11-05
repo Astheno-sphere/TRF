@@ -29,7 +29,7 @@ What to look for:
 | Corollary 1.2 witnesses, no erasure request | 39 |
 | Records invalidated | 138 (52 GDPR Art 17(1), 86 EHDS Art 68(12)) |
 | Semantics II, total violations | 0 |
-| Reference commitment, record 100 | `11087780fd192c8f…` |
+| Reference commitment, record 100 | `678ade47c1e6dc03…` |
 
 The extended erasure response period of Chapter 5 §5.5a:
 
@@ -46,7 +46,7 @@ python3 synthea_layer.py
 It reads `synthea_run/output/fhir/` if the full cohort has been regenerated,
 and otherwise the eight bundles committed at `data/synthea_subset/`. Expect six
 identical measures, 200 of 200 commitments differing, and a mean payload of 891
-bytes for the eight-bundle subset or 1,006 for the full cohort.
+bytes for the eight-bundle subset, or 1,002 for the full cohort regenerated on 6 October 2026 (1,006 for the September cohort).
 
 ## 3. Norwegian context modules
 

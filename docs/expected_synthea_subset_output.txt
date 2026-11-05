@@ -21,6 +21,6 @@ Semantics II: total violations                          0              0
 commitments differing between the two runs: 200/200   (expected 200 — same salt, different payload)
 
 ==========================================================================
-   RESULT: every reported figure is IDENTICAL under real FHIR payloads,   
+ RESULT: every reported figure is IDENTICAL under Synthea FHIR payloads,  
    while every commitment differs. The model reads timing, not content.   
 ==========================================================================

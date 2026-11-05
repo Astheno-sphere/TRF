@@ -58,7 +58,7 @@ def encrypt(custody, rid, payload):
     dek = custody.new_data_key(rid)
     nonce = os.urandom(12)
     ct = AESGCM(dek).encrypt(nonce, payload, f"rec:{rid}".encode())
-    del dek                                            # only the wrapped copy survives
+    del dek                                            # unbinds the plaintext key; Python gives no guarantee it is erased from memory
     return nonce, ct
 
 

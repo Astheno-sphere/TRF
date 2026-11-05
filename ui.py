@@ -74,14 +74,16 @@ ROWS = ["C1 floor: must stay verifiable",
 STATES = {
     "required": FLOOR, "must be gone": TRIGGER, "contradiction": REVOKE,
     "readable": "#7FC4B6", "destroyed, entry logged": "#2F5D73", "verifiable": SEAL,
-    "not required": "#DCE3E1",
+    "not required": "#DCE3E1", "fails its check": "#B23A48",
 }
 
 
 def life_strip(rec, inv_month, deadline, horizon, now):
     """rec is a trf_checker.Record; inv_month and deadline are its t_I and earliest
     deadline (equal in the model); the strip is drawn from the model's quantities only."""
+    import trf_checker as trf             # the Semantics II row is computed, not drawn
     t_a, end = rec.t_a, rec.t_a + rec.floor
+    integ = trf.integrity(rec) if getattr(rec, "log_idx", None) else (False, "not logged")
     cells = []
     for t in range(0, horizon + 1):
         in_floor = t_a <= t <= end
@@ -97,7 +99,8 @@ def life_strip(rec, inv_month, deadline, horizon, now):
         cells.append((ROWS[2], t, s1))
         cells.append((ROWS[3], t, "readable" if t_a <= t < inv_month else
                       ("destroyed, entry logged" if t >= inv_month else "not required")))
-        cells.append((ROWS[4], t, "verifiable" if in_floor else "not required"))
+        cells.append((ROWS[4], t, ("verifiable" if trf.V_II(rec, t, integ)[0] else "fails its check")
+                                   if in_floor else "not required"))
     data = alt.Data(values=[{"row": r, "t": t, "t2": t + 1, "state": s} for r, t, s in cells])
     scale = alt.Scale(domain=list(STATES), range=list(STATES.values()))
     base = alt.Chart(data).mark_rect(stroke="white", strokeWidth=0.6 if horizon < 60 else 0).encode(

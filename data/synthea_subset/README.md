@@ -38,7 +38,7 @@ the same clinical events, and timestamps shifted by a constant time-of-day offse
 bundle was byte-identical. The thesis figures do not depend on this: re-running
 `synthea_layer.py` on that regenerated cohort with the final code gives the same six
 measures and 200/200 differing commitments, with a mean payload of 1,002 bytes
-against 1,006 for the September cohort (`docs/expected_synthea_full_cohort_rerun_2026-10-06.txt`).
+(`docs/expected_synthea_full_cohort_rerun_2026-10-06.txt`), against 1,006 for the September cohort.
 
 ## Provenance markers, checkable by opening any file
 
@@ -74,7 +74,7 @@ and the payloads are not.
 
 One figure does change with cohort size, and Chapter 5 reports both. The mean
 payload is **891 bytes** across this eight-bundle subset and **1,006 bytes**
-across the full 98-bundle cohort, because a different set of clinical resources
+across the full September cohort (1,002 across its October regeneration, which Chapter 5 reports), because a different set of clinical resources
 is drawn and each payload is reused roughly twenty-five times across the two
 hundred records rather than twice. The six measures above are unchanged under
 both, which is the stronger result: payload independence holds across cohort

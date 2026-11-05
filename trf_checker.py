@@ -133,14 +133,21 @@ def _entry(obj) -> bytes:
     return json.dumps(obj, sort_keys=True).encode()
 
 
+def new_log():
+    """Start a fresh audit log for a new population and make it the module's current log."""
+    global AUDIT_LOG
+    AUDIT_LOG = MerkleLog()
+    return AUDIT_LOG
+
+
 def log_creation(rec):
     if getattr(rec, "log_idx", None) is None:
-        rec.log = AUDIT_LOG                       # the log of the population this record belongs to
         rec.log_idx = {"access": rec.log.append(_creation_entry(rec))}
 
 
 def log_of(rec):
-    return getattr(rec, "log", None) or AUDIT_LOG
+    """The log the record was bound to when it was created."""
+    return rec.log
 
 
 def integrity(rec):
@@ -177,8 +184,9 @@ def commit(payload: bytes, salt: bytes) -> str:
 class Record:
     """One audit record and its lifecycle state."""
 
-    def __init__(self, rid, t_a, floor, sigma, payload, t_r=INF, t_pi=INF):
+    def __init__(self, rid, t_a, floor, sigma, payload, t_r=INF, t_pi=INF, log=None):
         self.rid = rid
+        self.log = log if log is not None else AUDIT_LOG   # bound at creation: the population's log
         self.t_a = t_a
         self.floor = floor
         self.sigma = sigma
@@ -263,6 +271,8 @@ def apply_invalidation(rec):
     log_creation(rec)                     # the access event enters the log first
     t_I = rec.t_invalidation()
     if t_I < INF:
+        # The earlier deadline names the ground; on a tie (4 records in the thesis run) the
+        # data subject's request is recorded, since it is the act that triggered erasure.
         ground = ("GDPR Art 17(1)" if rec.erasure_deadline() <= rec.ceiling_deadline()
                   else "EHDS Art 68(12)")
         rec.k = None                      # simulated key destruction: reference removed (attested, not proven)
@@ -311,7 +321,7 @@ def V_II(rec, t, integrity_result=None):
 def check_semantics_II(rec):
     """C1, C2, C3 under accountability semantics. alpha is derived from the invalidation
     month, so C2 and C3 hold by construction once invalidation is applied; the part that
-    can fail is C1, through the integrity check of every logged event (Chapter 5, Section 5.6)."""
+    can fail is C1, through the integrity check of every logged event (Chapter 5, Section 5.7)."""
     violations = []
     integ = integrity(rec)                                   # one proof check per record
     for t in rec.window():                                   # C1
@@ -381,8 +391,7 @@ def brute_force_semantics_I(t_a, floor, t_r, t_pi, sigma, horizon):
 
 def generate(n_primary=100, n_secondary=100, seed=SEED):
     """A fresh population with a fresh audit log: one append-only log per run."""
-    global AUDIT_LOG
-    AUDIT_LOG = MerkleLog()
+    log = new_log()
     rng = random.Random(seed)
     records = []
     rid = 0
@@ -392,7 +401,7 @@ def generate(n_primary=100, n_secondary=100, seed=SEED):
         t_r = t_a + rng.randint(1, 130) if rng.random() < 0.40 else INF
         payload = (f"<ITI-55 QBP name=N{rid:03d} birthTime=19{40 + rid % 60:02d} "
                    f"rid={rid}>").encode()       # demographic query (Ch4 s4.3)
-        records.append(Record(rid, t_a, FLOOR_XBORDER, "primary", payload, t_r=t_r))
+        records.append(Record(rid, t_a, FLOOR_XBORDER, "primary", payload, t_r=t_r, log=log))
         rid += 1
     # Class 2: SPE access-log records, floor 12 months, ceiling applies
     for _ in range(n_secondary):
@@ -402,7 +411,7 @@ def generate(n_primary=100, n_secondary=100, seed=SEED):
         t_r = t_a + rng.randint(1, 18) if rng.random() < 0.25 else INF
         payload = f"<SPE-activity query=cohort-extract rid={rid}>".encode()
         records.append(Record(rid, t_a, FLOOR_SPE, "secondary", payload,
-                              t_r=t_r, t_pi=t_pi))
+                              t_r=t_r, t_pi=t_pi, log=log))
         rid += 1
     return records
 
@@ -465,8 +474,12 @@ def main():
         ("cross-border scaled (F=12), erasure at t=4", 0, 12, 4, INF, "primary"),
         ("control: no request, no expiry",      0, 12, INF, INF, "primary"),
     ]
+    cross_ok = True
     for label, t_a, floor, t_r, t_pi, sigma in cases:
         feasible = brute_force_semantics_I(t_a, floor, t_r, t_pi, sigma, horizon=14)
+        agrees = feasible == (check_semantics_I(Record(-1, t_a, floor, sigma, b"", t_r=t_r, t_pi=t_pi,
+                                                        log=MerkleLog())) == [])
+        cross_ok &= agrees
         print(f"  {label:<46} feasible={feasible}")
 
     # ---------------- Semantics II ----------------
@@ -533,7 +546,10 @@ def main():
     print(f"RESULT  Semantics II: {total_v2} violations across {n_bad2} records  "
           f"-> {'INFEASIBLE' if total_v2 else 'FEASIBLE'}")
     print("=" * 74)
-    return 0 if total_v2 == 0 else 1     # Proposition 2: any Semantics II violation is a failure
+    # Failure if Proposition 2 fails, the cross-check disagrees with the checker, a record fails its
+    # inclusion proof, or a tamper test goes undetected.
+    detected = not (ok_t or ok_g or ok_p)
+    return 0 if (total_v2 == 0 and cross_ok and n_ok == len(records) and detected) else 1
 
 
 if __name__ == "__main__":

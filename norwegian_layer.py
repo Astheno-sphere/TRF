@@ -55,11 +55,12 @@ def _spe_payload(rid, rng):
 
 def build(n_xb=60, n_spe=60, n_journal=40, seed=SEED):
     rng = random.Random(seed)
+    log = trf.new_log()                   # this population's own audit log
     recs, rid = [], 0
     for _ in range(n_xb):                                   # NO-XB
         t_a = rng.randint(0, 11)
         t_r = t_a + rng.randint(1, 130) if rng.random() < 0.40 else trf.INF
-        r = trf.Record(rid, t_a, trf.FLOOR_XBORDER, "primary", _xb_payload(rid, rng), t_r=t_r)
+        r = trf.Record(rid, t_a, trf.FLOOR_XBORDER, "primary", _xb_payload(rid, rng), t_r=t_r, log=log)
         r.m.update({"klasse": "NO-XB", "site": rng.choice(SITES),
                     "ncp": rng.choice(NCPS), "doc_category": "PatientSummary (inbound)",
                     "legal_basis": "Art9(2)(h)"})
@@ -69,14 +70,14 @@ def build(n_xb=60, n_spe=60, n_journal=40, seed=SEED):
         t_pi = t_a + rng.randint(1, 12)
         t_r = t_a + rng.randint(1, 18) if rng.random() < 0.25 else trf.INF
         r = trf.Record(rid, t_a, trf.FLOOR_SPE, "secondary", _spe_payload(rid, rng),
-                       t_r=t_r, t_pi=t_pi)
+                       t_r=t_r, t_pi=t_pi, log=log)
         r.m.update({"klasse": "NO-SPE", "node": rng.choice(NODES),
                     "doc_category": "SPE-ActivityLog", "legal_basis": "DataPermit (Helsedataservice)"})
         recs.append(r); rid += 1
     for _ in range(n_journal):                              # NO-JOURNAL
         t_a = rng.randint(0, 11)
         t_r = t_a + rng.randint(1, 240) if rng.random() < 0.40 else trf.INF
-        r = trf.Record(rid, t_a, HORIZON_INDEFINITE, "primary", _xb_payload(rid, rng), t_r=t_r)
+        r = trf.Record(rid, t_a, HORIZON_INDEFINITE, "primary", _xb_payload(rid, rng), t_r=t_r, log=log)
         r.m.update({"klasse": "NO-JOURNAL", "doc_category": "JournalAccess",
                     "legal_basis": "pasientjournalloven s 25 (purpose-based, indefinite)"})
         recs.append(r); rid += 1
@@ -122,7 +123,7 @@ def walkthrough(recs, v1):
         print(f"  erasure  : {'none' if r.t_r == trf.INF else 't_r=' + str(r.t_r) + ' -> deadline ' + str(int(r.erasure_deadline()))}")
         print(f"  ceiling  : {'n/a' if r.ceiling_deadline() == trf.INF else 't_pi=' + str(r.t_pi) + ' -> ' + str(int(r.ceiling_deadline()))}")
         print(f"  collision: {v1[r.rid][0]['constraint']} at t={v1[r.rid][0]['month']}")
-        print(f"  after invalidation -> metadata intact={bool(r.m)}, commitment={r.c[:16]}..., "
+        print(f"  after invalidation -> log integrity={trf.integrity(r)[0]}, commitment={r.c[:16]}..., "
               f"key={r.k}, salt={r.salt}, ground={r.iota['ground'] if r.iota else None}")
 
 

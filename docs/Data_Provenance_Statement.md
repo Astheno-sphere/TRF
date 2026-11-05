@@ -24,7 +24,7 @@ java -jar ../synthea.jar \
   --generate.only_alive_patients=true
 ```
 
-This produced 98 usable patient bundles totalling 314 MB. Two of the hundred requested patients did not survive to the end of their simulated lifetime and were therefore not exported, which is the behaviour the `only_alive_patients` flag produces. Every figure reported in Chapter 5 comes from that cohort.
+This produced 98 usable patient bundles totalling 314 MB. Two of the hundred requested patients did not survive to the end of their simulated lifetime and were therefore not exported, which is the behaviour the `only_alive_patients` flag produces. The eight-bundle subset is taken from that cohort. The full-cohort figure of Chapter 5, Table 5.7 comes from its regeneration on 6 October 2026 with the pinned jar and reference date `-r 20260916` (Appendix A, A.5), which has the same 98 patients except one and a mean payload of 1,002 bytes.
 
 A Linux container is a Linux environment. Running the official jar there is the same act as running it under WSL or on a university terminal. The jar that produced the cohort is Synthea commit `d9d07a6`, recorded in every bundle. Same-seed regeneration reproduces the patients and their clinical events but not byte-identical files, because Synthea anchors the simulated timeline to the clock time of the run (checked 6 October 2026; see `data/synthea_subset/README.md`).
 
@@ -57,7 +57,7 @@ An untrimmed subset of the real cohort is provided for the repository: eight com
 
 The layer was re-run against that subset. Every reported figure is identical to the full-cohort run: ninety records with violations, ninety-five violations, thirty-nine Corollary 1.2 witnesses, one hundred and thirty-eight invalidations, zero violations under the second semantics, and all two hundred commitments differing.
 
-One figure does change, and Chapter 5 now reports both rather than quietly using whichever is convenient. The mean payload size is 1,006 bytes across the full ninety-eight-bundle cohort and 891 bytes across the eight-bundle subset, because a different set of clinical resources is drawn and each payload is reused roughly twenty-five times across the two hundred records rather than twice. That the six measures are unchanged under both conditions is a stronger result than the single comparison was: the payload-independence claim holds across cohort size and across payload repetition frequency, not merely across one substitution.
+One figure does change, and Chapter 5 now reports both rather than quietly using whichever is convenient. The mean payload size is 1,006 bytes across the September cohort, 1,002 bytes across its October regeneration, which Chapter 5 reports, and 891 bytes across the eight-bundle subset, because a different set of clinical resources is drawn and each payload is reused roughly twenty-five times across the two hundred records rather than twice. That the six measures are unchanged under both conditions is a stronger result than the single comparison was: the payload-independence claim holds across cohort size and across payload repetition frequency, not merely across one substitution.
 
 An earlier version of the appendix shipped three bundles trimmed to their first twenty-five entries for document size, disclosed at the point of use. Those have been withdrawn in favour of the eight untrimmed bundles, so nothing trimmed now travels with the thesis or the repository.
 

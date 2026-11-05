@@ -106,7 +106,7 @@ def page_witness():
     t_I, d_er, d_ceil = plan[r.rid]
     deadline = min(d_er, d_ceil)
     end = r.t_a + r.floor
-    horizon = int(min(max(end, deadline if deadline < trf.INF else 0) + 3, 130))
+    horizon = int(min(max(end, deadline if deadline < trf.INF else 0) + 3, 134))   # a floor can end at month 131
     focus = int(t_I) if t_I < trf.INF else r.t_a
     now = st.slider("Month", 0, horizon, focus, help="Move through the record's life")
 
@@ -126,7 +126,7 @@ def page_witness():
                    "satisfies both (Proposition 1).", ui.REVOKE)
     else:
         ui.verdict("<b>Semantics I holds for this record:</b> no deadline falls inside its floor.", ui.FLOOR)
-    ui.verdict("<b>Semantics II holds.</b> " + (
+    ui.verdict(("<b>Semantics II holds.</b> " if not v2[r.rid] else "<b>Semantics II fails for this record.</b> ") + (
         "0 violations: the payload goes at the deadline, the invalidation entry is logged, "
         "and the record stays verifiable through the floor (Proposition 2)."
         if not v2[r.rid] else f"{len(v2[r.rid])} violation(s): investigate before citing."),
@@ -150,7 +150,7 @@ def page_witness():
     else:
         active = ("auditor", "merkle", "registry", "commit")
         msg = ("After invalidation. The auditor sees who acted, when, the commitment and the "
-               "invalidation entry, each proved against the log root, and cannot read the payload.")
+               "invalidation entry, each checked by inclusion proof against the log root, and cannot read the payload.")
     if now > end:
         msg += " The floor has run out; the terminal transition is specified (§4.8) but not implemented."
     st.subheader("Which part of the mechanism acts this month")
@@ -341,12 +341,13 @@ def page_explore():
         import random
 
         rng = random.Random(trf.SEED)
+        log = trf.new_log()                # this exploration's own audit log
         records, rid = [], 0
         for _ in range(100):
             t_a = rng.randint(0, 11)
             t_r = t_a + rng.randint(1, 130) if rng.random() < p_primary else trf.INF
             records.append(trf.Record(rid, t_a, trf.FLOOR_XBORDER, "primary",
-                                      f"<payload {rid}>".encode(), t_r=t_r))
+                                      f"<payload {rid}>".encode(), t_r=t_r, log=log))
             rid += 1
         for _ in range(100):
             t_a = rng.randint(0, 11)
@@ -354,7 +355,7 @@ def page_explore():
             t_r = t_a + rng.randint(1, 18) if rng.random() < p_spe else trf.INF
             records.append(trf.Record(rid, t_a, trf.FLOOR_SPE, "secondary",
                                       f"<payload {rid}>".encode(),
-                                      t_r=t_r, t_pi=t_pi))
+                                      t_r=t_r, t_pi=t_pi, log=log))
             rid += 1
 
         M, _ = measure(records)
@@ -365,8 +366,8 @@ def page_explore():
         c3.metric("Violations — Semantics II", M["sem2_total"])
         st.caption(
             f"Structural SPE collision rate at this horizon is approximately "
-            f"6/{pi_max} = {6 / pi_max:.0%}, as Chapter 5, Section 5.4 states. "
-            f"Semantics II yields {M['sem2_total']} violations at every setting."
+            f"min(6, {pi_max})/{pi_max} = {min(6, pi_max) / pi_max:.0%} of SPE records without a request, "
+            f"as Chapter 5, Section 5.4 states. Semantics II yields {M['sem2_total']} violations at this setting."
         )
 
 
@@ -705,7 +706,7 @@ def page_robustness():
                     try:
                         ce.decrypt(custody, r.rid, *store[r.rid])
                         readable += 1
-                    except KeyError:
+                    except (KeyError, ce.InvalidTag):
                         refused += 1
             e1, e2, e3 = st.columns(3)
             e1.metric("Records encrypted", len(recs))
@@ -856,7 +857,7 @@ def page_start():
               "Each reported figure beside the same figure recomputed now.", "Claim ledger")
     walk_step(6, "Stress the result",
               "Independent exhaustive search, a longer erasure response period, real AES-256-GCM, "
-              "and real Synthea FHIR payloads.", "Robustness and cross-checks")
+              "and Synthea-generated (synthetic) FHIR payloads.", "Robustness and cross-checks")
     with st.expander("What the thesis does not claim"):
         st.markdown(
             "No novel cryptographic primitive or construction. No novel formal method. No first-ever "
@@ -1042,7 +1043,7 @@ def ledger_rows():
         for r in cr:
             try:
                 ce.decrypt(custody, r.rid, *store[r.rid])
-            except KeyError:
+            except (KeyError, ce.InvalidTag):
                 refused += 1
         rows += [("Section 5.8", "AES-256-GCM: records refusing to decrypt after key destruction", "138", str(refused)),
                  ("Section 5.8", "AES-256-GCM: records still readable", "62", str(len(cr) - refused))]
