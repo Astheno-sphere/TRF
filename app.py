@@ -160,7 +160,8 @@ def page_witness():
     with st.expander("What the auditor holds for this record now"):
         ok, why = trf.integrity(r)
         idx = r.log_idx["access"]
-        proof = trf.AUDIT_LOG.proof(idx)
+        log = trf.log_of(r)
+        proof = log.proof(idx)
         st.code(
             f"accessor fields   : actor={r.m['actor']}  "
             f"{'permit=' + r.m['permit'] if 'permit' in r.m else 'ncp=' + r.m.get('ncp', '-')}  outcome={r.m['outcome']}\n"
@@ -168,7 +169,7 @@ def page_witness():
             f"commitment c(a)   : {r.c[:40]}...\n"
             f"key, salt, payload: {'destroyed at month ' + str(int(t_I)) if r.iota else 'held'}\n"
             f"invalidation entry: {r.iota['ground'] + ', month ' + str(r.iota['month']) if r.iota else 'none'}\n"
-            f"inclusion proof   : {len(proof)} hashes to root {trf.AUDIT_LOG.root().hex()[:24]}...  "
+            f"inclusion proof   : {len(proof)} hashes to root {log.root().hex()[:24]}...  "
             f"verifies={ok} {why}",
             language="text")
 

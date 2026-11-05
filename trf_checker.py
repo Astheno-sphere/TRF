@@ -58,7 +58,9 @@ def make_salt(rid: int) -> bytes:
     """Per-record 16-byte salt. By default derived from the record id so that every run
     reproduces exactly; that derivation is for reproducibility only and gives no hiding
     against an adversary who knows it. --random-salts draws each salt from os.urandom,
-    which is what a deployment must do (Appendix A, A.6)."""
+    which is what a deployment must do (Appendix A, A.6). The derived salts repeat with
+    period 256 in rid (make_salt(0) == make_salt(256)); the 200-record run stays inside one
+    period."""
     if RANDOM_SALTS:
         return os.urandom(16)
     return bytes([(rid * 7 + i) % 256 for i in range(16)])
@@ -75,7 +77,12 @@ def _h(b: bytes) -> bytes:
 
 class MerkleLog:
     """Append-only log of audit events. An auditor holding the current root can check that
-    a given event is in the log, unaltered, with an inclusion proof of log2(n) hashes."""
+    a given event is in the log, unaltered, with an inclusion proof of log2(n) hashes.
+
+    Scope: the root is recomputed from the leaves held here, so this detects divergence
+    between a record and its logged events. Detecting a rewrite of the log itself needs a
+    root published or anchored outside the log, or consistency proofs between roots; those
+    are specified in Chapter 6, Section 6.1, not implemented."""
 
     def __init__(self):
         self.leaves = []                       # leaf hashes
@@ -128,7 +135,12 @@ def _entry(obj) -> bytes:
 
 def log_creation(rec):
     if getattr(rec, "log_idx", None) is None:
-        rec.log_idx = {"access": AUDIT_LOG.append(_creation_entry(rec))}
+        rec.log = AUDIT_LOG                       # the log of the population this record belongs to
+        rec.log_idx = {"access": rec.log.append(_creation_entry(rec))}
+
+
+def log_of(rec):
+    return getattr(rec, "log", None) or AUDIT_LOG
 
 
 def integrity(rec):
@@ -140,7 +152,8 @@ def integrity(rec):
         link = _entry({f: rec.m.get(f) for f in SUBJECT_FIELDS})
         if rec.subj_salt is None or commit(link, rec.subj_salt) != rec.c_subj:
             return False, "patient link does not open its logged commitment (altered)"
-    root = AUDIT_LOG.root()
+    log = log_of(rec)
+    root = log.root()
     checks = [("access", _creation_entry(rec))]
     if rec.iota is not None:
         checks.append(("invalidation", _entry(rec.iota)))
@@ -149,7 +162,7 @@ def integrity(rec):
     for name, data in checks:
         if name not in idx:
             return False, f"{name} event not logged"
-        if not MerkleLog.verify(data, AUDIT_LOG.proof(idx[name]), root):
+        if not MerkleLog.verify(data, log.proof(idx[name]), root):
             return False, f"{name} entry fails its inclusion proof (altered)"
     return True, ""
 
@@ -171,7 +184,9 @@ class Record:
         self.sigma = sigma
         self.t_r = t_r
         self.t_pi = t_pi
-        # metadata m(a) = m_acc(a) + m_subj(a); no clinical content (Ch4 s4.3)
+        # metadata m(a) = m_acc(a) + m_subj(a); no clinical content (Ch4 s4.3).
+        # Synthetic pseudonyms PSN-{rid % 100}: 100 distinct patients, so two records may share
+        # one patient, as real audit logs do; no figure depends on pseudonym uniqueness.
         if sigma == "primary":                # cross-border: clinician, contact point
             self.m = {"rid": rid, "actor": f"HP-{rid % 37:03d}",
                       "ncp": ["NO", "PT", "CZ", "FI"][rid % 4],
@@ -254,9 +269,9 @@ def apply_invalidation(rec):
         rec.salt = None                   # salt destroyed with the key (Ch4 s4.8)
         rec.payload = None                # ciphertext deleted with the key (Ch4 s4.8, D-17)
         rec.iota = {"rid": rec.rid, "month": t_I, "ground": ground,
-                    "authorised_by": "DPO", "key_id_commitment":
-                        hashlib.sha256(f"KEY-{rec.rid:06d}".encode()).hexdigest()[:16]}
-        rec.log_idx["invalidation"] = AUDIT_LOG.append(_entry(rec.iota))
+                    "authorised_by": "DPO", "key_id_commitment":   # key identifier digest, not a hiding
+                        hashlib.sha256(f"KEY-{rec.rid:06d}".encode()).hexdigest()[:16]}  # commitment: toy keys are predictable
+        rec.log_idx["invalidation"] = log_of(rec).append(_entry(rec.iota))
     t_S = rec.subject_removal()
     if t_S < INF and any(f in rec.m for f in SUBJECT_FIELDS):
         for f in SUBJECT_FIELDS:          # beta = 0 from the ceiling (Ch4 s4.7, steps 2 and 4)
@@ -264,7 +279,7 @@ def apply_invalidation(rec):
         rec.subj_salt = None              # the link's salt goes with the link
         rec.iota_subj = {"rid": rec.rid, "month": t_S, "removed": list(SUBJECT_FIELDS),
                          "ground": "EHDS Art 68(12)", "authorised_by": "DPO"}
-        rec.log_idx["subject_link"] = AUDIT_LOG.append(_entry(rec.iota_subj))
+        rec.log_idx["subject_link"] = log_of(rec).append(_entry(rec.iota_subj))
     return rec
 
 
@@ -294,6 +309,9 @@ def V_II(rec, t, integrity_result=None):
 
 
 def check_semantics_II(rec):
+    """C1, C2, C3 under accountability semantics. alpha is derived from the invalidation
+    month, so C2 and C3 hold by construction once invalidation is applied; the part that
+    can fail is C1, through the integrity check of every logged event (Chapter 5, Section 5.6)."""
     violations = []
     integ = integrity(rec)                                   # one proof check per record
     for t in rec.window():                                   # C1
@@ -334,7 +352,13 @@ def check_semantics_II(rec):
 
 def brute_force_semantics_I(t_a, floor, t_r, t_pi, sigma, horizon):
     """Enumerate every alpha in {0,1}^horizon; return True if any satisfies
-    C1 (under V_I = alpha), C2 and C3 simultaneously."""
+    C1 (under V_I = alpha), C2 and C3 simultaneously over months 0..horizon-1.
+
+    Precondition: horizon > t_a + floor, so every month of the retention window
+    is examined. A deadline at or beyond the horizon then falls after the window
+    and cannot collide with C1, so the answer is exact for the whole timeline."""
+    if horizon <= t_a + floor:
+        raise ValueError(f"horizon {horizon} must exceed t_a + floor = {t_a + floor}")
     e_dl = t_r + DELTA if t_r < INF else INF
     c_dl = t_pi + CEILING if (sigma == "secondary" and t_pi < INF) else INF
     for assign in product([0, 1], repeat=horizon):
@@ -356,6 +380,9 @@ def brute_force_semantics_I(t_a, floor, t_r, t_pi, sigma, horizon):
 # ----------------------------------------------------------------------
 
 def generate(n_primary=100, n_secondary=100, seed=SEED):
+    """A fresh population with a fresh audit log: one append-only log per run."""
+    global AUDIT_LOG
+    AUDIT_LOG = MerkleLog()
     rng = random.Random(seed)
     records = []
     rid = 0
@@ -548,6 +575,7 @@ if __name__ == "__main__" and "--delta-witness" in __import__("sys").argv:
     print(f"{'delta':>6}{'SemI recs':>11}{'SemI viol':>11}{'Cor1.2':>9}"
           f"{'SemII recs':>12}{'SemII viol':>12}{'invalidated':>13}")
     for r in delta_witness():
+        _status |= 1 if r["sem2_total"] else 0      # a Semantics II violation at any delta fails the run
         print(f"{r['delta']:>6}{r['sem1_records']:>11}{r['sem1_total']:>11}"
               f"{r['cor12']:>9}{r['sem2_records']:>12}{r['sem2_total']:>12}"
               f"{r['invalidated']:>13}")

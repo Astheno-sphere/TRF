@@ -20,3 +20,9 @@ def test_brute_force_matches_checker(sigma, t_a, floor, t_r, t_pi):
     horizon = t_a + floor + 3
     rec = Record(0, t_a, floor, sigma, b"x", t_r=t_r, t_pi=t_pi)
     assert brute_force_semantics_I(t_a, floor, t_r, t_pi, sigma, horizon) == (check_semantics_I(rec) == [])
+
+
+def test_brute_force_rejects_short_horizon():
+    """The cross-check refuses a horizon that would leave retention months unexamined."""
+    with pytest.raises(ValueError):
+        brute_force_semantics_I(0, 120, 5, INF, "primary", 14)

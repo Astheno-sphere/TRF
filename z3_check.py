@@ -57,9 +57,11 @@ def C3(alpha, ceil, e, L):
 
 def check(name, formula):
     s = Solver()
+    s.set(timeout=120_000)                # milliseconds; an unknown result counts as a failure
     s.add(formula)
     r = s.check()
-    print(f"{name:<74} {'unsat (no counterexample)' if r == unsat else 'SAT: ' + str(s.model())}")
+    verdict = "unsat (no counterexample)" if r == unsat else ("SAT: counterexample found" if r == sat else f"{r}: no verdict")
+    print(f"{name:<74} {verdict}")
     return r == unsat
 
 
@@ -92,6 +94,9 @@ def main():
     tI = dl
     traj = [t < tI for t in T]
 
+    # The accountability conjuncts are instantiated true by construction below (m_acc and c kept,
+    # iota logged from t_I), so this check verifies the timing of the trajectory, not that
+    # accountability is preserved; that is argued in Chapter 4, Section 4.7 (see Section 5.5).
     def sem2(macc, c, iota, beta, iota_s):
         V2 = [And(macc[t], c[t], Or(traj[t], iota[t]), Or(beta[t], iota_s[t])) for t in T]
         c1 = And([Implies(And(ta <= t, t <= ta + F), V2[t]) for t in T])
