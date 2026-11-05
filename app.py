@@ -117,7 +117,7 @@ def page_witness():
         ("floor runs to", f"month {end}"),
         ("erasure deadline", "none" if d_er == trf.INF else f"month {int(d_er)}"),
         ("deletion ceiling", "none" if d_ceil == trf.INF else f"month {int(d_ceil)}"),
-    ])
+    ], [None, None, ui.FLOOR, ui.TRIGGER, ui.TRIGGER])
     st.altair_chart(ui.life_strip(r, t_I, deadline, horizon, now), width="stretch", height=300, theme=None)
 
     if v1[r.rid]:
@@ -832,7 +832,7 @@ def page_start():
         ("retention floor: must stay verifiable", "Art 73(1)(e)"),
         ("erasure right: payload must go", "GDPR Art 17"),
         ("deletion ceiling: SPE data must go", "Art 68(12)"),
-    ])
+    ], [ui.FLOOR, ui.TRIGGER, ui.TRIGGER])
     ui.verdict("<b>Read <i>verifiable</i> as <i>readable</i></b> and the three cannot be met "
                "together whenever an erasure or deletion deadline falls inside the retention window: "
                "some month requires the payload to be both readable and gone (Proposition 1).", ui.REVOKE)
@@ -1086,25 +1086,24 @@ def page_ledger():
 # Navigation
 # ----------------------------------------------------------------------
 
-PAGES = {
+PAGES = {                                  # the walk first, in its order (ui.py numbers these seven)
     "Start here": page_start,
     "Witness a record": page_witness,
     "The four propositions": page_propositions,
-    "How it is built": page_architecture,
-    "Thesis run": page_thesis_run,
-    "Claim ledger": page_ledger,
     "Where the ceiling is anchored": page_anchor,
+    "How it is built": page_architecture,
+    "Claim ledger": page_ledger,
     "Robustness and cross-checks": page_robustness,
+    "Thesis run": page_thesis_run,
     "Synthea realism": page_synthea,
     "Norwegian context (illustrative)": page_norway,
     "Explore (not a thesis claim)": page_explore,
 }
 
 with st.sidebar:
-    st.markdown("### Tri-Lateral Retention Feasibility")
+    ui.brand()
     page = st.radio("Go to", list(PAGES), label_visibility="collapsed", key="page")
-    st.caption("Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde, 2026. "
-               "Seed 20260915 throughout the thesis run.")
+    st.caption("Arshad Akhtar Abbasia, MSc Sustainable Energy Logistics. Seed 20260915 throughout the thesis run.")
     st.caption("A viewer over the verified artefact, never a source of results. Thesis run, "
                "Synthea realism and Robustness reproduce Chapter 5; Explore and Norwegian "
                "context are not thesis claims.")
@@ -1117,7 +1116,7 @@ WALK = ["Start here", "Witness a record", "The four propositions", "Where the ce
 if page in WALK:
     i = WALK.index(page)
     st.divider()
-    st.caption(f"Walk: step {i} of {len(WALK) - 1}" if i else "Walk: start")
+    ui.walk_progress(i, WALK)
     b1, b2 = st.columns(2)
     if i > 0:
         b1.button(f"← {WALK[i - 1]}", on_click=goto, args=(WALK[i - 1],), key="walk_prev", width="stretch")
