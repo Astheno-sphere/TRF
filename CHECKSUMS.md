@@ -10,14 +10,14 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `.gitattributes` | 4bdecba1ae5d | 2 |
 | `.github/workflows/tests.yml` | 3adf3d2ae903 | 15 |
 | `.gitignore` | cb73318af08d | 3 |
-| `.streamlit/config.toml` | 1b9021506433 | 12 |
+| `.streamlit/config.toml` | 7da18a106472 | 13 |
 | `.zenodo.json` | 03f1475d386b | 61 |
 | `app.py` | 1388d35fcd2c | 1124 |
 | `assets/cei-mechanism.html` | 92aeed86d769 | 13883 |
 | `assets/fig4_1_cei_mechanism.png` | 93e674403d49 | — |
 | `assets/fig5_1_trf_artefact.png` | eff6f61b5b5e | — |
 | `assets/trf-artefact.html` | 46d82d2748c4 | 13881 |
-| `CHANGE_TRAIL.md` | aaf719f8c9e2 | 275 |
+| `CHANGE_TRAIL.md` | bf68328efde5 | 276 |
 | `CITATION.cff` | 970ec10d828d | 54 |
 | `cross_sector_check.py` | 65130c3758e6 | 113 |
 | `crypto_envelope.py` | 041627b58210 | 122 |
@@ -45,5 +45,5 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `tests/test_app.py` | 9ecd1f050963 | 116 |
 | `tests/test_props.py` | 2b5edca06e4d | 45 |
 | `trf_checker.py` | 5655e159e5be | 601 |
-| `ui.py` | ad7f69534eb4 | 217 |
+| `ui.py` | 8cc1d5a15bb1 | 217 |
 | `z3_check.py` | 3342a7f3a160 | 160 |

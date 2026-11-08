@@ -14,49 +14,49 @@ ASSETS = pathlib.Path(__file__).resolve().parent / "assets"
 
 # Palette: named for what each colour means in the model, and matched to the
 # semantic colours of the Archify diagrams (Figures 4.1 and 5.1).
-INK = "#10263A"        # text
-LEDGER = "#EEF2F1"     # page
+INK = "#1B1C20"        # text: charcoal
+LEDGER = "#FFFFFF"     # page
 SEAL = "#0F7C6B"       # accountable: Semantics II holds
 FLOOR = "#C98A12"      # retention floor: must stay verifiable
 TRIGGER = "#6B4FBB"    # erasure request / permit expiry and the deadlines they set
 REVOKE = "#B4233C"     # contradiction under Semantics I; key destruction
 MUTED = "#8A9AA6"
-FONT = "Atkinson Hyperlegible, Helvetica, Arial, sans-serif"
+FONT = "IBM Plex Sans, Helvetica, Arial, sans-serif"
 
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap');
-html, body, .stMarkdown, p, li, label, input, textarea {{ font-family: 'Atkinson Hyperlegible', sans-serif; }}
-h1, h2, h3, h4 {{ font-family: 'Bricolage Grotesque', sans-serif !important; color: {INK}; letter-spacing: -0.01em; }}
-h1 {{ font-size: 2.6rem !important; line-height: 1.08 !important; font-weight: 700 !important; max-width: 22ch; }}
-code, pre, .stCode {{ font-family: 'JetBrains Mono', monospace !important; }}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap');
+html, body, .stMarkdown, p, li, label, input, textarea {{ font-family: 'IBM Plex Sans', sans-serif; }}
+h1, h2, h3, h4 {{ font-family: 'IBM Plex Sans', sans-serif !important; color: {INK}; letter-spacing: -0.01em; }}
+h1 {{ font-size: 2.2rem !important; line-height: 1.12 !important; font-weight: 600 !important; letter-spacing: -0.018em; max-width: 24ch; }}
+h2, h3 {{ font-weight: 600 !important; letter-spacing: -0.01em; }}
+code, pre, .stCode {{ font-family: 'IBM Plex Mono', monospace !important; }}
 .block-container {{ max-width: 1180px; padding-top: 2.2rem; }}
-.lede {{ font-size: 1.15rem; line-height: 1.6; max-width: 68ch; color: #2C4255; }}
-.verdict {{ border-left: 4px solid var(--c); padding: .7rem 1rem; margin: .4rem 0 1rem;
-           background: white; border-radius: 0 6px 6px 0; max-width: 72ch; }}
+.lede {{ font-family: 'Source Serif 4', Georgia, serif; font-size: 1.18rem; line-height: 1.62; max-width: 66ch; color: #33343A; }}
+.verdict {{ border-left: 2px solid var(--c); padding: .2rem 0 .2rem 1rem; margin: .6rem 0 1.1rem;
+           max-width: 70ch; }}
 .verdict b {{ color: var(--c); }}
 .facts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin: .6rem 0 1.2rem; }}
-.fact {{ background: white; border: 1px solid #D5DEDB; border-radius: 6px; padding: .6rem .8rem; }}
-.fact .v {{ font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.6rem; font-weight: 700; color: {INK}; }}
-.fact .k {{ font-size: .86rem; color: #4A5E6E; }}
+.fact {{ background: white; border: 0; border-radius: 0; padding: .55rem .2rem .2rem 0; }}
+.fact .v {{ font-family: 'IBM Plex Sans', sans-serif; font-size: 1.45rem; font-weight: 600; color: {INK}; }}
+.fact .k {{ font-size: .84rem; color: #6A6B72; }}
 .legend span {{ display: inline-block; margin-right: 1rem; font-size: .88rem; }}
 .legend i {{ display: inline-block; width: .8rem; height: .8rem; border-radius: 2px; margin-right: .3rem; vertical-align: -1px; }}
-section[data-testid="stSidebar"] {{ background: #E2E9E7; }}
+section[data-testid="stSidebar"] {{ background: #F5F4F0; border-right: 1px solid #E6E2D8; }}
 
 /* Facts: one card per quantity, its top rule in the colour of what it is in the model */
-.fact {{ border-top: 3px solid var(--c, #D5DEDB); }}
+.fact {{ border-top: 2px solid var(--c, #D9D4C8); }}
 .fact .v {{ font-variant-numeric: tabular-nums; line-height: 1.15; }}
 
 /* Brand mark: the three clocks on one record, floor, deadline, accountable */
 .brand {{ margin: 0 0 1.1rem; }}
-.brand .t {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 1.22rem;
+.brand .t {{ font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 1.12rem; letter-spacing: -0.01em;
             line-height: 1.15; color: {INK}; }}
-.brand .band {{ display: grid; grid-template-columns: 5fr 2fr 3fr; height: 6px; margin: .55rem 0 .45rem;
-               border-radius: 3px; overflow: hidden; }}
+.brand .band {{ display: grid; grid-template-columns: 5fr 2fr 3fr; height: 3px; margin: .6rem 0 .5rem; overflow: hidden; }}
 .brand .band i:nth-child(1) {{ background: {FLOOR}; }}
 .brand .band i:nth-child(2) {{ background: {TRIGGER}; }}
 .brand .band i:nth-child(3) {{ background: {SEAL}; }}
-.brand .s {{ font-size: .84rem; color: #4A5E6E; }}
+.brand .s {{ font-size: .84rem; color: #6A6B72; }}
 
 /* Navigation: rows, not radio buttons; the walk is numbered because it is a sequence */
 section[data-testid="stSidebar"] [role="radiogroup"] {{ counter-reset: step; gap: 0; }}
@@ -65,11 +65,11 @@ section[data-testid="stSidebar"] [data-testid="stRadioOption"] {{
     padding: .36rem .6rem .36rem .7rem; margin: 0; border-left: 3px solid transparent;
     border-radius: 0 5px 5px 0; cursor: pointer; width: 100%; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {{ display: none; }}
-section[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {{ background: #D5E0DD; }}
+section[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {{ background: #ECEAE3; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] {{
-    border-left-color: {SEAL}; background: #F6F8F7; }}
+    border-left-color: {INK}; background: #FFFFFF; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] p {{ font-weight: 700; color: {INK}; }}
-section[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:focus-visible) {{ outline: 2px solid {SEAL}; }}
+section[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:focus-visible) {{ outline: 1px dashed {MUTED}; outline-offset: -1px; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(-n+7) p::before {{
     counter-increment: step; content: counter(step); display: inline-block; width: 1.35rem;
     color: {MUTED}; font-variant-numeric: tabular-nums; }}
@@ -77,26 +77,26 @@ section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(n+8) p {{ p
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(1)::before,
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(8)::before,
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(10)::before {{
-    display: block; font-size: .8rem; color: #4A5E6E; margin: 1rem 0 .3rem .1rem; }}
+    display: block; font-size: .8rem; color: #6A6B72; margin: 1rem 0 .3rem .1rem; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(1)::before {{ content: "The walk, in the order of the thesis"; margin-top: 0; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(8)::before {{ content: "Full runs"; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(10)::before {{ content: "Context, not thesis claims"; }}
 
 /* Alerts in the palette instead of the framework's blue */
-div[data-testid="stAlert"] {{ background: white; border: 1px solid #D5DEDB; border-left: 4px solid {SEAL};
-    border-radius: 0 6px 6px 0; color: {INK}; }}
+div[data-testid="stAlert"] {{ background: white; border: 0; border-left: 2px solid {SEAL};
+    border-radius: 0; color: {INK}; }}
 div[data-testid="stAlert"] p {{ color: {INK}; }}
 div[data-testid="stAlert"] > div {{ background: transparent !important; color: {INK} !important; }}
 div[data-testid="stAlertContentError"], div[data-testid="stAlert"]:has(div[data-testid="stAlertContentError"]) {{ border-left-color: {REVOKE}; }}
 div[data-testid="stAlert"]:has(div[data-testid="stAlertContentWarning"]) {{ border-left-color: {FLOOR}; }}
 
 /* Metrics read like the facts */
-div[data-testid="stMetricValue"] {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700;
+div[data-testid="stMetricValue"] {{ font-family: 'IBM Plex Sans', sans-serif; font-weight: 700;
     font-variant-numeric: tabular-nums; color: {INK}; }}
-div[data-testid="stMetricLabel"] p {{ font-size: .88rem; color: #4A5E6E; }}
+div[data-testid="stMetricLabel"] p {{ font-size: .88rem; color: #6A6B72; }}
 
 /* Buttons: quiet until used */
-.stButton > button {{ border: 1px solid #B9C7C3; background: white; color: {INK}; }}
+.stButton > button {{ border: 1px solid #CFCAC0; border-radius: 3px; background: white; color: {INK}; font-weight: 500; }}
 .stButton > button:hover {{ border-color: {SEAL}; color: {SEAL}; }}
 .stButton > button:focus-visible {{ outline: 2px solid {SEAL}; outline-offset: 2px; }}
 
@@ -105,7 +105,7 @@ div[data-testid="stMetricLabel"] p {{ font-size: .88rem; color: #4A5E6E; }}
 .walk i {{ height: 5px; border-radius: 2px; background: #CBD6D3; }}
 .walk i.done {{ background: #8CC2B7; }}
 .walk i.now {{ background: {SEAL}; }}
-.walkcap {{ font-size: .86rem; color: #4A5E6E; }}
+.walkcap {{ font-size: .86rem; color: #6A6B72; }}
 @media (prefers-reduced-motion: reduce) {{ * {{ transition: none !important; animation: none !important; }} }}
 </style>
 """
@@ -155,7 +155,7 @@ ROWS = ["C1 floor: must stay verifiable",
 STATES = {
     "required": FLOOR, "must be gone": TRIGGER, "contradiction": REVOKE,
     "readable": "#7FC4B6", "destroyed, entry logged": "#2F5D73", "verifiable": SEAL,
-    "not required": "#DCE3E1", "fails its check": "#B23A48",
+    "not required": "#DCE3E1", "fails its check": "#B0592B",
 }
 
 
