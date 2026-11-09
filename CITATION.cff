@@ -10,6 +10,7 @@ authors:
   - family-names: Abbasia
     given-names: Arshad Akhtar
     affiliation: "Høgskolen i Molde (Molde University College)"
+    orcid: "https://orcid.org/0000-0001-9461-9442"
     email: arshad.a.abbasia@himolde.no
 repository-code: "https://github.com/Astheno-sphere/TRF"
 url: "https://trfhimolde.streamlit.app/"

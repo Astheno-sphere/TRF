@@ -3,7 +3,7 @@
 *Thesis:* Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space
 *Author:* Arshad Akhtar Abbasia, MSc Sustainable Energy Logistics, Høgskolen i Molde
 *Supervisor:* Prof. João Ferreira
-*Artefact date:* 18 September 2026; revised 3–6 October 2026
+*Artefact date:* 18 September 2026; revised 3 to 6 October and 5 to 6 November 2026 (release 1.3.0)
 
 This appendix contains every piece of code written for the thesis, the exact commands used to produce every reported result, and the provenance of all data. Nothing reported in Chapters 4 or 5 was produced by code not listed here.
 
@@ -19,7 +19,7 @@ The artefact is publicly available in two forms.
 | Source repository | https://github.com/Astheno-sphere/TRF |
 | Live demonstration | https://trfhimolde.streamlit.app/ |
 
-The archived release is the citable artefact: version 1.3.0 of the repository, deposited on Zenodo, is the exact code whose outputs this thesis reports and the viewer described below; its result modules produce the same figures as versions 1.0.1 to 1.2.0 and differ from them in the corrections of the code review (an audit log per population, fuller exit codes, two reworded output lines), recorded in `CODE_REVIEW.md` of the thesis repository, whereas the repository's default branch may change after submission. It contains eight Python files, the checker and seven further modules as Chapter 5, Section 5.2 counts them, the viewer among them split across `app.py` and `ui.py`, together with a test suite run on every change, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every module (`docs/expected_*.txt`), and this appendix. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its Thesis run page asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice, with the expected and the computed values, beside the results if it does not.
+The archived release is the citable artefact: version 1.3.0 of the repository, deposited on Zenodo, is the exact code whose outputs this thesis reports and the viewer described below; its result modules produce the same figures as versions 1.0.1 to 1.2.0 and differ from them in the corrections of the code review (an audit log per population, fuller exit codes, two reworded output lines), recorded in `CODE_REVIEW.md` of the thesis repository, whereas the repository's default branch may change after submission. It contains eight Python files, the checker and seven further modules as Chapter 5, Section 5.2 counts them, the viewer among them split across `app.py` and `ui.py`, together with a test suite run on every change, the eight-bundle Synthea subset the realism layer reads, a recorded console run for every module (`docs/expected_*.txt`), and an earlier copy of this appendix; the current copy is the one in this thesis and on the repository's default branch. The live application is a convenience for readers who prefer not to clone and run: it executes the same unmodified source, and its Thesis run page asserts that the run reproduces the figures reported in Chapter 5, displaying a failure notice, with the expected and the computed values, beside the results if it does not.
 
 The demonstration has eleven pages. *Start here* states the problem and sets out a walk through the remaining pages in the order of the thesis. *The four propositions* quotes each proposition from Chapter 4 with the limits the thesis states for it, shows the corresponding figures from the checker, and runs the bounded SMT check of Section 5.5, including the deliberately broken variants it must refute; Proposition 4, which rests on a legal premise, is marked as argued and not executed. *Claim ledger* sets each figure reported in Chapter 5 beside the same figure recomputed when the page opens. *Witness a record* draws one record of the thesis population through its months, showing where Semantics I contradicts itself and where Semantics II holds, and lights the components of Figure 4.1 that act in each month. *How it is built* embeds Figures 4.1 and 5.1 as interactive diagrams. *Thesis run* reproduces, on opening, Tables 5.3 and 5.6 and shows the audit-log integrity check and all three tamper tests of Section 5.7. *Where the ceiling is anchored* evaluates the condition of Proposition 3 for any floor and ceiling, with Article 68(12) and politiregisterloven § 17 as presets. *Robustness and cross-checks* runs the independent exhaustive cross-check of Section 5.5, the erasure-response-period witness of Section 5.6 and the optional envelope-encryption module of Section 5.8. *Synthea realism* reproduces Table 5.7. *Norwegian context* runs the illustrative Norwegian modules, and *Explore* varies population parameters as a teaching aid; neither reports a thesis figure.
 
@@ -29,25 +29,25 @@ A note on durability. Hosted applications are not archival objects: the live dem
 
 | File | Purpose | Lines |
 |---|---|---|
-| `trf_checker.py` | Feasibility checker — executable witness for Propositions 1 and 2, including the exhaustive cross-check and the audit-log integrity check; exits non-zero if Semantics II reports any violation, the cross-check disagrees with the checker, a record fails its inclusion proof or a tamper test goes undetected | 601 |
-| `synthea_layer.py` | Realism layer — substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run; exits non-zero on a divergence | 156 |
+| `trf_checker.py` | Feasibility checker: executable witness for Propositions 1 and 2, including the exhaustive cross-check and the audit-log integrity check; exits non-zero if Semantics II reports any violation, the cross-check disagrees with the checker, a record fails its inclusion proof or a tamper test goes undetected | 601 |
+| `synthea_layer.py` | Realism layer: substitutes Synthea-generated FHIR R4 payloads and compares every reported figure against the constructed-payload run; exits non-zero on a divergence | 156 |
 | `norwegian_layer.py` | Three Norwegian record classes, parallel to the thesis and reporting no thesis figure | 136 |
 | `cross_sector_check.py` | Cross-sector instance drawn from politiregisterloven § 17 | 113 |
 | `app.py`, `ui.py` | Eleven-page demonstration viewer with live architecture diagrams (Figures 4.1 and 5.1), never a source of results | 1124 + 217 |
 | `crypto_envelope.py` | Optional: the same lifecycle with real AES-256-GCM envelope encryption; needs the `cryptography` package and reports no thesis figure; counts a ciphertext that fails authentication as refused; exits non-zero on a mismatch | 122 |
 | `z3_check.py` | Optional: bounded SMT check of Propositions 1–3 with the Z3 solver; needs the `z3-solver` package; exits non-zero if any check, the sanity check or a mutation check fails; solver timeout two minutes per check | 160 |
 | `data/synthea_subset/` | Eight untrimmed Synthea bundles from the reported cohort, so a reader can run the realism layer without regenerating it | 8 files, 40 MB |
-| `docs/expected_trf_output.txt` | Recorded console run of the checker | — |
-| `docs/expected_delta_witness_output.txt` | Recorded run at δ = 1 and δ = 3 | — |
-| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset | — |
-| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run | — |
-| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | — |
-| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison | — |
-| `docs/expected_crypto_envelope_output.txt`, `docs/expected_z3_check_output.txt` | Recorded runs of the two optional modules (A.22, A.24) | — |
-| `docs/expected_synthea_full_cohort_rerun_2026-10-06.txt` | Recorded full-cohort comparison (A.17) | — |
-| `tests/test_app.py`, `tests/test_props.py`, `.github/workflows/tests.yml` | Automated checks run on every change: every recorded run reproduces byte for byte, every viewer page renders, the viewer's claim ledger matches Chapter 5, the exhaustive cross-check agrees with the checker on 31 cases including every boundary month of a twelve-month window and refuses a horizon too short to examine the window, and each population keeps its own audit log; 56 tests, run on Python 3.11 to 3.13, also from `demo_app/` in the thesis repository; they report no thesis figure | — |
-| `docs/architecture/`, `assets/` | Archify sources and renderings of Figures 4.1 and 5.1 | — |
-| `LICENSE`, `CITATION.cff`, `.zenodo.json`, `CHECKSUMS.md` | MIT licence, citation and archive metadata, file checksums | — |
+| `docs/expected_trf_output.txt` | Recorded console run of the checker |: |
+| `docs/expected_delta_witness_output.txt` | Recorded run at δ = 1 and δ = 3 |: |
+| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset |: |
+| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run |: |
+| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run |: |
+| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison |: |
+| `docs/expected_crypto_envelope_output.txt`, `docs/expected_z3_check_output.txt` | Recorded runs of the two optional modules (A.22, A.24) |: |
+| `docs/expected_synthea_full_cohort_rerun_2026-10-06.txt` | Recorded full-cohort comparison (A.17) |: |
+| `tests/test_app.py`, `tests/test_props.py`, `.github/workflows/tests.yml` | Automated checks run on every change: every recorded run reproduces byte for byte, every viewer page renders, the viewer's claim ledger matches Chapter 5, the exhaustive cross-check agrees with the checker on 31 cases including every boundary month of a twelve-month window and refuses a horizon too short to examine the window, and each population keeps its own audit log; 56 tests, run on Python 3.11 to 3.13, also from `demo_app/` in the thesis repository; they report no thesis figure |: |
+| `docs/architecture/`, `assets/` | Archify sources and renderings of Figures 4.1 and 5.1 |: |
+| `LICENSE`, `CITATION.cff`, `.zenodo.json`, `CHECKSUMS.md` | MIT licence, citation and archive metadata, file checksums |: |
 | `requirements.txt` | Pinned to the tested versions: `streamlit==1.66.1`, `cryptography==50.0.1`, `z3-solver==5.3.3.0`; the checker itself needs nothing | 3 |
 
 Every module has a recorded run committed beside it. A reader who executes a command and diffs the result against its recorded file can distinguish a changed file from a changed result, which is the distinction that matters when a figure disagrees with the text.
@@ -159,7 +159,7 @@ Implements the TRF Model of Chapter 4 directly. Records are the seven-element tu
 Four components matter for the thesis's claims:
 
 - `check_semantics_I()` evaluates the constraint system under plaintext verifiability, reporting for each record the first month at which C1 and C2, or C1 and C3, are simultaneously required. These are the witnesses for Proposition 1.
-- `check_semantics_II()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`, the artefact running with no payload retention period; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each; retain the accessor fields and the commitment) and then verifies all three constraints, including C3 over the subject link.
+- `apply_invalidation()` applies the constructive trajectory from the proof of Proposition 2 (destroy the payload key and the commitment salt and delete the payload at `min(t_r + δ, t_π + 6)`, the artefact running with no payload retention period; remove the subject fields of a Secure Processing Environment record at `t_π + 6`; append a grounded entry for each to the record's own population log; retain the accessor fields and the commitment), and `check_semantics_II()` then verifies all three constraints, including C3 over the subject link.
 - `integrity()` and the `MerkleLog` class give condition (i) of Semantics II real content. Every access event, invalidation and subject-link removal is appended to an append-only Merkle log using RFC 6962 hashing, and `V_II` checks each of a record's entries against the current root with an inclusion proof. The run includes three tamper tests, an altered accessor field and an altered invalidation ground of record 100 and an altered patient link of record 3, under each of which `V_II` fails, and a restore after which it holds.
 - `brute_force_semantics_I()` is written independently of the first function, taking the constraint definitions directly and enumerating all 2¹⁴ assignments of the accessibility variable over a fourteen-month horizon. It exists so that the infeasibility results do not rest on the correctness of a single implementation. The control case, in which neither C2 nor C3 is active, returns feasible: confirming the search can succeed when it should.
 
@@ -169,7 +169,7 @@ Key destruction is modelled as setting the key reference to `None`, and deletion
 
 ### `synthea_layer.py`
 
-Replaces the constructed payload strings with real FHIR R4 resources drawn from Synthea bundles (one clinical resource per bundle, from `Condition`, `Observation`, `MedicationRequest`, `AllergyIntolerance`, `Immunization`, or `Procedure`), recomputes each commitment over the real payload, and leaves every timing quantity untouched. It then runs both populations through the same checks and prints them side by side.
+Replaces the constructed payload strings with Synthea-generated (synthetic) FHIR R4 resources drawn from the bundles (one clinical resource per bundle, from `Condition`, `Observation`, `MedicationRequest`, `AllergyIntolerance`, `Immunization`, or `Procedure`), recomputes each commitment over the substituted payload, and leaves every timing quantity untouched. It then runs both populations through the same checks and prints them side by side.
 
 The expected result, and the observed one, is that every reported figure is identical while all 200 commitments differ. Mean payload size rises from 43 bytes to 891 with the committed subset (to 1,002 with the full cohort; see A.17). The model reads timing and accessibility, never payload content; running the comparison rather than asserting the invariance lets a reader see the claim tested against inputs that demonstrably changed.
 
@@ -191,16 +191,16 @@ Results reported in Chapters 4 and 5 and confirmed by execution:
 
 | Result | Value | Where reported |
 |---|---|---|
-| Semantics I — records with ≥1 violation | 90 / 200 | Table 5.3 |
-| Semantics I — total violations | 95 | §5.3 |
+| Semantics I, records with ≥1 violation | 90 / 200 | Table 5.3 |
+| Semantics I, total violations | 95 | §5.3 |
 | Violation decomposition | 41 C2-only, 44 C3-only, 5 both | §5.3 |
 | Corollary 1.2 witnesses (no erasure request) | 39 | §5.4 |
 | Exhaustive cross-check, three conflict cases | no satisfying assignment | Table 5.4 |
 | Exhaustive cross-check, control case | satisfying assignment exists | Table 5.4 |
-| Semantics II — records invalidated | 138 (52 Art 17, 86 Art 68(12)) | Table 5.6 |
-| Semantics II — total violations | 0 | Table 5.6 |
-| Synthea comparison — figures changed | none | Table 5.7 |
-| Synthea comparison — commitments changed | 200 / 200 | Table 5.7 |
+| Semantics II, records invalidated | 138 (52 Art 17, 86 Art 68(12)) | Table 5.6 |
+| Semantics II, total violations | 0 | Table 5.6 |
+| Synthea comparison, figures changed | none | Table 5.7 |
+| Synthea comparison, commitments changed | 200 / 200 | Table 5.7 |
 | Audit-log integrity | 200 / 200 records verify; all three tamper tests fail V_II | §5.7 |
 | Reference commitment, record 100 | `678ade47c1e6dc03…` | §5.7 |
 
@@ -223,7 +223,7 @@ Stated here so that they are not inferred from silence:
 
 ## A.10 Source listing: `trf_checker.py`
 
-The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 551.
+The complete source of the feasibility checker, reproduced as executed. It depends on the Python standard library only. Line count: 601.
 
 ```python
 """
@@ -994,7 +994,7 @@ if __name__ == "__main__":
 
 ## A.12 Source listing: `norwegian_layer.py`
 
-The Norwegian context module, reproduced as executed. It imports `trf_checker.py` without modifying it and changes nothing the thesis reports: it varies only the retention floor, the pathway, and the arrival of erasure requests and permit expiries. Line count: 135.
+The Norwegian context module, reproduced as executed. It imports `trf_checker.py` without modifying it and changes nothing the thesis reports: it varies only the retention floor, the pathway, and the arrival of erasure requests and permit expiries. Line count: 136.
 
 ```python
 """
@@ -1139,7 +1139,7 @@ if __name__ == "__main__":
 
 ## A.13 Source listing: `cross_sector_check.py`
 
-The cross-sector instance discussed in Chapter 6, Section 6.10. It takes the floor and ceiling of politiregisterloven § 17 and runs them through the same unmodified model. Line count: 110.
+The cross-sector instance discussed in Chapter 6, Section 6.10. It takes the floor and ceiling of politiregisterloven § 17 and runs them through the same unmodified model. Line count: 113.
 
 ```python
 """
@@ -1265,7 +1265,7 @@ Not reproduced here, because the viewer is never a source of results: every figu
 
 ## A.15 Source listing: `crypto_envelope.py`
 
-The optional envelope-encryption module. Each record's payload is encrypted under its own AES-256-GCM data key; the data keys are wrapped under a key-encrypting key held in a custody object standing in for a hardware security module; at each record's invalidation month the wrapped key is destroyed; every record is then decrypted again. It is the only module with a dependency outside the standard library. Line count: 118.
+The optional envelope-encryption module. Each record's payload is encrypted under its own AES-256-GCM data key; the data keys are wrapped under a key-encrypting key held in a custody object standing in for a hardware security module; at each record's invalidation month the wrapped key is destroyed; every record is then decrypted again. It is the only module with a dependency outside the standard library. Line count: 122.
 
 ```python
 """
@@ -1469,7 +1469,7 @@ RESULT  Semantics II: 0 violations across 0 records  -> FEASIBLE
 
 ## A.17 Console output of the payload-provenance comparison, full cohort
 
-Produced by command 4 against the 98-bundle cohort regenerated on 6 October 2026 with the pinned jar (commands 2 and 3) and the final code. It is the source of Chapter 5, Table 5.7, at a mean payload of 1,002 bytes; the September cohort it replaces gave the same six measures at 1,006 bytes. Reproducing it requires regenerating the cohort with command 3, because the full cohort is about 315 MB and is not committed.
+Produced by command 4 against the 98-bundle cohort regenerated on 6 October 2026 with the pinned jar (commands 2 and 3), with the code of that date. The code review later reworded its result line from "real FHIR payloads" to "Synthea FHIR payloads" (`CODE_REVIEW.md`, Section 4); the full cohort is not committed, so this record was not re-run, and no figure in it depends on that line. It is the source of Chapter 5, Table 5.7, at a mean payload of 1,002 bytes; the September cohort it replaces gave the same six measures at 1,006 bytes. Reproducing it requires regenerating the cohort with command 3, because the full cohort is about 315 MB and is not committed.
 
 ```text
 ==========================================================================

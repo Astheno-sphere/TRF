@@ -1,11 +1,12 @@
 {
   "title": "TRF: Tri-Lateral Retention Feasibility Model. Executable artefact for EHDS and GDPR audit-log retention and erasure",
   "upload_type": "software",
-  "description": "<p>Executable research artefact for the MSc thesis <em>Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space</em> by Arshad Akhtar Abbasia, Høgskolen i Molde (Molde University College), Norway, 2026. Supervisor: Prof. João Ferreira.</p><p><strong>The problem.</strong> One audit record from cross-border health data exchange (MyHealth@EU, National Contact Points for eHealth) or from a Secure Processing Environment under the European Health Data Space Regulation (EU) 2025/327 is bound by three obligations at once: a retention floor (Article 73(1)(e) EHDS for access logs; a nationally set period for cross-border audit repositories), the right to erasure (Article 17 GDPR), and the six-month deletion ceiling of Article 68(12) EHDS.</p><p><strong>What the code shows.</strong> The Tri-Lateral Retention Feasibility (TRF) Model expresses the three obligations as constraints. If a verifiable record must stay readable, they cannot be met together whenever a deadline falls inside the retention window (Proposition 1: 95 violations across 90 of 200 generated records). If verifiable means accountable (who acted, when, a commitment and a logged invalidation entry), they can always be met (Proposition 2: 0 violations). The mechanism, Crypto-Erasure by Invalidation, deletes the payload at the deadline and keeps a tamper-evident Merkle audit log.</p><p><strong>Contents.</strong> Constraint checker (Python standard library); exhaustive cross-check; bounded Z3 SMT check of Propositions 1 to 3 with mutation tests; AES-256-GCM envelope encryption module; Synthea FHIR R4 payload layer; Norwegian context modules (Helsedataservice permits, NORTRE secure processing environments, politiregisterloven § 17); a Streamlit viewer with an examiner's walk and a claim ledger; 56 automated tests run in CI on Python 3.11 to 3.13, including a comparison of the exhaustive cross-check with the checker at every boundary month and a check that each population keeps its own audit log. Every recorded output reproduces byte for byte.</p><p><strong>Scope.</strong> Results are checked on synthetic data and are not estimates of real frequency. Key destruction is simulated and attested, not proven. The retained residue is pseudonymised, not anonymous.</p><p><strong>Norsk sammendrag.</strong> Kjørbar forskningsartefakt for en masteroppgave ved Høgskolen i Molde om hvordan revisjonslogger for grensekryssende helsedata kan oppbevares, slettes og etterprøves samtidig under forordningen om det europeiske helsedataområdet (EHDS) og personvernforordningen (GDPR), analysert mot norsk infrastruktur: Helsedirektoratet, Helsedataservice og sikre analyserom.</p><p>Thesis text: https://github.com/Astheno-sphere/TRF-thesis. Live demonstration: https://trfhimolde.streamlit.app/</p>",
+  "description": "<p>Executable research artefact for the MSc thesis <em>Verifiable Crypto-Erasure for Cross-Border Health Data Audit Trails under the European Health Data Space</em> by Arshad Akhtar Abbasia, Høgskolen i Molde (Molde University College), Norway, 2026. Supervisor: Prof. João Ferreira.</p><p><strong>The problem.</strong> One audit record from cross-border health data exchange (MyHealth@EU, National Contact Points for eHealth) or from a Secure Processing Environment under the European Health Data Space Regulation (EU) 2025/327 is bound by three obligations at once: a retention floor (Article 73(1)(e) EHDS for access logs; a nationally set period for cross-border audit repositories), the right to erasure (Article 17 GDPR), and the six-month deletion ceiling of Article 68(12) EHDS.</p><p><strong>What the code shows.</strong> The Tri-Lateral Retention Feasibility (TRF) Model expresses the three obligations as constraints. If a verifiable record must stay readable, they cannot be met together whenever a deadline falls inside the retention window (Proposition 1: 95 violations across 90 of 200 generated records). If verifiable means accountable (who acted, when, a commitment and a logged invalidation entry), in the model they can always be met (Proposition 2: 0 violations; 138 records invalidated, 52 on Article 17 and 86 on Article 68(12)). Thirty-nine of the collisions arise with no erasure request at all (Corollary 1.2). The mechanism, Crypto-Erasure by Invalidation, destroys each record's payload key at the deadline and appends every event to a Merkle audit log (RFC 6962 hashing) whose inclusion proofs detect an altered entry; detecting a rewritten log needs a published root, which is specified and not implemented.</p><p><strong>Contents.</strong> Constraint checker (Python standard library); exhaustive cross-check; bounded Z3 SMT check of Propositions 1 to 3 with mutation tests; AES-256-GCM envelope encryption module; Synthea FHIR R4 payload layer; Norwegian context modules (Helsedataservice permits, NORTRE secure processing environments, politiregisterloven § 17); a Streamlit viewer with an examiner's walk and a claim ledger; 56 automated tests run in CI on Python 3.11 to 3.13, including a comparison of the exhaustive cross-check with the checker at every boundary month and a check that each population keeps its own audit log. Every recorded output reproduces byte for byte.</p><p><strong>Scope.</strong> Results are checked on synthetic data and are not estimates of real frequency. Key destruction is simulated and attested, not proven. The retained residue is pseudonymised, not anonymous.</p><p><strong>Norsk sammendrag.</strong> Kjørbar forskningsartefakt for en masteroppgave ved Høgskolen i Molde om hvordan revisjonslogger for grensekryssende helsedata kan oppbevares, slettes og etterprøves samtidig under forordningen om det europeiske helsedataområdet (EHDS) og personvernforordningen (GDPR), analysert mot norsk infrastruktur: Helsedirektoratet, Helsedataservice og sikre analyserom.</p><p>Thesis text: https://github.com/Astheno-sphere/TRF-thesis. Live demonstration: https://trfhimolde.streamlit.app/</p>",
   "creators": [
     {
       "name": "Abbasia, Arshad Akhtar",
-      "affiliation": "Høgskolen i Molde (Molde University College)"
+      "affiliation": "Høgskolen i Molde (Molde University College)",
+      "orcid": "0000-0001-9461-9442"
     }
   ],
   "contributors": [
@@ -48,13 +49,38 @@
     "personvern",
     "sletting",
     "revisjonslogg",
-    "Høgskolen i Molde"
+    "Høgskolen i Molde",
+    "VERA-SNARK",
+    "Crypto-Erasure by Invalidation",
+    "Tri-Lateral Retention Feasibility",
+    "TRF Model",
+    "Article 68(12) EHDS",
+    "Article 73(1)(e) EHDS",
+    "accountability",
+    "pseudonymisation",
+    "secondary use of health data",
+    "audit log integrity",
+    "RFC 6962",
+    "Synthea",
+    "Streamlit"
   ],
   "related_identifiers": [
     {
       "identifier": "https://github.com/Astheno-sphere/TRF-thesis",
       "relation": "isSupplementTo",
       "resource_type": "publication-thesis",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://eur-lex.europa.eu/eli/reg/2025/327/oj",
+      "relation": "references",
+      "resource_type": "publication-other",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "relation": "references",
+      "resource_type": "publication-other",
       "scheme": "url"
     }
   ]

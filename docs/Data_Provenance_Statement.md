@@ -53,7 +53,7 @@ So the repository was incomplete rather than out of sync with the thesis. Nothin
 
 ## What is being committed, and its effect on one reported figure
 
-An untrimmed subset of the real cohort is provided for the repository: eight complete bundles, roughly 39 MB, selected in file order from the generated output with no modification of any kind.
+An untrimmed subset of the real cohort is provided for the repository: eight complete bundles, roughly 40 MB, selected in file order from the generated output with no modification of any kind.
 
 The layer was re-run against that subset. Every reported figure is identical to the full-cohort run: ninety records with violations, ninety-five violations, thirty-nine Corollary 1.2 witnesses, one hundred and thirty-eight invalidations, zero violations under the second semantics, and all two hundred commitments differing.
 
@@ -65,6 +65,6 @@ An earlier version of the appendix shipped three bundles trimmed to their first 
 
 The recommendation was to commit the eight-bundle subset, then run `python3 synthea_layer.py` against whatever is committed and confirm that the printed mean matches what Chapter 5 states for that cohort, on the principle that the number in the thesis must be the number the script prints for the cohort the reader can obtain.
 
-Done on 28 September and verified from a fresh clone of the public repository rather than from the working copy: eight bundles read, mean payload 891 bytes, the six measures identical to the constructed-payload run, and all 200 commitments differing. Chapter 5 states 891 for the subset and 1,006 for the full cohort, so the thesis and the obtainable artefact agree.
+Done on 28 September and verified from a fresh clone of the public repository rather than from the working copy: eight bundles read, mean payload 891 bytes, the six measures identical to the constructed-payload run, and all 200 commitments differing. Chapter 5 states 891 for the subset and 1,002 for the October regeneration of the full cohort, so the thesis and the obtainable artefact agree.
 
 No change to Chapter 5 or Appendix A is required on grounds of provenance, because the provenance was never in doubt. The changes made are the addition of the cohort-size comparison and the explicit statement of both mean values.

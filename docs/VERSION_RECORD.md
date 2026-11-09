@@ -1,5 +1,7 @@
 # Version and Change Record
 
+*Superseded as a statement of current counts: this is the September 2026 record, kept as history. The current line counts, table numbers and release are those of Appendix A, A.1 and A.2 (`docs/Appendix_A.md`) and release 1.3.0.*
+
 This thesis and its artefact are versioned together. The table records what changed, when, and what verified it, so that a reader comparing the document against the published repository can tell which of the two moved if a figure disagrees. The full trail, with an identifier for every individual change, is maintained alongside the artefact.
 
 *Table F.1. Document and artefact versions*
