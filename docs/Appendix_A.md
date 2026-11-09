@@ -37,17 +37,17 @@ A note on durability. Hosted applications are not archival objects: the live dem
 | `crypto_envelope.py` | Optional: the same lifecycle with real AES-256-GCM envelope encryption; needs the `cryptography` package and reports no thesis figure; counts a ciphertext that fails authentication as refused; exits non-zero on a mismatch | 122 |
 | `z3_check.py` | Optional: bounded SMT check of Propositions 1–3 with the Z3 solver; needs the `z3-solver` package; exits non-zero if any check, the sanity check or a mutation check fails; solver timeout two minutes per check | 160 |
 | `data/synthea_subset/` | Eight untrimmed Synthea bundles from the reported cohort, so a reader can run the realism layer without regenerating it | 8 files, 40 MB |
-| `docs/expected_trf_output.txt` | Recorded console run of the checker |: |
-| `docs/expected_delta_witness_output.txt` | Recorded run at δ = 1 and δ = 3 |: |
-| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset |: |
-| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run |: |
-| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run |: |
-| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison |: |
-| `docs/expected_crypto_envelope_output.txt`, `docs/expected_z3_check_output.txt` | Recorded runs of the two optional modules (A.22, A.24) |: |
-| `docs/expected_synthea_full_cohort_rerun_2026-10-06.txt` | Recorded full-cohort comparison (A.17) |: |
-| `tests/test_app.py`, `tests/test_props.py`, `.github/workflows/tests.yml` | Automated checks run on every change: every recorded run reproduces byte for byte, every viewer page renders, the viewer's claim ledger matches Chapter 5, the exhaustive cross-check agrees with the checker on 31 cases including every boundary month of a twelve-month window and refuses a horizon too short to examine the window, and each population keeps its own audit log; 56 tests, run on Python 3.11 to 3.13, also from `demo_app/` in the thesis repository; they report no thesis figure |: |
-| `docs/architecture/`, `assets/` | Archify sources and renderings of Figures 4.1 and 5.1 |: |
-| `LICENSE`, `CITATION.cff`, `.zenodo.json`, `CHECKSUMS.md` | MIT licence, citation and archive metadata, file checksums |: |
+| `docs/expected_trf_output.txt` | Recorded console run of the checker | n/a |
+| `docs/expected_delta_witness_output.txt` | Recorded run at δ = 1 and δ = 3 | n/a |
+| `docs/expected_synthea_subset_output.txt` | Recorded realism-layer run against the committed subset | n/a |
+| `docs/expected_norwegian_output.txt` | Recorded Norwegian-layer run | n/a |
+| `docs/expected_cross_sector_output.txt` | Recorded politiregisterloven § 17 run | n/a |
+| `docs/Data_Provenance_Statement.md` | Where the synthetic data came from, the six Synthea markers a reader can check for, and the cohort-size comparison | n/a |
+| `docs/expected_crypto_envelope_output.txt`, `docs/expected_z3_check_output.txt` | Recorded runs of the two optional modules (A.22, A.24) | n/a |
+| `docs/expected_synthea_full_cohort_rerun_2026-10-06.txt` | Recorded full-cohort comparison (A.17) | n/a |
+| `tests/test_app.py`, `tests/test_props.py`, `.github/workflows/tests.yml` | Automated checks run on every change: every recorded run reproduces byte for byte, every viewer page renders, the viewer's claim ledger matches Chapter 5, the exhaustive cross-check agrees with the checker on 31 cases including every boundary month of a twelve-month window and refuses a horizon too short to examine the window, and each population keeps its own audit log; 56 tests, run on Python 3.11 to 3.13, also from `demo_app/` in the thesis repository; they report no thesis figure | n/a |
+| `docs/architecture/`, `assets/` | Archify sources and renderings of Figures 4.1 and 5.1 | n/a |
+| `LICENSE`, `CITATION.cff`, `.zenodo.json`, `CHECKSUMS.md` | MIT licence, citation and archive metadata, file checksums | n/a |
 | `requirements.txt` | Pinned to the tested versions: `streamlit==1.66.1`, `cryptography==50.0.1`, `z3-solver==5.3.3.0`; the checker itself needs nothing | 3 |
 
 Every module has a recorded run committed beside it. A reader who executes a command and diffs the result against its recorded file can distinguish a changed file from a changed result, which is the distinction that matters when a figure disagrees with the text.
