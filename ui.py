@@ -28,19 +28,19 @@ CSS = f"""
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap');
 html, body, .stMarkdown, p, li, label, input, textarea {{ font-family: 'IBM Plex Sans', sans-serif; }}
 h1, h2, h3, h4 {{ font-family: 'IBM Plex Sans', sans-serif !important; color: {INK}; letter-spacing: -0.01em; }}
-h1 {{ font-size: 2.2rem !important; line-height: 1.12 !important; font-weight: 600 !important; letter-spacing: -0.018em; max-width: 24ch; }}
+h1 {{ font-size: 2.6rem !important; line-height: 1.15 !important; font-weight: 650 !important; letter-spacing: -0.018em; max-width: none; }}
 h2, h3 {{ font-weight: 600 !important; letter-spacing: -0.01em; }}
 code, pre, .stCode {{ font-family: 'IBM Plex Mono', monospace !important; }}
-.block-container {{ max-width: 1180px; padding-top: 2.2rem; }}
-.lede {{ font-family: 'Source Serif 4', Georgia, serif; font-size: 1.18rem; line-height: 1.62; max-width: 66ch; color: #33343A; }}
+.block-container {{ max-width: 860px; margin-left: auto; margin-right: auto; padding-top: 3rem; padding-bottom: 5rem; }}
+.lede {{ font-family: 'Source Serif 4', Georgia, serif; font-size: 1.3rem; line-height: 1.6; max-width: none; color: {INK}; }}
 .verdict {{ border-left: 2px solid var(--c); padding: .2rem 0 .2rem 1rem; margin: .6rem 0 1.1rem;
-           max-width: 70ch; }}
+           max-width: none; }}
 .verdict b {{ color: var(--c); }}
 .facts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin: .6rem 0 1.2rem; }}
 .fact {{ background: white; border: 0; border-radius: 0; padding: .55rem .2rem .2rem 0; }}
-.fact .v {{ font-family: 'IBM Plex Sans', sans-serif; font-size: 1.45rem; font-weight: 600; color: {INK}; }}
-.fact .k {{ font-size: .84rem; color: #6A6B72; }}
-.legend span {{ display: inline-block; margin-right: 1rem; font-size: .88rem; }}
+.fact .v {{ font-family: 'IBM Plex Sans', sans-serif; font-size: 1.6rem; font-weight: 600; color: {INK}; }}
+.fact .k {{ font-size: .95rem; color: #55565C; }}
+.legend span {{ display: inline-block; margin-right: 1rem; font-size: .95rem; color: #3A3B40; }}
 .legend i {{ display: inline-block; width: .8rem; height: .8rem; border-radius: 2px; margin-right: .3rem; vertical-align: -1px; }}
 section[data-testid="stSidebar"] {{ background: #F5F4F0; border-right: 1px solid #E6E2D8; }}
 
@@ -56,19 +56,19 @@ section[data-testid="stSidebar"] {{ background: #F5F4F0; border-right: 1px solid
 .brand .band i:nth-child(1) {{ background: {FLOOR}; }}
 .brand .band i:nth-child(2) {{ background: {TRIGGER}; }}
 .brand .band i:nth-child(3) {{ background: {SEAL}; }}
-.brand .s {{ font-size: .84rem; color: #6A6B72; }}
+.brand .s {{ font-size: .95rem; color: #55565C; }}
 
 /* Navigation: rows, not radio buttons; the walk is numbered because it is a sequence */
 section[data-testid="stSidebar"] [role="radiogroup"] {{ counter-reset: step; gap: 0; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div {{ width: 100%; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"] {{
-    padding: .36rem .6rem .36rem .7rem; margin: 0; border-left: 3px solid transparent;
+    padding: .5rem .6rem .5rem .7rem; margin: 0; border-left: 3px solid transparent;
     border-radius: 0 5px 5px 0; cursor: pointer; width: 100%; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {{ display: none; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"]:hover {{ background: #ECEAE3; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] {{
     border-left-color: {INK}; background: #FFFFFF; }}
-section[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] p {{ font-weight: 700; color: {INK}; }}
+section[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] p {{ font-weight: 600; color: {INK}; }}
 section[data-testid="stSidebar"] [data-testid="stRadioOption"]:has(input:focus-visible) {{ outline: 1px dashed {MUTED}; outline-offset: -1px; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(-n+7) p::before {{
     counter-increment: step; content: counter(step); display: inline-block; width: 1.35rem;
@@ -77,7 +77,7 @@ section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(n+8) p {{ p
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(1)::before,
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(8)::before,
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(10)::before {{
-    display: block; font-size: .8rem; color: #6A6B72; margin: 1rem 0 .3rem .1rem; }}
+    display: block; font-size: .95rem; color: #55565C; margin: 1rem 0 .3rem .1rem; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(1)::before {{ content: "The walk, in the order of the thesis"; margin-top: 0; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(8)::before {{ content: "Full runs"; }}
 section[data-testid="stSidebar"] [role="radiogroup"] > div:nth-child(10)::before {{ content: "Context, not thesis claims"; }}
@@ -93,7 +93,7 @@ div[data-testid="stAlert"]:has(div[data-testid="stAlertContentWarning"]) {{ bord
 /* Metrics read like the facts */
 div[data-testid="stMetricValue"] {{ font-family: 'IBM Plex Sans', sans-serif; font-weight: 700;
     font-variant-numeric: tabular-nums; color: {INK}; }}
-div[data-testid="stMetricLabel"] p {{ font-size: .88rem; color: #6A6B72; }}
+div[data-testid="stMetricLabel"] p {{ font-size: .95rem; color: #55565C; }}
 
 /* Buttons: quiet until used */
 .stButton > button {{ border: 1px solid #CFCAC0; border-radius: 3px; background: white; color: {INK}; font-weight: 500; }}
@@ -105,7 +105,23 @@ div[data-testid="stMetricLabel"] p {{ font-size: .88rem; color: #6A6B72; }}
 .walk i {{ height: 5px; border-radius: 2px; background: #CBD6D3; }}
 .walk i.done {{ background: #8CC2B7; }}
 .walk i.now {{ background: {SEAL}; }}
-.walkcap {{ font-size: .86rem; color: #6A6B72; }}
+.walkcap {{ font-size: .95rem; color: #55565C; }}
+/* Reading typography: one calm column */
+.stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p, div[data-testid="stMarkdownContainer"] li {{ font-size: 1.125rem; line-height: 1.65; color: {INK}; }}
+.stMarkdown h2, div[data-testid="stMarkdownContainer"] h2 {{ font-size: 1.6rem !important; line-height: 1.25 !important; margin-top: 2.2rem !important; }}
+.stMarkdown h3, div[data-testid="stMarkdownContainer"] h3 {{ font-size: 1.25rem !important; line-height: 1.3 !important; margin-top: 1.6rem !important; }}
+div[data-testid="stCaptionContainer"], div[data-testid="stCaptionContainer"] p, small {{ font-size: .95rem !important; color: #55565C !important; line-height: 1.5; }}
+.stMarkdown a, div[data-testid="stMarkdownContainer"] a {{ color: #0B5F52; text-decoration: underline; text-underline-offset: 2px; }}
+section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] label {{ font-size: 1rem; line-height: 1.4; color: {INK}; }}
+.brand .t {{ font-size: 1.25rem; }}
+div[data-testid="stMetricValue"] {{ font-size: 1.6rem; }}
+code, pre, .stCode, div[data-testid="stCode"] pre, div[data-testid="stCode"] code {{ font-size: .95rem !important; line-height: 1.55; }}
+pre, div[data-testid="stCode"] pre {{ background: #F5F4F0 !important; border: 1px solid #E0DCD0; border-radius: 4px; padding: 1rem 1.1rem !important; }}
+div[data-testid="stDataFrame"], div[data-testid="stTable"] table, div[data-testid="stTable"] td, div[data-testid="stTable"] th {{ font-size: .95rem; }}
+div[data-testid="stTable"] table {{ width: 100%; }}
+blockquote, blockquote p, div[data-testid="stMarkdownContainer"] blockquote p {{ color: {INK} !important; opacity: 1 !important; }}
+blockquote {{ border-left: 2px solid #C9C4B8 !important; }}
+div[data-testid="stCaptionContainer"], div[data-testid="stCaptionContainer"] * {{ opacity: 1 !important; color: #55565C !important; font-size: .95rem !important; }}
 @media (prefers-reduced-motion: reduce) {{ * {{ transition: none !important; animation: none !important; }} }}
 </style>
 """
