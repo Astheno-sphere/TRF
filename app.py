@@ -837,7 +837,7 @@ def page_start():
                "together whenever an erasure or deletion deadline falls inside the retention window: "
                "some month requires the payload to be both readable and gone (Proposition 1).", ui.REVOKE)
     ui.verdict("<b>Read <i>verifiable</i> as <i>accountable</i></b>, keeping who acted, when, a "
-               "commitment to the payload and a logged, grounded invalidation entry, and they can always "
+               "commitment to the payload and a logged, grounded invalidation entry, and in the model they can always "
                "be met together: the payload goes at the deadline and the record stays checkable "
                "(Proposition 2). Per-record key destruction covers copies that cannot be deleted at once.", ui.SEAL)
     st.subheader("The walk, in the order of the thesis")
