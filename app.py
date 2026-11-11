@@ -881,8 +881,10 @@ PROPOSITIONS = [
      r"""*Proposition 1.* Under Semantics I, the constraint system $\{C1, C2, C3\}$ is infeasible for any record $a$ such that
 
 $$
-t_r(a) + \delta \le t(a) + F(a) \quad\text{or}\quad t_\pi(a) + 6 \le t(a) + F(a).
-$$""",
+t_r(a) + \delta \le t(a) + F(a) \quad\text{ or }\quad t_\pi(a) + 6 \le t(a) + F(a).
+$$
+
+The second disjunct is tested only for records the ceiling reaches, that is, with $\sigma(a)$ = secondary and $\rho(a) = 1$.""",
      [r"""Propositions 1 and 3 follow almost immediately from the definitions, each resolving to a month in which $\alpha$ must be both 1 and 0, and the thesis states this plainly rather than presenting them as hard-won.""",
       r"""How often data subjects exercise Article 17 is an empirical question that the model does not answer (Chapter 3, Section 3.7)."""]),
     ("Proposition 2", "Feasibility under accountability-preserving verifiability", "Chapter 4, Section 4.7",
