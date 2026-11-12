@@ -11,7 +11,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `.github/workflows/tests.yml` | 3adf3d2ae903 | 15 |
 | `.gitignore` | cb73318af08d | 3 |
 | `.streamlit/config.toml` | 7da18a106472 | 13 |
-| `.zenodo.json` | 41ce34e6d380 | 87 |
+| `.zenodo.json` | de48beec2946 | 85 |
 | `app.py` | 1388d35fcd2c | 1124 |
 | `assets/cei-mechanism.html` | 92aeed86d769 | 13883 |
 | `assets/fig4_1_cei_mechanism.png` | 93e674403d49 | — |
