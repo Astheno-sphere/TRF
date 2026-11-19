@@ -834,7 +834,7 @@ def page_start():
         ("deletion ceiling: SPE data must go", "Art 68(12)"),
     ], [ui.FLOOR, ui.TRIGGER, ui.TRIGGER])
     ui.verdict("<b>Read <i>verifiable</i> as <i>readable</i></b> and the three cannot be met "
-               "together whenever an erasure or deletion deadline falls inside the retention window: "
+               "together whenever an erasure deadline, or a deletion deadline for a record the ceiling reaches, falls inside the retention window: "
                "some month requires the payload to be both readable and gone (Proposition 1).", ui.REVOKE)
     ui.verdict("<b>Read <i>verifiable</i> as <i>accountable</i></b>, keeping who acted, when, a "
                "commitment to the payload and a logged, grounded invalidation entry, and in the model they can always "
