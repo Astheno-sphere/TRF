@@ -11,14 +11,14 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `.github/workflows/tests.yml` | 3adf3d2ae903 | 15 |
 | `.gitignore` | cb73318af08d | 3 |
 | `.streamlit/config.toml` | 7da18a106472 | 13 |
-| `.zenodo.json` | de48beec2946 | 85 |
+| `.zenodo.json` | b059d1987c22 | 85 |
 | `app.py` | 083b0b9d969a | 1126 |
 | `assets/cei-mechanism.html` | 92aeed86d769 | 13883 |
 | `assets/fig4_1_cei_mechanism.png` | 93e674403d49 | — |
 | `assets/fig5_1_trf_artefact.png` | eff6f61b5b5e | — |
 | `assets/trf-artefact.html` | 46d82d2748c4 | 13881 |
 | `CHANGE_TRAIL.md` | bf68328efde5 | 276 |
-| `CITATION.cff` | 68aa2a4977ec | 55 |
+| `CITATION.cff` | 40bdfa16bdf1 | 55 |
 | `cross_sector_check.py` | 65130c3758e6 | 113 |
 | `crypto_envelope.py` | 041627b58210 | 122 |
 | `data/synthea_subset/README.md` | 7c0efc975898 | 81 |
