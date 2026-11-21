@@ -100,14 +100,22 @@ def page_witness():
         f"Cross-border record nobody asks to erase, record {quiet}": quiet,
     }
     c1, c2 = st.columns([3, 1])
-    choice = c1.selectbox("Record", list(presets) + ["Any record by number"])
-    rid = presets.get(choice) if choice in presets else c2.number_input("Record number", 0, len(recs) - 1, 100)
+    qr = st.session_state.get("_qp_rid")
+    opts = list(presets) + ["Any record by number"]
+    pick = (list(presets.values()).index(qr) if qr in presets.values()
+            else len(presets) if qr is not None and 0 <= qr < len(recs) else 0)
+    choice = c1.selectbox("Record", opts, index=pick)
+    rid = presets.get(choice) if choice in presets else c2.number_input(
+        "Record number", 0, len(recs) - 1, qr if qr is not None and 0 <= qr < len(recs) else 100)
     r = by[int(rid)]
     t_I, d_er, d_ceil = plan[r.rid]
     deadline = min(d_er, d_ceil)
     end = r.t_a + r.floor
     horizon = int(min(max(end, deadline if deadline < trf.INF else 0) + 3, 134))   # a floor can end at month 131
     focus = int(t_I) if t_I < trf.INF else r.t_a
+    qm = st.session_state.get("_qp_month")
+    if qm is not None and r.rid == qr and 0 <= qm <= horizon:
+        focus = qm                                            # deep link from the deck
     now = st.slider("Month", 0, horizon, focus, help="Move through the record's life")
 
     pathway = "cross-border" if r.sigma == "primary" else "research log"
@@ -1101,6 +1109,20 @@ PAGES = {                                  # the walk first, in its order (ui.py
     "Norwegian context (illustrative)": page_norway,
     "Explore (not a thesis claim)": page_explore,
 }
+
+# Deep links from the defence deck: ?p=<page slug>&r=<record>&m=<month>. Read once per session.
+SLUGS = {"start": "Start here", "witness": "Witness a record", "propositions": "The four propositions",
+         "anchor": "Where the ceiling is anchored", "built": "How it is built", "ledger": "Claim ledger",
+         "robust": "Robustness and cross-checks", "run": "Thesis run", "synthea": "Synthea realism",
+         "norway": "Norwegian context (illustrative)"}
+if not st.session_state.get("_qp_read"):
+    st.session_state["_qp_read"] = True
+    _qp = st.query_params
+    if _qp.get("p") in SLUGS:
+        st.session_state["page"] = SLUGS[_qp["p"]]
+    for _k, _s in (("r", "_qp_rid"), ("m", "_qp_month")):
+        if str(_qp.get(_k, "")).isdigit():
+            st.session_state[_s] = int(_qp[_k])
 
 with st.sidebar:
     ui.brand()
