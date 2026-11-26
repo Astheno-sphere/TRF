@@ -1,0 +1,10 @@
+seed=20260915  SPE floor=12  ceiling=6 months
+ floor   ceiling  records  plaintext viol  accountability viol  invalidated
+   120   applies       90              95                    0          138
+   120  excluded       46              46                    0           60
+    72   applies       78              83                    0          138
+    72  excluded       34              34                    0           60
+    36   applies       61              66                    0          138
+    36  excluded       17              17                    0           60
+
+response period 3 months, floor 120, ceiling applies: 89 records, 94 violations, accountability 0

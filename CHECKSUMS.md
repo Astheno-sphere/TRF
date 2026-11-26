@@ -30,6 +30,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `docs/expected_crypto_envelope_output.txt` | 4ad480942a75 | 13 |
 | `docs/expected_delta_witness_output.txt` | 4bf290f1e369 | 69 |
 | `docs/expected_norwegian_output.txt` | 31bf8fc03d99 | 39 |
+| `docs/expected_sensitivity_output.txt` | 5c12f9533665 | 10 |
 | `docs/expected_synthea_full_cohort_rerun_2026-10-06.txt` | 440e62fb38c6 | 26 |
 | `docs/expected_synthea_subset_output.txt` | 89775273c278 | 26 |
 | `docs/expected_trf_output.txt` | 0a85e8900073 | 66 |
@@ -41,6 +42,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `norwegian_layer.py` | 75fd53a06f54 | 136 |
 | `README.md` | 5892ccf8353d | 148 |
 | `requirements.txt` | e53d86d42c41 | 3 |
+| `sensitivity.py` | 5537231936c1 | 47 |
 | `synthea_layer.py` | 1b2389fce34b | 156 |
 | `tests/test_app.py` | 9ecd1f050963 | 116 |
 | `tests/test_props.py` | 2b5edca06e4d | 45 |
