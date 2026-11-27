@@ -11,14 +11,14 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `.github/workflows/tests.yml` | 3adf3d2ae903 | 15 |
 | `.gitignore` | cb73318af08d | 3 |
 | `.streamlit/config.toml` | 7da18a106472 | 13 |
-| `.zenodo.json` | 7e903aa06956 | 95 |
+| `.zenodo.json` | 86ef7d42d1b6 | 95 |
 | `app.py` | 010ae67cdfec | 1148 |
 | `assets/cei-mechanism.html` | 92aeed86d769 | 13883 |
 | `assets/fig4_1_cei_mechanism.png` | 93e674403d49 | — |
 | `assets/fig5_1_trf_artefact.png` | eff6f61b5b5e | — |
 | `assets/trf-artefact.html` | 46d82d2748c4 | 13881 |
-| `CHANGE_TRAIL.md` | a9a49813c957 | 287 |
-| `CITATION.cff` | ffbabb12c5da | 55 |
+| `CHANGE_TRAIL.md` | f4097bb4413f | 288 |
+| `CITATION.cff` | c78fa4ea6e01 | 55 |
 | `cross_sector_check.py` | 65130c3758e6 | 113 |
 | `crypto_envelope.py` | 041627b58210 | 122 |
 | `data/synthea_subset/README.md` | 7c0efc975898 | 81 |
@@ -42,6 +42,7 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `norwegian_layer.py` | 75fd53a06f54 | 136 |
 | `README.md` | 5892ccf8353d | 148 |
 | `requirements.txt` | e53d86d42c41 | 3 |
+| `sensitivity_secondary.py` | aed06481cf98 | 165 |
 | `sensitivity.py` | 5537231936c1 | 47 |
 | `synthea_layer.py` | 1b2389fce34b | 156 |
 | `tests/test_app.py` | 9ecd1f050963 | 116 |
@@ -49,3 +50,4 @@ provenance is recorded in `data/synthea_subset/README.md` and in
 | `trf_checker.py` | 5655e159e5be | 601 |
 | `ui.py` | 8cc1d5a15bb1 | 217 |
 | `z3_check.py` | 3342a7f3a160 | 160 |
+| `tests/test_sensitivity_secondary.py` | c493402dde01 | 49 |
